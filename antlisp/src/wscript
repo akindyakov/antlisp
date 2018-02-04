@@ -22,3 +22,15 @@ def build(ctx):
         rule="${SRC}",
         source="stack_machine_ut",
     )
+
+    ctx.program(
+        target="exception_ut",
+        source="exception_ut.cpp",
+        use=[
+            "antlisp-src"
+        ],
+    )
+    ctx(
+        rule="${SRC}",
+        source="exception_ut",
+    )
