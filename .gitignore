@@ -1,0 +1,9 @@
+doc/**.html
+doc/**.pdf
+**/a.out
+
+**.lock-waf**
+**.waf-**
+**.swp
+build-waf
+antlisp/tools/waf/waf-**
