@@ -8,6 +8,7 @@
 #include <boost/variant.hpp>
 #include <boost/variant/get.hpp>
 
+namespace AntLisp {
 
 class FunctionDefinition;
 class FunctionCall;
@@ -363,3 +364,5 @@ bool FunctionDefinition::step(Environment& env) {
 * Все не POD типы передаются по указателю. Может быть в том числе строки. ХЗ пока.
 * Для передачи в качестве аргумента копии объекта необходимы специальные функции (copy x) и (deep-copy x)
 */
+
+}  // namespace AntLisp
