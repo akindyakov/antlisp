@@ -1,13 +1,7 @@
 #include "antlisp/src/exception.h"
 
 int main() {
-    auto ex = AntLisp::Exception()(
-        "abc"
-    )(
-        123
-    )(
-        "]"
-    );
+    auto ex = AntLisp::Exception()("abc")(123)("]");
     auto expected = std::string("abc123]");
     if (ex.message() != expected) {
         std::cerr

@@ -87,7 +87,7 @@ int main() {
     );
     while (AntLisp::FunctionDefinition::step(env)) {
     }
-    if (boost::get<int>(env.ret) != 350) {
+    if (boost::get<int>(env.ret) != (12 + 13) * 14) {
         std::cerr << boost::get<int>(env.ret) << '\n';
         throw std::exception();
     }
