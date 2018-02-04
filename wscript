@@ -4,7 +4,7 @@
 import os
 
 
-top = "antlisp"
+top = "."
 out = "build-waf"
 
 
