@@ -4,7 +4,7 @@
 
 def build(ctx):
     ctx.stlib(
-        target="src-antlisp",
+        target="antlisp-src",
         source = [
             "stack_machine.cpp",
         ],
@@ -14,7 +14,9 @@ def build(ctx):
     ctx.program(
         target="stack_machine_ut",
         source="stack_machine_ut.cpp",
-        use="arc-antlisp",
+        use=[
+            "antlisp-src"
+        ],
     )
     ctx(
         rule="${SRC}",
