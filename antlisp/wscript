@@ -1,0 +1,10 @@
+#!/usr/bin/env python
+# encoding: utf-8
+
+
+def build(ctx):
+    print ctx.env.INCLUDES
+    ctx.recurse([
+        "src",
+        "bin",
+    ])
