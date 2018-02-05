@@ -7,6 +7,7 @@ def build(ctx):
         target="antlisp-src",
         source = [
             "stack_machine.cpp",
+            "cell.cpp"
         ],
         use=[
         ],
@@ -33,4 +34,16 @@ def build(ctx):
     ctx(
         rule="${SRC}",
         source="exception_ut",
+    )
+
+    ctx.program(
+        target="cell_ut",
+        source="cell_ut.cpp",
+        use=[
+            "antlisp-src"
+        ],
+    )
+    ctx(
+        rule="${SRC}",
+        source="cell_ut",
     )

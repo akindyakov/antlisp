@@ -17,17 +17,17 @@ int main() {
     );
     env.vars.insert(
         std::make_pair(
-            "first", AntLisp::Cell(12)
+            "first", AntLisp::Cell::integer(12)
         )
     );
     env.vars.insert(
         std::make_pair(
-            "second", AntLisp::Cell(13)
+            "second", AntLisp::Cell::integer(13)
         )
     );
     env.vars.insert(
         std::make_pair(
-            "third", AntLisp::Cell(14)
+            "third", AntLisp::Cell::integer(14)
         )
     );
     auto fdef = std::make_shared<AntLisp::FunctionDefinition>();
@@ -87,8 +87,8 @@ int main() {
     );
     while (AntLisp::FunctionDefinition::step(env)) {
     }
-    if (boost::get<int>(env.ret) != (12 + 13) * 14) {
-        std::cerr << boost::get<int>(env.ret) << '\n';
+    if (env.ret.get<AntLisp::Integer>() != (12 + 13) * 14) {
+        std::cerr << env.ret.get<AntLisp::Integer>() << '\n';
         throw std::exception();
     }
 }

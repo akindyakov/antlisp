@@ -1,3 +1,5 @@
+#include "cell.h"
+
 #include <iostream>
 #include <string>
 #include <vector>
@@ -5,33 +7,9 @@
 #include <exception>
 #include <memory>
 
-#include <boost/variant.hpp>
-#include <boost/variant/get.hpp>
 
 namespace AntLisp {
 
-class FunctionDefinition;
-class FunctionCall;
-
-class IExtFunction;
-
-using FunctionDefinitionPtr = std::shared_ptr<FunctionDefinition>;
-using ExtFunctionPtr        = std::shared_ptr<IExtFunction>;
-
-struct Nil {};
-
-using Cell = boost::variant<
-    Nil
-    , int
-    , FunctionDefinitionPtr
-    , ExtFunctionPtr
->;
-
-bool isNil(const Cell& cell) {
-    return cell.which() == 0;
-}
-
-// may we use a std::stringview here?
 using TVarName = std::string;
 
 using LocalFrame = std::vector<Cell>;
@@ -50,9 +28,9 @@ class ExtSum
     void call(
         LocalFrame& frame
     ) const override {
-        auto sum = int{0};
+        auto sum = Integer{0};
         for (const auto& cell : frame) {
-            sum += boost::get<int>(cell);
+            sum += cell.get<Integer>();
         }
         frame.clear();
         frame.push_back(
@@ -61,16 +39,15 @@ class ExtSum
     }
 };
 
-
 class ExtPrint
     : public IExtFunction
 {
     void call(
         LocalFrame& frame
     ) const override {
-        auto m = int{1};
+        auto m = Integer{1};
         for (const auto& cell : frame) {
-            m *= boost::get<int>(cell);
+            m *= cell.get<Integer>();
         }
         frame.clear();
         frame.push_back(
@@ -273,9 +250,7 @@ bool FunctionDefinition::step(Environment& env) {
         case RunFunction:
             {
                 auto args = call->createArgs();
-                auto fdef = boost::get<FunctionDefinitionPtr>(
-                    call->popLocal()
-                );
+                auto fdef = call->popLocal().get<FunctionDefinitionPtr>();
                 call = env.stackPush(
                     FunctionCall(
                         std::move(fdef),
@@ -287,9 +262,7 @@ bool FunctionDefinition::step(Environment& env) {
         case RunExternalFunction:
             {
                 auto frame = call->createArgs();
-                auto fdef = boost::get<ExtFunctionPtr>(
-                    call->popLocal()
-                );
+                auto fdef = call->popLocal().get<ExtFunctionPtr>();
                 fdef->call(frame);
                 if (!frame.empty()) {
                     call->pushLocal(
@@ -297,7 +270,7 @@ bool FunctionDefinition::step(Environment& env) {
                     );
                 } else {
                     call->pushLocal(
-                        Cell(Nil{})
+                        Cell::nil()
                     );
                 }
             }
@@ -308,7 +281,7 @@ bool FunctionDefinition::step(Environment& env) {
         case SkipIfTrue:
             {
                 auto guard = call->popLocal();
-                if (isNil(guard)) {
+                if (guard.is<Nil>()) {
                     call->skip();
                 }
             }
@@ -316,7 +289,7 @@ bool FunctionDefinition::step(Environment& env) {
         case SkipIfFalse:
             {
                 auto guard = call->popLocal();
-                if (!isNil(guard)) {
+                if (!guard.is<Nil>()) {
                     call->skip();
                 }
             }
