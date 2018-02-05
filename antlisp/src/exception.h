@@ -35,9 +35,11 @@ public:
     }
 
     template<
-        typename T
+        typename Type
     >
-    Exception&& operator()(const T& value) {
+    Exception&& operator()(
+        const Type& value
+    ) {
         std::ostringstream ostr;
         ostr << value;
         message_.append(
