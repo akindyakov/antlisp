@@ -23,10 +23,7 @@ public:
     constexpr Nil() noexcept = default;
 };
 
-constexpr inline bool operator == (
-    Nil
-    , Nil
-) noexcept {
+constexpr inline bool operator == (Nil, Nil) noexcept {
     return true;
 }
 
@@ -44,7 +41,7 @@ using Symbol = std::string::value_type;
 template<typename T>
 class TypeInfo;
 
-class Cell
+class Cell final
 {
 public:
     using Value = boost::variant<
@@ -78,10 +75,6 @@ public:
 
     explicit Cell()
         : value(Nil{})
-    {
-    }
-    explicit Cell(Nil v)
-        : value(v)
     {
     }
     static Cell nil() {
@@ -123,6 +116,10 @@ public:
         };
     }
 
+    explicit Cell(Nil v)
+        : value(v)
+    {
+    }
     explicit Cell(Integer v)
         : value(v)
     {
@@ -135,24 +132,28 @@ public:
         : value(v)
     {
     }
-    explicit Cell(const StringPtr& v)
-        : value(v)
+    explicit Cell(StringPtr v)
+        : value(
+            std::move(v)
+        )
     {
     }
-    explicit Cell(const ConsPtr& v)
-        : value(v)
-    {
-    }
-    explicit Cell(ConsPtr&& v)
-        : value(std::move(v))
+    explicit Cell(ConsPtr v)
+        : value(
+            std::move(v)
+        )
     {
     }
     explicit Cell(FunctionDefinitionPtr ptr)
-        : value(ptr)
+        : value(
+            std::move(ptr)
+        )
     {
     }
     explicit Cell(ExtFunctionPtr ptr)
-        : value(ptr)
+        : value(
+            std::move(ptr)
+        )
     {
     }
 
