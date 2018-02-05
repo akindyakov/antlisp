@@ -21,7 +21,6 @@ def configure(ctx):
         ]
     )
     ctx.env.INCLUDES = [
-        os.path.abspath("."),
         os.path.abspath(top),
         os.path.abspath(out),
     ]
