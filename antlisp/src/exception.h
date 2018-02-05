@@ -35,6 +35,15 @@ public:
     }
 
     template<
+        typename StrType
+    >
+    void append(StrType&& str) {
+        message_.append(
+            std::forward<StrType>(str)
+        );
+    }
+
+    template<
         typename Type
     >
     Exception&& operator()(
@@ -42,7 +51,7 @@ public:
     ) {
         std::ostringstream ostr;
         ostr << value;
-        message_.append(
+        this->append(
             ostr.str()
         );
         return std::move(*this);

@@ -116,6 +116,31 @@ public:
         };
     }
 
+    template<
+        typename... Args
+    >
+    static Cell function(Args&&... args) {
+        return Cell{
+            std::make_shared<FunctionDefinition>(
+                std::forward<Args>(args)...
+            )
+        };
+    }
+
+    template<
+        typename ExtFunctionType
+        , typename... Args
+    >
+    static Cell extFunction(Args&&... args) {
+        return Cell{
+            static_cast<ExtFunctionPtr>(
+                std::make_shared<ExtFunctionType>(
+                    std::forward<Args>(args)...
+                )
+            )
+        };
+    }
+
     explicit Cell(Nil v)
         : value(v)
     {
