@@ -42,20 +42,26 @@ public:
             std::forward<StrType>(str)
         );
     }
-
-    template<
-        typename Type
-    >
-    Exception&& operator()(
-        const Type& value
-    ) {
-        std::ostringstream ostr;
-        ostr << value;
-        this->append(
-            ostr.str()
-        );
-        return std::move(*this);
-    }
 };
+
+template<
+    typename Err
+    , typename Val
+    , typename = typename std::enable_if<
+        std::is_convertible<
+            typename std::decay<Err>::type&,
+            Exception&
+        >::value
+    >::type
+>
+inline Err&& operator<<(
+    Err&& err
+    , const Val& val
+) {
+    std::ostringstream ostr(std::ios_base::ate);
+    ostr << val;
+    err.append(ostr.str());
+    return std::forward<Err>(err);
+}
 
 }  // namespace AntLisp

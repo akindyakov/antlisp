@@ -221,7 +221,7 @@ public:
             );
         } else {
             throw BadGetError()
-                (this->toString())("is not a real number")
+                << this->toString() << "is not a real number"
             ;
         }
         return realV;
@@ -233,9 +233,9 @@ public:
             return boost::get<T>(value);
         } catch (const boost::bad_get& err) {
             throw BadGetError()
-                ("Wrong type. ")
-                (this->toString())
-                (" is not a ")(TypeInfo<T>::name())
+                << "Wrong type. "
+                << this->toString()
+                << " is not a " << TypeInfo<T>::name()
             ;
         }
     }
@@ -246,9 +246,9 @@ public:
             return boost::get<T>(value);
         } catch (const boost::bad_get& err) {
             throw BadGetError()
-                ("Wrong type. ")
-                (this->toString())
-                (" is not a ")(TypeInfo<T>::name())
+                << "Wrong type. "
+                << this->toString()
+                << " is not a " << TypeInfo<T>::name()
             ;
         }
     }

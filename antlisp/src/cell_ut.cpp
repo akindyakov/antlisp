@@ -36,7 +36,15 @@ void cellCheckTypeTag() {
     checkTagTempl<AntLisp::ExtFunctionPtr>();
 }
 
+void cellGetError() {
+    UT_ASSERT_EXCEPTION_TYPE(
+        AntLisp::Cell::nil().get<AntLisp::Integer>(),
+        AntLisp::Cell::BadGetError
+    );
+}
+
 UT_LIST(
     nilEqualTest();
     cellCheckTypeTag();
+    cellGetError();
 );

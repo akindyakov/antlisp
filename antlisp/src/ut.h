@@ -31,8 +31,8 @@ public:
         } \
         if (!success) { \
             throw AntLisp::UnitTestException() \
-                ( __FILE__ )(":")( __LINE__ ) \
-                (" Assert failed: ")( reason ) \
+                <<  __FILE__ << ':' << __LINE__ \
+                << " Assert failed: " << reason \
             ; \
         } \
     }
@@ -60,8 +60,8 @@ public:
                 reason = "Exception " #exception_type " was not throwned"; \
             } \
             throw AntLisp::UnitTestException() \
-                ( __FILE__ )(":")( __LINE__ ) \
-                ( reason ) \
+                << __FILE__ << ':' << __LINE__ \
+                << reason \
             ; \
         } \
     }
