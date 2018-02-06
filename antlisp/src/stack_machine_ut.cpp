@@ -1,9 +1,11 @@
-#include "antlisp/src/stack_machine.h"
+#include "stack_machine.h"
+
+#include "ut.h"
 
 #include <iostream>
 
 
-int main() {
+void testFullCycle() {
     AntLisp::Environment env;
     env.vars.insert(
         std::make_pair(
@@ -87,8 +89,12 @@ int main() {
     );
     while (AntLisp::FunctionDefinition::step(env)) {
     }
-    if (env.ret.get<AntLisp::Integer>() != (12 + 13) * 14) {
-        std::cerr << env.ret.get<AntLisp::Integer>() << '\n';
-        throw std::exception();
-    }
+    UT_ASSERT_EQUAL(
+        env.ret.get<AntLisp::Integer>(),
+        (12 + 13) * 14
+    );
 }
+
+UT_LIST(
+    testFullCycle();
+);
