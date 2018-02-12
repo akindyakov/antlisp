@@ -28,9 +28,16 @@ void SkipSpaces(
     }
 }
 
-class ParenthesesExprReader
+class InCodeStream
 {
 public:
+    explicit InCodeStream(
+        std::istream& in
+    )
+        : istream(in)
+    {
+    }
+
     class Error
         : public Exception
     {
@@ -39,11 +46,11 @@ public:
     bool good() const {
         return (
             istream.good()
-            && parenthesesCounter > 0
+            && parenthesesCounter >= 0
         );
     }
 
-    int count() const {
+    int pCount() const {
         return parenthesesCounter;
     }
 
@@ -74,17 +81,29 @@ public:
     bool nextToken(
         std::string& token
     ) {
-        skipSpaces();
+        token.clear();
+        if (!this->good()) {
+            throw Error() << "TODO: " << __FILE__ << __LINE__;
+        }
+        this->skipSpaces();
         auto ch = Char{};
         while (
             this->peek(ch)
-            && getCounter(ch) == 0
-            && std::isspace(istream.peek()) == false
+            && std::isspace(ch) == false
         ) {
+            if (getCounter(ch) != 0) {
+                while (
+                    this->peek(ch)
+                    && getCounter(ch) != 0
+                ) {
+                    this->ignore();
+                }
+                break;
+            }
             token.push_back(ch);
-            istream.ignore();
+            this->ignore();
         }
-        return this->good() && !token.empty();
+        return !token.empty();
     }
 
     std::string nextToken() {
@@ -113,26 +132,7 @@ public:
         CHAR_CLOSE = ')',
     };
 
-    static ParenthesesExprReader createFromStream(
-        std::istream& in
-    ) {
-        SkipSpaces(in);
-        auto ch = in.get();
-        if (ch != CHAR_OPEN) {
-            throw Error();
-        }
-        return ParenthesesExprReader(in);
-    }
-
-private:
-    explicit ParenthesesExprReader(
-        std::istream& in
-    )
-        : istream(in)
-    {
-    }
-
-    static inline int getCounter(Char ch) {
+    static int getCounter(Char ch) {
         if (ch == CHAR_OPEN) {
             return 1;
         } else if (ch == CHAR_CLOSE) {
@@ -143,7 +143,81 @@ private:
 
 private:
     std::istream& istream;
-    int parenthesesCounter = 1;
+    int parenthesesCounter = 0;
+};
+
+class ParenthesesParser
+{
+public:
+    class Error
+        : public Exception
+    {
+    };
+
+    static ParenthesesParser fromCodeStream(
+        InCodeStream& codeStream
+    ) {
+        codeStream.skipSpaces();
+        auto startLevel = codeStream.pCount();
+        if (!codeStream.ignore()) {
+            throw Error();
+        }
+        if (
+            !(startLevel < codeStream.pCount())
+        ) {
+            throw Error() << "'";
+        }
+        return ParenthesesParser(
+            codeStream,
+            codeStream.pCount()
+        );
+    }
+
+    bool isLocked() const {
+        return level < codeStream.pCount();
+    }
+
+    bool good() const {
+        return (
+            level == codeStream.pCount()
+            && codeStream.good()
+        );
+    }
+
+    bool nextToken(
+        std::string& token
+    ) {
+        return this->good() && codeStream.nextToken(token);
+    }
+
+    std::string nextToken() {
+        auto token = std::string{};
+        if (!this->nextToken(token)) {
+            throw Error() << "Unexpected end of stream";
+        }
+        return token;
+    }
+
+    ParenthesesParser nextParser() {
+        return ParenthesesParser(
+            codeStream,
+            codeStream.pCount()
+        );
+    }
+
+private:
+    explicit ParenthesesParser(
+        InCodeStream& reader_
+        , int level_
+    )
+        : codeStream(reader_)
+        , level(level_)
+    {
+    }
+
+private:
+    InCodeStream& codeStream;
+    int level = 0;
 };
 
 }  // namespace AntLisp
