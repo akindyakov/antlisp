@@ -9,6 +9,7 @@ def build(ctx):
             "stack_machine.cpp",
             "cell.cpp",
             "string.cpp",
+            "parser.cpp",
         ],
         use=[
         ],
