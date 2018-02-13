@@ -7,14 +7,6 @@
 
 namespace AntLisp {
 
-/**
-* function call
-* function definition
-* let
-* cond
-* lambda
-*/
-
 using Char = char;
 
 class InCodeStream
@@ -98,7 +90,7 @@ private:
 
 FunctionDefinition parseCode(
     std::istream& in
-    , GlobalFrame global
+    , GlobalFrame& global
 );
 
 }  // namespace AntLisp
