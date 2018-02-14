@@ -93,4 +93,81 @@ FunctionDefinition parseCode(
     , GlobalFrame& global
 );
 
+class ConstructionParser {
+public:
+    explicit ConstructionParser (
+        ParenthesesParser& parentStream
+        , GlobalFrame& global
+    )
+        : parentStream_(parentStream)
+        , global_(global)
+    {
+    }
+
+    void choose(
+        const std::string& token
+        , FunctionDefinition& fdef
+    ) {
+        if ("function" == token) {
+            functionDef(fdef);
+        } else if ("lambda" == token) {
+            lambdaDef(fdef);
+        } else if ("let" == token) {
+            letDef(fdef);
+        } else if ("cond" == token) {
+            condDef(fdef);
+        } else {
+            callDef(token, fdef);
+        }
+    }
+
+    void bodyDef(
+        FunctionDefinition& fdef
+    ) {
+    }
+
+    void functionDef(
+        FunctionDefinition& fdef
+    ) {
+    }
+
+    void lambdaDef(
+        FunctionDefinition& fdef
+    ) {
+    }
+
+    void letDef(
+        FunctionDefinition& fdef
+    ) {
+    }
+
+    void condDef(
+        FunctionDefinition& fdef
+    ) {
+    }
+
+    void callDef(
+        const std::string& token
+        , FunctionDefinition& fdef
+    ) {
+        fdef.operations.emplace_back(
+            FunctionDefinition::GetGlobal,
+            fdef.addName(token)
+        );
+        auto argCount = std::size_t{0};
+    }
+
+    void finish() {
+        for (auto& value : globalPatch_) {
+            global_[value.first] = std::move(value.second);
+        }
+        globalPatch_.clear();
+    }
+
+private:
+    ParenthesesParser& parentStream_;
+    GlobalFrame& global_;
+    GlobalFrame globalPatch_;
+};
+
 }  // namespace AntLisp

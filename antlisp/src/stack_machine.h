@@ -91,6 +91,14 @@ struct FunctionDefinition {
     std::vector<TVarName> names;
     LocalFrame consts;
 
+    std::size_t addName(
+        const TVarName& name
+    ) {
+        auto pos = names.size();
+        names.push_back(name);
+        return pos;
+    }
+
     static bool step(Environment& env);
 };
 

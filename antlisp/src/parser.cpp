@@ -168,16 +168,24 @@ ParenthesesParser::ParenthesesParser(
 * cond
 * lambda
 */
+namespace {
+
+}  // namespace
+
 FunctionDefinition parseCode(
     std::istream& in
     , GlobalFrame& global
 ) {
-    auto fdef = FunctionDefinition{};
     auto codeStream = InCodeStream(in);
     auto pParser = ParenthesesParser::fromCodeStream(codeStream);
-    auto token = pParser.nextToken();
-    std::cerr << token << '\n';
-    return fdef;
+    auto cParser = ConstructionParser(
+        pParser,
+        global
+    );
+    auto module = FunctionDefinition{};
+    cParser.bodyDef(module);
+    cParser.finish();
+    return module;
 }
 
 }  // namespace AntLisp
