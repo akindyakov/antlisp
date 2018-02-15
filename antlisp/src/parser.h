@@ -61,6 +61,9 @@ public:
     {
     };
 
+    static ParenthesesParser openFromCodeStream(
+        InCodeStream& codeStream
+    );
     static ParenthesesParser fromCodeStream(
         InCodeStream& codeStream
     );
@@ -90,71 +93,106 @@ private:
 
 FunctionDefinition parseCode(
     std::istream& in
-    , GlobalFrame& global
+    , Namespace& global
 );
 
 class ConstructionParser {
 public:
     explicit ConstructionParser (
-        ParenthesesParser& parentStream
-        , GlobalFrame& global
+        InCodeStream& codeStream
+        , Namespace& global
     )
-        : parentStream_(parentStream)
+        : codeStream_(codeStream)
         , global_(global)
     {
     }
 
-    void choose(
-        const std::string& token
+    void next(
+        ParenthesesParser pParser
         , FunctionDefinition& fdef
     ) {
-        if ("function" == token) {
-            functionDef(fdef);
-        } else if ("lambda" == token) {
-            lambdaDef(fdef);
-        } else if ("let" == token) {
-            letDef(fdef);
-        } else if ("cond" == token) {
-            condDef(fdef);
+        auto token = std::string{};
+        if (!pParser.nextToken(token)) {
+            if ("define" == token) {
+                functionDef(std::move(pParser), fdef);
+            } else if ("lambda" == token) {
+                lambdaDef(std::move(pParser), fdef);
+            } else if ("let" == token) {
+                letDef(std::move(pParser), fdef);
+            } else if ("cond" == token) {
+                condDef(std::move(pParser), fdef);
+            } else {
+                fdef.getGlobalName(token);
+                callDef(std::move(pParser), fdef);
+            }
         } else {
-            callDef(token, fdef);
+            if (pParser.good()) {
+                next(pParser.nextParser(), fdef);
+                callDef(std::move(pParser), fdef);
+            } else {
+                throw Error();
+            }
         }
     }
 
     void bodyDef(
-        FunctionDefinition& fdef
+        ParenthesesParser pParser
+        , FunctionDefinition& fdef
     ) {
+        // TODO
     }
 
     void functionDef(
-        FunctionDefinition& fdef
+        ParenthesesParser pParser
+        , FunctionDefinition& fdef
     ) {
+        // TODO
     }
 
     void lambdaDef(
-        FunctionDefinition& fdef
+        ParenthesesParser pParser
+        , FunctionDefinition& fdef
     ) {
+        // TODO
     }
 
     void letDef(
-        FunctionDefinition& fdef
+        ParenthesesParser pParser
+        , FunctionDefinition& fdef
     ) {
+        // TODO
     }
 
     void condDef(
-        FunctionDefinition& fdef
+        ParenthesesParser pParser
+        , FunctionDefinition& fdef
     ) {
+        // TODO
     }
 
     void callDef(
+        ParenthesesParser pParser
+        , FunctionDefinition& fdef
+    ) {
+        auto argCount = std::size_t{0};
+        auto token = std::string{};
+        while (pParser.good()) {
+            if (pParser.nextToken(token)) {
+                tokenDef(token, fdef);
+            } else if (pParser.isLocked()) {
+                next(pParser.nextParser(), fdef);
+            }
+        }
+        fdef.operations.emplace_back(
+            FunctionDefinition::RunFunction,
+            argCount
+        );
+    }
+
+    void tokenDef(
         const std::string& token
         , FunctionDefinition& fdef
     ) {
-        fdef.operations.emplace_back(
-            FunctionDefinition::GetGlobal,
-            fdef.addName(token)
-        );
-        auto argCount = std::size_t{0};
     }
 
     void finish() {
@@ -165,9 +203,8 @@ public:
     }
 
 private:
-    ParenthesesParser& parentStream_;
-    GlobalFrame& global_;
-    GlobalFrame globalPatch_;
+    Namespace& global_;
+    Namespace globalPatch_;
 };
 
 }  // namespace AntLisp

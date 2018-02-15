@@ -65,7 +65,7 @@ void testFullCycle() {
     );
     fdef->operations.push_back(
         AntLisp::FunctionDefinition::Step(
-            AntLisp::FunctionDefinition::RunExternalFunction,
+            AntLisp::FunctionDefinition::RunFunction,
             2
         )
     );
@@ -77,7 +77,7 @@ void testFullCycle() {
     );
     fdef->operations.push_back(
         AntLisp::FunctionDefinition::Step(
-            AntLisp::FunctionDefinition::RunExternalFunction,
+            AntLisp::FunctionDefinition::RunFunction,
             2
         )
     );

@@ -101,7 +101,7 @@ int InCodeStream::getParenthesesNumber(Char ch) {
     return 0;
 }
 
-ParenthesesParser ParenthesesParser::fromCodeStream(
+ParenthesesParser ParenthesesParser::openFromCodeStream(
     InCodeStream& codeStream
 ) {
     codeStream.skipSpaces();
@@ -114,6 +114,15 @@ ParenthesesParser ParenthesesParser::fromCodeStream(
     ) {
         throw Error() << "'";
     }
+    return ParenthesesParser(
+        codeStream,
+        codeStream.pCount()
+    );
+}
+
+ParenthesesParser ParenthesesParser::fromCodeStream(
+    InCodeStream& codeStream
+) {
     return ParenthesesParser(
         codeStream,
         codeStream.pCount()

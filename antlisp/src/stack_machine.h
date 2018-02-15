@@ -15,12 +15,12 @@ namespace AntLisp {
 using TVarName = std::string;
 
 using LocalFrame = std::vector<Cell>;
-using GlobalFrame = std::unordered_map<TVarName, Cell>;
+using Namespace = std::unordered_map<TVarName, Cell>;
 
 class IExtFunction {
 public:
-    virtual void call(
-        LocalFrame& frame
+    virtual Cell call(
+        LocalFrame frame
     ) const = 0;
 };
 
@@ -28,16 +28,13 @@ class ExtSum
     : public IExtFunction
 {
     void call(
-        LocalFrame& frame
+        LocalFrame frame
     ) const override {
         auto sum = Integer{0};
         for (const auto& cell : frame) {
             sum += cell.get<Integer>();
         }
-        frame.clear();
-        frame.push_back(
-            Cell(sum)
-        );
+        return Cell(sum);
     }
 };
 
@@ -45,16 +42,13 @@ class ExtPrint
     : public IExtFunction
 {
     void call(
-        LocalFrame& frame
+        LocalFrame frame
     ) const override {
         auto m = Integer{1};
         for (const auto& cell : frame) {
             m *= cell.get<Integer>();
         }
-        frame.clear();
-        frame.push_back(
-            Cell(m)
-        );
+        return Cell(m);
     }
 };
 
@@ -68,7 +62,6 @@ struct FunctionDefinition {
         GetGlobal,
         SetGlobal,
         RunFunction,
-        RunExternalFunction,
         StackRewind,
         SkipIfTrue,
         SkipIfFalse,
@@ -86,17 +79,33 @@ struct FunctionDefinition {
         std::size_t position = 0;
     };
 
+    static constexpr InvalidPosition = std::numeric_limits<std::size_t>::max();
+
     std::vector<Step> operations;
     std::size_t argnum;
-    std::vector<TVarName> names;
+    std::vector<TVarName> globalNames;
+    std::unordered_map<TVarName, std::size_t> localNames;
     LocalFrame consts;
 
-    std::size_t addName(
+    void getGlobalName(
         const TVarName& name
     ) {
-        auto pos = names.size();
-        names.push_back(name);
-        return pos;
+        auto pos = globalNames.size();
+        globalNames.push_back(name);
+        operations.emplace_back(
+            FunctionDefinition::GetGlobal,
+            pos
+        );
+    }
+
+    std::size_t getLocalPosition(
+        const std::string& name
+    ) const {
+        const auto it = localNames.find(name);
+        if (it == localNames.local.end()) {
+            return InvalidPosition;
+        }
+        return it.second;
     }
 
     static bool step(Environment& env);
@@ -171,8 +180,8 @@ public:
         );
     }
 
-    void getGlobal(const GlobalFrame& global) {
-        const auto& name = function->names[
+    void getGlobal(const Namespace& global) {
+        const auto& name = function->globalNames[
             function->operations[runner].position
         ];
         // copy
@@ -181,8 +190,8 @@ public:
         );
     }
 
-    void setGlobal(GlobalFrame& global) {
-        const auto& name = function->names[
+    void setGlobal(Namespace& global) {
+        const auto& name = function->globalNames[
             function->operations[runner].position
         ];
         global[name] = this->popLocal();
@@ -215,7 +224,7 @@ private:
 
 struct Environment {
     std::vector<FunctionCall> CallStack;
-    std::unordered_map<TVarName, Cell> vars;
+    Namespace vars;
     Cell ret;
 
     bool isStackEmpty() {

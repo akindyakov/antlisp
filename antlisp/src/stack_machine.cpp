@@ -22,28 +22,24 @@ bool FunctionDefinition::step(Environment& env) {
         case RunFunction:
             {
                 auto args = call->createArgs();
-                auto fdef = call->popLocal().get<FunctionDefinitionPtr>();
-                call = env.stackPush(
-                    FunctionCall(
-                        std::move(fdef),
-                        std::move(args)
-                    )
-                );
-            }
-            break;
-        case RunExternalFunction:
-            {
-                auto frame = call->createArgs();
-                auto fdef = call->popLocal().get<ExtFunctionPtr>();
-                fdef->call(frame);
-                if (!frame.empty()) {
+                auto toCall = call->popLocal();
+                if (toCall.is<FunctionDefinitionPtr>()) {
+                    auto fdef = toCall.get<FunctionDefinitionPtr>();
+                    call = env.stackPush(
+                        FunctionCall(
+                            std::move(fdef),
+                            std::move(args)
+                        )
+                    );
+                } else if (toCall.is<ExtFunctionPtr>()) {
+                    auto extf = toCall.get<ExtFunctionPtr>();
                     call->pushLocal(
-                        std::move(frame.back())
+                        extf->call(
+                            std::move(args)
+                        )
                     );
                 } else {
-                    call->pushLocal(
-                        Cell::nil()
-                    );
+                    throw Error() << __FILE__ << ":" << __LINE__;
                 }
             }
             break;
