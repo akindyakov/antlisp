@@ -34,11 +34,11 @@ void testFullCycle() {
     );
     auto fdef = std::make_shared<AntLisp::FunctionDefinition>();
     auto frame = AntLisp::LocalFrame{};
-    fdef->names.push_back("*");
-    fdef->names.push_back("+");
-    fdef->names.push_back("first");
-    fdef->names.push_back("second");
-    fdef->names.push_back("third");
+    fdef->globalNames.push_back("*");
+    fdef->globalNames.push_back("+");
+    fdef->globalNames.push_back("first");
+    fdef->globalNames.push_back("second");
+    fdef->globalNames.push_back("third");
     fdef->operations.push_back(
         AntLisp::FunctionDefinition::Step(
             AntLisp::FunctionDefinition::GetGlobal,

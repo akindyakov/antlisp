@@ -9,7 +9,7 @@ def build(ctx):
             "stack_machine.cpp",
             "cell.cpp",
             "string.cpp",
-            "parser.cpp",
+            #"parser.cpp",
         ],
         use=[
         ],
@@ -62,14 +62,14 @@ def build(ctx):
         source="string_ut",
     )
 
-    ctx.program(
-        target="parser_ut",
-        source="parser_ut.cpp",
-        use=[
-            "antlisp-src"
-        ],
-    )
-    ctx(
-        rule="${SRC}",
-        source="parser_ut",
-    )
+    #ctx.program(
+    #    target="parser_ut",
+    #    source="parser_ut.cpp",
+    #    use=[
+    #        "antlisp-src"
+    #    ],
+    #)
+    #ctx(
+    #    rule="${SRC}",
+    #    source="parser_ut",
+    #)

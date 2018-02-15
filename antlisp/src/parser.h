@@ -99,11 +99,9 @@ FunctionDefinition parseCode(
 class ConstructionParser {
 public:
     explicit ConstructionParser (
-        InCodeStream& codeStream
-        , Namespace& global
+        Namespace& global
     )
-        : codeStream_(codeStream)
-        , global_(global)
+        : global_(global)
     {
     }
 

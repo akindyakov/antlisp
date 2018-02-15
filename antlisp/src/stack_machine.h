@@ -27,28 +27,28 @@ public:
 class ExtSum
     : public IExtFunction
 {
-    void call(
+    Cell call(
         LocalFrame frame
     ) const override {
         auto sum = Integer{0};
         for (const auto& cell : frame) {
             sum += cell.get<Integer>();
         }
-        return Cell(sum);
+        return Cell::integer(sum);
     }
 };
 
 class ExtPrint
     : public IExtFunction
 {
-    void call(
+    Cell call(
         LocalFrame frame
     ) const override {
         auto m = Integer{1};
         for (const auto& cell : frame) {
             m *= cell.get<Integer>();
         }
-        return Cell(m);
+        return Cell::integer(m);
     }
 };
 
@@ -79,7 +79,12 @@ struct FunctionDefinition {
         std::size_t position = 0;
     };
 
-    static constexpr InvalidPosition = std::numeric_limits<std::size_t>::max();
+    class Error
+        : public Exception
+    {
+    };
+
+    static constexpr auto InvalidPosition = std::numeric_limits<std::size_t>::max();
 
     std::vector<Step> operations;
     std::size_t argnum;
@@ -102,10 +107,10 @@ struct FunctionDefinition {
         const std::string& name
     ) const {
         const auto it = localNames.find(name);
-        if (it == localNames.local.end()) {
+        if (it == localNames.end()) {
             return InvalidPosition;
         }
-        return it.second;
+        return it->second;
     }
 
     static bool step(Environment& env);
