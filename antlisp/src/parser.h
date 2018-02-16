@@ -197,6 +197,19 @@ public:
         const std::string& token
         , FunctionDefinition& fdef
     ) {
+        auto cell = tryFromString(token);
+        if (cell) {
+            auto pos = fdef.consts.size();
+            fdef.consts.push_back(
+                std::move(cell.get())
+            );
+            fdef.operations.push_back(
+                FunctionDefinition::GetConst,
+                pos
+            );
+        } else {
+            // TODO
+        }
     }
 
     void finish() {
