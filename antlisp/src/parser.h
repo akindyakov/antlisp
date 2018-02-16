@@ -105,6 +105,11 @@ public:
     {
     }
 
+    class Error
+        : public Exception
+    {
+    };
+
     void next(
         ParenthesesParser pParser
         , FunctionDefinition& fdef

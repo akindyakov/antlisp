@@ -183,16 +183,13 @@ namespace {
 
 FunctionDefinition parseCode(
     std::istream& in
-    , GlobalFrame& global
+    , Namespace& global
 ) {
     auto codeStream = InCodeStream(in);
     auto pParser = ParenthesesParser::fromCodeStream(codeStream);
-    auto cParser = ConstructionParser(
-        pParser,
-        global
-    );
+    auto cParser = ConstructionParser(global);
     auto module = FunctionDefinition{};
-    cParser.bodyDef(module);
+    //cParser.bodyDef(module);
     cParser.finish();
     return module;
 }

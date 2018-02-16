@@ -47,7 +47,7 @@ void testParenthesesRecursiveReader() {
     UT_ASSERT(
         reader.good()
     );
-    auto parser1 = AntLisp::ParenthesesParser::fromCodeStream(reader);
+    auto parser1 = AntLisp::ParenthesesParser::openFromCodeStream(reader);
     UT_ASSERT(
         reader.good()
     );
