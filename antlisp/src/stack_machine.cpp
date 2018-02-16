@@ -71,10 +71,22 @@ bool FunctionDefinition::step(Environment& env) {
         if (env.isStackEmpty()) {
             return false;
         }
-        call = env.stackTop();
-        call->pushLocal(
-            std::move(env.ret)
-        );
+        if (env.ret.is<PostponedFunctionPtr>()) {
+            call = env.stackPush(
+                FunctionCall(
+                    std::move(
+                        env.ret.get<PostponedFunctionPtr>()
+                    )
+                )
+            );
+            call = env.stackTop();
+        } else {
+            call = env.stackTop();
+            call->pushLocal(
+                std::move(env.ret)
+            );
+        }
+        env.ret = Cell::nil();
     }
     return true;
 }

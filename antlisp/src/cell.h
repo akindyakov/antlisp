@@ -12,9 +12,11 @@
 namespace AntLisp {
 
 class FunctionDefinition;
+class PostponedFunction;
 class IExtFunction;
 
 using FunctionDefinitionPtr = std::shared_ptr<FunctionDefinition>;
+using PostponedFunctionPtr  = std::shared_ptr<FunctionDefinition>;
 using ExtFunctionPtr        = std::shared_ptr<IExtFunction>;
 
 class Nil
@@ -52,6 +54,7 @@ public:
         , StringPtr
         , ConsPtr
         , FunctionDefinitionPtr
+        , PostponedFunctionPtr
         , ExtFunctionPtr
     >;
 
@@ -63,6 +66,7 @@ public:
         StringPtr,
         Cons,
         FunctionDefinitionPtr,
+        PostponedFunctionPtr,
         ExtFunctionPtr,
     };
 

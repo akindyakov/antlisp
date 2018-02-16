@@ -55,6 +55,7 @@ class ExtPrint
 struct Environment;
 
 struct FunctionDefinition {
+    virtual ~FunctionDefinition() = default;
     enum EOperations {
         Nope,
         GetConst,
@@ -114,6 +115,11 @@ struct FunctionDefinition {
     }
 
     static bool step(Environment& env);
+};
+
+class PostponedFunction
+    : public FunctionDefinition
+{
 };
 
 class FunctionCall {
