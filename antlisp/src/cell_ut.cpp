@@ -44,99 +44,86 @@ void cellGetError() {
 }
 
 void test_tryFromString_number() {
-    auto dst = AntLisp::Cell{};
-    UT_ASSERT(
-        AntLisp::tryFromString(dst, "12")
-    );
+    auto dst = AntLisp::tryFromString("12");
+    UT_ASSERT(dst);
     UT_ASSERT_EQUAL(
-        dst.get<AntLisp::Integer>(),
+        dst->get<AntLisp::Integer>(),
         12
     );
-    UT_ASSERT(
-        AntLisp::tryFromString(dst, "-511")
-    );
+    dst = AntLisp::tryFromString("-511");
+    UT_ASSERT(dst);
     UT_ASSERT_EQUAL(
-        dst.get<AntLisp::Integer>(),
+        dst->get<AntLisp::Integer>(),
         -511
     );
-    UT_ASSERT(
-        AntLisp::tryFromString(dst, "-0911")
-    );
+    dst = AntLisp::tryFromString("-0911");
+    UT_ASSERT(dst);
     UT_ASSERT_EQUAL(
-        dst.get<AntLisp::Integer>(),
+        dst->get<AntLisp::Integer>(),
         -911
     );
-    UT_ASSERT(
-        AntLisp::tryFromString(dst, "0587")
-    );
+    dst = AntLisp::tryFromString("0587");
+    UT_ASSERT(dst);
     UT_ASSERT_EQUAL(
-        dst.get<AntLisp::Integer>(),
+        dst->get<AntLisp::Integer>(),
         587
     );
+    dst = AntLisp::tryFromString("1.01");
+    UT_ASSERT(dst);
     UT_ASSERT(
-        AntLisp::tryFromString(dst, "1.01")
-    );
-    UT_ASSERT(
-        dst.is<AntLisp::Float>()
+        dst->is<AntLisp::Float>()
     );
     UT_ASSERT_EQUAL(
-        static_cast<int>(dst.get<AntLisp::Float>()),
+        static_cast<int>(dst->get<AntLisp::Float>()),
         1
     );
+    dst = AntLisp::tryFromString("-2.01");
+    UT_ASSERT(dst);
     UT_ASSERT(
-        AntLisp::tryFromString(dst, "-2.01")
-    );
-    UT_ASSERT(
-        dst.is<AntLisp::Float>()
+        dst->is<AntLisp::Float>()
     );
     UT_ASSERT_EQUAL(
-        static_cast<int>(dst.get<AntLisp::Float>()),
+        static_cast<int>(dst->get<AntLisp::Float>()),
         -2
     );
+    dst = AntLisp::tryFromString("0.02");
+    UT_ASSERT(dst);
     UT_ASSERT(
-        AntLisp::tryFromString(dst, "0.02")
+        dst->is<AntLisp::Float>()
     );
     UT_ASSERT(
-        dst.is<AntLisp::Float>()
+        dst->get<AntLisp::Float>() > 0.019
     );
     UT_ASSERT(
-        dst.get<AntLisp::Float>() > 0.019
+        dst->get<AntLisp::Float>() < 0.021
+    );
+    dst = AntLisp::tryFromString(".02");
+    UT_ASSERT(dst);
+    UT_ASSERT(
+        dst->is<AntLisp::Float>()
     );
     UT_ASSERT(
-        dst.get<AntLisp::Float>() < 0.021
+        dst->get<AntLisp::Float>() > 0.019
     );
     UT_ASSERT(
-        AntLisp::tryFromString(dst, ".02")
-    );
-    UT_ASSERT(
-        dst.is<AntLisp::Float>()
-    );
-    UT_ASSERT(
-        dst.get<AntLisp::Float>() > 0.019
-    );
-    UT_ASSERT(
-        dst.get<AntLisp::Float>() < 0.021
+        dst->get<AntLisp::Float>() < 0.021
     );
 }
 
 void test_tryFromString_string() {
-    auto dst = AntLisp::Cell{};
-    UT_ASSERT(
-        AntLisp::tryFromString(dst, "\" abc \"")
-    );
+    auto dst = AntLisp::tryFromString("\" abc \"");
+    UT_ASSERT(dst);
     UT_ASSERT_EQUAL(
-        *dst.get<AntLisp::StringPtr>().get(),
+        *dst->get<AntLisp::StringPtr>().get(),
         " abc "
     );
 }
 
 void test_tryFromString_simple_char() {
-    auto dst = AntLisp::Cell{};
-    UT_ASSERT(
-        AntLisp::tryFromString(dst, "#\\b")
-    );
+    auto dst = AntLisp::tryFromString("#\\b");
+    UT_ASSERT(dst);
     UT_ASSERT_EQUAL(
-        dst.get<AntLisp::Symbol>(),
+        dst->get<AntLisp::Symbol>(),
         'b'
     );
 }

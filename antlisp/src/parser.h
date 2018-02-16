@@ -185,6 +185,7 @@ public:
             } else if (pParser.isLocked()) {
                 next(pParser.nextParser(), fdef);
             }
+            ++argCount;
         }
         fdef.operations.emplace_back(
             FunctionDefinition::RunFunction,

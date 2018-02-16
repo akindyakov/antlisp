@@ -140,23 +140,21 @@ private:
 
 }  // namespace
 
-bool tryFromString(
-    Cell& dst
-    , const std::string& str
+boost::optional<Cell> tryFromString(
+    const std::string& str
 ) {
+    auto out = boost::optional<Cell>{};
     if (str.empty()) {
-        return false;
+        return out;
     }
     if (NumberValueParser::checkPrefix(str)) {
-        dst = NumberValueParser::parse(str);
+        out = NumberValueParser::parse(str);
     } else if (StringValueParser::checkPrefix(str)) {
-        dst = StringValueParser::parse(str);
+        out = StringValueParser::parse(str);
     } else if (SimpleCharacterParser::checkPrefix(str)) {
-        dst = SimpleCharacterParser::parse(str);
-    } else {
-        return false;
+        out = SimpleCharacterParser::parse(str);
     }
-    return true;
+    return out;
 }
 
 }  // namespace AntLisp

@@ -4,6 +4,7 @@
 
 #include <boost/variant.hpp>
 #include <boost/variant/get.hpp>
+#include <boost/optional.hpp>
 
 #include <string>
 #include <unordered_map>
@@ -305,9 +306,8 @@ class ParserError
 {
 };
 
-bool tryFromString(
-    Cell& dst
-    , const std::string& str
+boost::optional<Cell> tryFromString(
+    const std::string& str
 );
 
 }  // namespace AntLisp
