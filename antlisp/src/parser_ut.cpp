@@ -12,6 +12,7 @@ void testInCodeStream() {
     UT_ASSERT(
         !code.nextToken(token)
     );
+    code.ignore(); // ignore '('
     UT_ASSERT(
         code.nextToken(token)
     );
@@ -24,6 +25,7 @@ void testInCodeStream() {
     UT_ASSERT_EXCEPTION_TYPE(
         code.nextToken(), AntLisp::InCodeStream::Error
     );
+    code.ignore();
     UT_ASSERT_EQUAL(
         code.pCount(), 2
     );
@@ -36,6 +38,8 @@ void testInCodeStream() {
     UT_ASSERT_EQUAL(
         code.nextToken(), "3"
     );
+    code.ignore();
+    code.ignore();
     UT_ASSERT_EQUAL(
         code.pCount(), 0
     );
@@ -79,6 +83,9 @@ void testParenthesesRecursiveReader() {
     );
     UT_ASSERT_EQUAL(token, "2");
     UT_ASSERT(
+        !parser2.nextToken(token)
+    );
+    UT_ASSERT(
         !parser2.good()
     );
 
@@ -102,6 +109,9 @@ void testParenthesesRecursiveReader() {
     );
     UT_ASSERT_EQUAL(token, "5");
     UT_ASSERT(
+        !parser3.nextToken(token)
+    );
+    UT_ASSERT(
         !parser3.good()
     );
 
@@ -115,6 +125,14 @@ void testParenthesesRecursiveReader() {
         parser1.nextToken(token)
     );
     UT_ASSERT_EQUAL(token, "15");
+}
+
+void test_parseCode() {
+    auto global = AntLisp::Namespace{};
+    std::istringstream in("  (sum 1.23 (* 2 3)) ");
+    auto body = AntLisp::parseCode(in, global);
+    UT_ASSERT_EQUAL(body->consts.size(), 3);
+    UT_ASSERT_EQUAL(body->names.size(), 2);
 }
 
 UT_LIST(

@@ -91,6 +91,20 @@ public:
 };
 
 template<>
+class TypeInfo<PostponedFunctionPtr>
+{
+public:
+    static constexpr const char* name() {
+        return "postponed-function-call";
+    }
+    static std::string toString(PostponedFunctionPtr ptr) {
+        auto out = std::ostringstream();
+        out << name() << ": " << ptr;
+        return out.str();
+    }
+};
+
+template<>
 class TypeInfo<ConsPtr>
 {
 public:

@@ -56,6 +56,13 @@ private:
 class ParenthesesParser
 {
 public:
+    ParenthesesParser() = delete;
+    ParenthesesParser(const ParenthesesParser&) = delete;
+    ParenthesesParser(ParenthesesParser&&) = default;
+
+    ParenthesesParser& operator=(const ParenthesesParser&) = delete;
+    ParenthesesParser& operator=(ParenthesesParser&&) = default;
+
     class Error
         : public Exception
     {
@@ -91,137 +98,9 @@ private:
     int level = 0;
 };
 
-FunctionDefinition parseCode(
+FunctionDefinitionPtr parseCode(
     std::istream& in
     , Namespace& global
 );
-
-class ConstructionParser {
-public:
-    explicit ConstructionParser (
-        Namespace& global
-    )
-        : global_(global)
-    {
-    }
-
-    class Error
-        : public Exception
-    {
-    };
-
-    void next(
-        ParenthesesParser pParser
-        , FunctionDefinition& fdef
-    ) {
-        auto token = std::string{};
-        if (!pParser.nextToken(token)) {
-            if ("define" == token) {
-                functionDef(std::move(pParser), fdef);
-            } else if ("lambda" == token) {
-                lambdaDef(std::move(pParser), fdef);
-            } else if ("let" == token) {
-                letDef(std::move(pParser), fdef);
-            } else if ("cond" == token) {
-                condDef(std::move(pParser), fdef);
-            } else {
-                fdef.getGlobalName(token);
-                callDef(std::move(pParser), fdef);
-            }
-        } else {
-            if (pParser.good()) {
-                next(pParser.nextParser(), fdef);
-                callDef(std::move(pParser), fdef);
-            } else {
-                throw Error();
-            }
-        }
-    }
-
-    void bodyDef(
-        ParenthesesParser pParser
-        , FunctionDefinition& fdef
-    ) {
-        // TODO
-    }
-
-    void functionDef(
-        ParenthesesParser pParser
-        , FunctionDefinition& fdef
-    ) {
-        // TODO
-    }
-
-    void lambdaDef(
-        ParenthesesParser pParser
-        , FunctionDefinition& fdef
-    ) {
-        // TODO
-    }
-
-    void letDef(
-        ParenthesesParser pParser
-        , FunctionDefinition& fdef
-    ) {
-        // TODO
-    }
-
-    void condDef(
-        ParenthesesParser pParser
-        , FunctionDefinition& fdef
-    ) {
-        // TODO
-    }
-
-    void callDef(
-        ParenthesesParser pParser
-        , FunctionDefinition& fdef
-    ) {
-        auto argCount = std::size_t{0};
-        auto token = std::string{};
-        while (pParser.good()) {
-            if (pParser.nextToken(token)) {
-                tokenDef(token, fdef);
-            } else if (pParser.isLocked()) {
-                next(pParser.nextParser(), fdef);
-            }
-            ++argCount;
-        }
-        fdef.operations.emplace_back(
-            FunctionDefinition::RunFunction,
-            argCount
-        );
-    }
-
-    void tokenDef(
-        const std::string& token
-        , FunctionDefinition& fdef
-    ) {
-        auto cell = tryFromString(token);
-        if (cell) {
-            auto pos = fdef.consts.size();
-            fdef.consts.push_back(
-                std::move(cell.get())
-            );
-            fdef.operations.push_back(
-                FunctionDefinition::GetConst,
-                pos
-            );
-        } else {
-            // TODO
-        }
-    }
-
-    void finish() {
-        for (auto& value : globalPatch_) {
-            global_[value.first] = std::move(value.second);
-        }
-        globalPatch_.clear();
-    }
-
-private:
-    Namespace& global_;
-    Namespace globalPatch_;
-};
 
 }  // namespace AntLisp

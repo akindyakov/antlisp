@@ -57,16 +57,17 @@ bool InCodeStream::nextToken(
     while (
         this->peek(ch)
         && std::isspace(ch) == false
+        /**/ && getParenthesesNumber(ch) == 0
     ) {
-        if (getParenthesesNumber(ch) != 0) {
-            while (
-                this->peek(ch)
-                && getParenthesesNumber(ch) != 0
-            ) {
-                this->ignore();
-            }
-            break;
-        }
+        //if (getParenthesesNumber(ch) != 0) {
+        //    while (
+        //        this->peek(ch)
+        //        && getParenthesesNumber(ch) != 0
+        //    ) {
+        //        this->ignore();
+        //    }
+        //    break;
+        //}
         token.push_back(ch);
         this->ignore();
     }
@@ -143,7 +144,16 @@ bool ParenthesesParser::good() const {
 bool ParenthesesParser::nextToken(
     std::string& token
 ) {
-    return this->good() && codeStream.nextToken(token);
+    if (this->good()) {
+        if (codeStream.nextToken(token)) {
+            return true;
+        }
+        if (codeStream.good()) {
+            codeStream.ignore();
+        }
+        return false;
+    }
+    return false;
 }
 
 std::string ParenthesesParser::nextToken() {
@@ -179,19 +189,170 @@ ParenthesesParser::ParenthesesParser(
 */
 namespace {
 
+class ConstructionParser {
+public:
+    explicit ConstructionParser (
+        Namespace& global
+    )
+        : global_(global)
+    {
+        definitionStack.push_back(
+            std::make_shared<FunctionDefinition>()
+        );
+    }
+
+    ConstructionParser& fromCodeStream(
+        InCodeStream& inStream
+    ) {
+        this->next(
+            ParenthesesParser::openFromCodeStream(inStream)
+        );
+        return *this;
+    }
+
+    FunctionDefinitionPtr finish() {
+        for (auto& value : globalPatch_) {
+            global_[value.first] = std::move(value.second);
+        }
+        if (definitionStack.size() != 1) {
+            throw Error() << __FILE__ << ":" << __LINE__;
+        }
+        return std::move(
+            definitionStack.back()
+        );
+    }
+
+    class Error
+        : public Exception
+    {
+    };
+
+private:
+    void next(
+        ParenthesesParser pParser
+    ) {
+        auto token = std::string{};
+        if (pParser.nextToken(token)) {
+            if ("define" == token) {
+                functionDef(std::move(pParser));
+            } else if ("lambda" == token) {
+                lambdaDef(std::move(pParser));
+            } else if ("let" == token) {
+                letDef(std::move(pParser));
+            } else if ("cond" == token) {
+                condDef(std::move(pParser));
+            } else {
+                auto& fdef = definitionStack.back();
+                fdef->getGlobalName(token);
+                callDef(std::move(pParser));
+            }
+        } else {
+            if (pParser.good()) {
+                next(pParser.nextParser());
+                callDef(std::move(pParser));
+            } else {
+                throw Error();
+            }
+        }
+    }
+
+    void bodyDef(
+        ParenthesesParser pParser
+    ) {
+        // TODO
+    }
+
+    void functionDef(
+        ParenthesesParser pParser
+    ) {
+        // TODO
+    }
+
+    void lambdaDef(
+        ParenthesesParser pParser
+    ) {
+        // TODO
+    }
+
+    void letDef(
+        ParenthesesParser pParser
+    ) {
+        // TODO
+        auto token = std::string{};
+        {
+            auto argListParser = pParser.nextParser();
+        }
+    }
+
+    void condDef(
+        ParenthesesParser pParser
+    ) {
+        // TODO
+    }
+
+    void callDef(
+        ParenthesesParser pParser
+    ) {
+        auto argCount = std::size_t{0};
+        auto token = std::string{};
+        while (pParser.good()) {
+            if (pParser.nextToken(token)) {
+                tokenDef(token);
+                ++argCount;
+            } else if (pParser.isLocked()) {
+                next(pParser.nextParser());
+                ++argCount;
+            }
+        }
+        auto& fdef = definitionStack.back();
+        fdef->operations.emplace_back(
+            FunctionDefinition::RunFunction,
+            argCount
+        );
+    }
+
+    void tokenDef(
+        const std::string& token
+    ) {
+        auto& fdef = definitionStack.back();
+        auto cellOpt = tryFromString(token);
+        if (cellOpt) {
+            auto pos = fdef->consts.size();
+            fdef->consts.push_back(
+                std::move(cellOpt.get())
+            );
+            fdef->operations.emplace_back(
+                FunctionDefinition::GetConst,
+                pos
+            );
+        } else {
+            takeVarByName(token);
+        }
+    }
+
+    void takeVarByName(
+        const std::string& varName
+    ) {
+       // std::size_t getLocalPosition(
+        //return it->second;
+    }
+
+private:
+    Namespace& global_;
+    Namespace globalPatch_;
+    std::vector<FunctionDefinitionPtr> definitionStack;
+};
+
 }  // namespace
 
-FunctionDefinition parseCode(
+FunctionDefinitionPtr parseCode(
     std::istream& in
     , Namespace& global
 ) {
     auto codeStream = InCodeStream(in);
-    auto pParser = ParenthesesParser::fromCodeStream(codeStream);
-    auto cParser = ConstructionParser(global);
-    auto module = FunctionDefinition{};
-    //cParser.bodyDef(module);
-    cParser.finish();
-    return module;
+    return ConstructionParser(global).fromCodeStream(
+        codeStream
+    ).finish();
 }
 
 }  // namespace AntLisp

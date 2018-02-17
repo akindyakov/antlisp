@@ -22,7 +22,7 @@ bool FunctionDefinition::step(Environment& env) {
         case RunFunction:
             {
                 auto args = call->createArgs();
-                auto toCall = call->popLocal();
+                auto toCall = call->popCallStack();
                 if (toCall.is<FunctionDefinitionPtr>()) {
                     auto fdef = toCall.get<FunctionDefinitionPtr>();
                     call = env.stackPush(
@@ -33,13 +33,15 @@ bool FunctionDefinition::step(Environment& env) {
                     );
                 } else if (toCall.is<ExtFunctionPtr>()) {
                     auto extf = toCall.get<ExtFunctionPtr>();
-                    call->pushLocal(
+                    call->pushCallStack(
                         extf->call(
                             std::move(args)
                         )
                     );
                 } else {
-                    throw Error() << __FILE__ << ":" << __LINE__;
+                    throw Error()
+                        << __FILE__ << ":" << __LINE__
+                        << " " << toCall.toString();
                 }
             }
             break;
@@ -48,7 +50,7 @@ bool FunctionDefinition::step(Environment& env) {
             break;
         case SkipIfTrue:
             {
-                auto guard = call->popLocal();
+                auto guard = call->popCallStack();
                 if (guard.is<Nil>()) {
                     call->skip();
                 }
@@ -56,7 +58,7 @@ bool FunctionDefinition::step(Environment& env) {
             break;
         case SkipIfFalse:
             {
-                auto guard = call->popLocal();
+                auto guard = call->popCallStack();
                 if (!guard.is<Nil>()) {
                     call->skip();
                 }
@@ -65,24 +67,24 @@ bool FunctionDefinition::step(Environment& env) {
     }
     if (!call->next()) {
         env.ret = std::move(
-            call->popLocal()
+            call->popCallStack()
         );
         env.stackPop();
         if (env.isStackEmpty()) {
             return false;
         }
         if (env.ret.is<PostponedFunctionPtr>()) {
+            auto ptr = env.ret.get<PostponedFunctionPtr>();
             call = env.stackPush(
                 FunctionCall(
-                    std::move(
-                        env.ret.get<PostponedFunctionPtr>()
-                    )
+                    std::move(ptr->fdef),
+                    std::move(ptr->args)
                 )
             );
             call = env.stackTop();
         } else {
             call = env.stackTop();
-            call->pushLocal(
+            call->pushCallStack(
                 std::move(env.ret)
             );
         }

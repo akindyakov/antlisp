@@ -73,3 +73,15 @@ def build(ctx):
         rule="${SRC}",
         source="parser_ut",
     )
+
+    ctx.program(
+        target="parse_and_run_ut",
+        source="parse_and_run_ut.cpp",
+        use=[
+            "antlisp-src"
+        ],
+    )
+    ctx(
+        rule="${SRC}",
+        source="parse_and_run_ut",
+    )

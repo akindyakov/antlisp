@@ -16,8 +16,9 @@ def configure(ctx):
     ctx.load("compiler_cxx")
     ctx.env.append_unique(
         "CXXFLAGS", [
-            "-O2",
+            #"-O2",
             "-std=c++14",
+            "-ggdb",
         ]
     )
     ctx.env.INCLUDES = [

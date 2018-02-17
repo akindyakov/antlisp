@@ -14,13 +14,13 @@ namespace AntLisp {
 
 using TVarName = std::string;
 
-using LocalFrame = std::vector<Cell>;
+using LocalStack = std::vector<Cell>;
 using Namespace = std::unordered_map<TVarName, Cell>;
 
 class IExtFunction {
 public:
     virtual Cell call(
-        LocalFrame frame
+        LocalStack frame
     ) const = 0;
 };
 
@@ -28,7 +28,7 @@ class ExtSum
     : public IExtFunction
 {
     Cell call(
-        LocalFrame frame
+        LocalStack frame
     ) const override {
         auto sum = Integer{0};
         for (const auto& cell : frame) {
@@ -42,7 +42,7 @@ class ExtPrint
     : public IExtFunction
 {
     Cell call(
-        LocalFrame frame
+        LocalStack frame
     ) const override {
         auto m = Integer{1};
         for (const auto& cell : frame) {
@@ -89,64 +89,48 @@ struct FunctionDefinition {
 
     std::vector<Step> operations;
     std::size_t argnum;
-    std::vector<TVarName> globalNames;
-    std::unordered_map<TVarName, std::size_t> localNames;
-    LocalFrame consts;
+    std::vector<TVarName> argNames;
+    std::vector<TVarName> names;
+    LocalStack consts;
 
     void getGlobalName(
         const TVarName& name
     ) {
-        auto pos = globalNames.size();
-        globalNames.push_back(name);
+        auto pos = names.size();
+        names.push_back(name);
         operations.emplace_back(
             FunctionDefinition::GetGlobal,
             pos
         );
     }
 
-    std::size_t getLocalPosition(
-        const std::string& name
-    ) const {
-        const auto it = localNames.find(name);
-        if (it == localNames.end()) {
-            return InvalidPosition;
-        }
-        return it->second;
-    }
-
     static bool step(Environment& env);
 };
 
-class PostponedFunction
-    : public FunctionDefinition
+struct PostponedFunction
 {
+    FunctionDefinitionPtr fdef;
+    LocalStack args;
 };
 
 class FunctionCall {
 public:
     explicit FunctionCall(
         FunctionDefinitionPtr fdef
+        // positional args
+        // named args - use tuple please for it
+        , LocalStack args
     )
         : function(
             std::move(fdef)
         )
-        , frame(
-            function->consts
+        , localCallStack(
+            std::move(args)
         )
     {
-    }
-
-    explicit FunctionCall(
-        FunctionDefinitionPtr fdef
-        , LocalFrame frame_
-    )
-        : function(
-            std::move(fdef)
-        )
-        , frame(
-            std::move(frame_)
-        )
-    {
+        for (const auto& argName : this->function->argNames) {
+            vars.emplace(argName, this->popCallStack());
+        }
     }
 
     FunctionDefinition::EOperations getOperation() const {
@@ -157,16 +141,16 @@ public:
         return ++runner < function->operations.size();
     }
 
-    Cell popLocal() {
+    Cell popCallStack() {
         auto value = std::move(
-            frame.back()
+            localCallStack.back()
         );
-        frame.pop_back();
+        localCallStack.pop_back();
         return value;
     }
 
-    void pushLocal(Cell cell) {
-        frame.push_back(
+    void pushCallStack(Cell cell) {
+        localCallStack.push_back(
             std::move(cell)
         );
     }
@@ -176,41 +160,43 @@ public:
         auto cell = function->consts[
             function->operations[runner].position
         ];
-        this->pushLocal(
+        this->pushCallStack(
             std::move(cell)
         );
     }
 
     void getLocal() {
         // copy
-        auto local = frame[
-            function->operations[runner].position
-        ];
-        this->pushLocal(
+        auto local = vars.at(
+            function->names[
+                function->operations[runner].position
+            ]
+        );
+        this->pushCallStack(
             std::move(local)
         );
     }
 
     void getGlobal(const Namespace& global) {
-        const auto& name = function->globalNames[
+        const auto& name = function->names[
             function->operations[runner].position
         ];
         // copy
-        this->pushLocal(
+        this->pushCallStack(
             global.at(name)
         );
     }
 
     void setGlobal(Namespace& global) {
-        const auto& name = function->globalNames[
+        const auto& name = function->names[
             function->operations[runner].position
         ];
-        global[name] = this->popLocal();
+        global[name] = this->popCallStack();
     }
 
     void stackRewind() {
-        frame.resize(
-            frame.size() - function->operations[runner].position
+        localCallStack.resize(
+            localCallStack.size() - function->operations[runner].position
         );
     }
 
@@ -218,18 +204,21 @@ public:
         runner += function->operations[runner].position;
     }
 
-    LocalFrame createArgs() {
+    LocalStack createArgs() {
         auto size = function->operations[runner].position;
-        auto newFrame = LocalFrame(size);
+        auto newFrame = LocalStack{};
         while (size--) {
-            newFrame[size] = popLocal();
+            newFrame.push_back(
+                popCallStack()
+            );
         }
         return newFrame;
     }
 
 private:
-    LocalFrame frame;
     FunctionDefinitionPtr function;
+    LocalStack localCallStack;
+    Namespace vars;
     std::size_t runner = 0;
 };
 
