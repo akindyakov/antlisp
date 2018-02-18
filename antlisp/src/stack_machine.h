@@ -96,14 +96,7 @@ struct FunctionDefinition {
 
     void getGlobalName(
         const TVarName& name
-    ) {
-        auto pos = names.size();
-        names.push_back(name);
-        operations.emplace_back(
-            FunctionDefinition::GetGlobal,
-            pos
-        );
-    }
+    );
 
     static bool step(Environment& env);
 };
@@ -118,114 +111,32 @@ class FunctionCall {
 public:
     explicit FunctionCall(
         FunctionDefinitionPtr fdef
-        // positional args
-        // named args - use tuple please for it
         , LocalStack args
-    )
-        : function(
-            std::move(fdef)
-        )
-        , localCallStack(
-            std::move(args)
-        )
-    {
-        for (const auto& argName : this->function->argNames) {
-            vars.emplace(argName, this->popCallStack());
-        }
-    }
+    );
 
-    FunctionDefinition::EOperations getOperation() const {
-        return function->operations[runner].operation;
-    }
+    FunctionDefinition::EOperations getOperation() const;
 
-    bool next() noexcept {
-        return ++runner < function->operations.size();
-    }
+    bool next() noexcept;
 
-    Cell popCallStack() {
-        auto value = std::move(
-            localCallStack.back()
-        );
-        localCallStack.pop_back();
-        return value;
-    }
+    Cell popCallStack();
 
-    void pushCallStack(Cell cell) {
-        localCallStack.push_back(
-            std::move(cell)
-        );
-    }
+    void pushCallStack(Cell cell);
 
-    void getConst() {
-        // copy
-        auto cell = function->consts[
-            function->operations[runner].position
-        ];
-        this->pushCallStack(
-            std::move(cell)
-        );
-    }
+    void getConst();
 
-    void getLocal() {
-        // copy
-        auto local = this->vars.at(
-            this->function->names[
-                this->function->operations[
-                    this->runner
-                ].position
-            ]
-        );
-        this->pushCallStack(
-            std::move(local)
-        );
-    }
+    void getLocal();
 
-    void setLocal() {
-        const auto& name = function->names[
-            this->function->operations[
-                this->runner
-            ].position
-        ];
-        this->vars[name] =  this->popCallStack();
-    }
+    void setLocal();
 
-    void getGlobal(const Namespace& global) {
-        const auto& name = function->names[
-            function->operations[runner].position
-        ];
-        // copy
-        this->pushCallStack(
-            global.at(name)
-        );
-    }
+    void getGlobal(const Namespace& global);
 
-    void setGlobal(Namespace& global) {
-        const auto& name = function->names[
-            function->operations[runner].position
-        ];
-        global[name] = this->popCallStack();
-    }
+    void setGlobal(Namespace& global);
 
-    void stackRewind() {
-        localCallStack.resize(
-            localCallStack.size() - function->operations[runner].position
-        );
-    }
+    void stackRewind();
 
-    void skip() {
-        runner += function->operations[runner].position;
-    }
+    void skip();
 
-    LocalStack createArgs() {
-        auto size = function->operations[runner].position;
-        auto newFrame = LocalStack{};
-        while (size--) {
-            newFrame.push_back(
-                popCallStack()
-            );
-        }
-        return newFrame;
-    }
+    LocalStack createArgs();
 
 private:
     FunctionDefinitionPtr function;
