@@ -60,6 +60,7 @@ struct FunctionDefinition {
         Nope,
         GetConst,
         GetLocal,
+        SetLocal,
         GetGlobal,
         SetGlobal,
         RunFunction,
@@ -167,14 +168,25 @@ public:
 
     void getLocal() {
         // copy
-        auto local = vars.at(
-            function->names[
-                function->operations[runner].position
+        auto local = this->vars.at(
+            this->function->names[
+                this->function->operations[
+                    this->runner
+                ].position
             ]
         );
         this->pushCallStack(
             std::move(local)
         );
+    }
+
+    void setLocal() {
+        const auto& name = function->names[
+            this->function->operations[
+                this->runner
+            ].position
+        ];
+        this->vars[name] =  this->popCallStack();
     }
 
     void getGlobal(const Namespace& global) {

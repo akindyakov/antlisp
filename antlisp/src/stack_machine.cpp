@@ -13,6 +13,9 @@ bool FunctionDefinition::step(Environment& env) {
         case GetLocal:
             call->getLocal();
             break;
+        case SetLocal:
+            call->setLocal();
+            break;
         case GetGlobal:
             call->getGlobal(env.vars);
             break;

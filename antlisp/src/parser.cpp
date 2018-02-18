@@ -215,7 +215,7 @@ public:
             global_[value.first] = std::move(value.second);
         }
         if (definitionStack.size() != 1) {
-            throw Error() << __FILE__ << ":" << __LINE__;
+            throw Error() << __FILE__ << ":" << __LINE__ << " Definition stack should has size 1";
         }
         return std::move(
             definitionStack.back()
@@ -281,6 +281,19 @@ private:
         auto token = std::string{};
         {
             auto argListParser = pParser.nextParser();
+            while (true) {
+                argListParser.nextToken(token);
+                if (!argListParser.isLocked()) {
+                    break;
+                }
+                auto argParser = argListParser.nextParser();
+                if (!argParser.nextToken(token)) {
+                    throw Error() << __FILE__ << ":" << __LINE__;
+                }
+                if (!argParser.nextToken(token)) {
+                    throw Error() << __FILE__ << ":" << __LINE__;
+                }
+            }
         }
     }
 
@@ -333,8 +346,13 @@ private:
     void takeVarByName(
         const std::string& varName
     ) {
-       // std::size_t getLocalPosition(
-        //return it->second;
+        auto& fdef = definitionStack.back();
+        auto pos = fdef->names.size();
+        fdef->names.push_back(varName);
+        fdef->operations.emplace_back(
+            FunctionDefinition::GetLocal,
+            pos
+        );
     }
 
 private:
