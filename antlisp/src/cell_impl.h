@@ -63,48 +63,6 @@ public:
 };
 
 template<>
-class TypeInfo<FunctionDefinitionPtr>
-{
-public:
-    static constexpr const char* name() {
-        return "function";
-    }
-    static std::string toString(FunctionDefinitionPtr ptr) {
-        auto out = std::ostringstream();
-        out << name() << ": " << ptr;
-        return out.str();
-    }
-};
-
-template<>
-class TypeInfo<ExtFunctionPtr>
-{
-public:
-    static constexpr const char* name() {
-        return "external-function";
-    }
-    static std::string toString(ExtFunctionPtr ptr) {
-        auto out = std::ostringstream();
-        out << name() << ": " << ptr;
-        return out.str();
-    }
-};
-
-template<>
-class TypeInfo<PostponedFunctionPtr>
-{
-public:
-    static constexpr const char* name() {
-        return "postponed-function-call";
-    }
-    static std::string toString(PostponedFunctionPtr ptr) {
-        auto out = std::ostringstream();
-        out << name() << ": " << ptr;
-        return out.str();
-    }
-};
-
-template<>
 class TypeInfo<ConsPtr>
 {
 public:
@@ -118,6 +76,20 @@ public:
             << " . "
             << (cons ? cons->cdr.toString() : "?")
             << ')';
+        return out.str();
+    }
+};
+
+template<>
+class TypeInfo<FunctionPtr>
+{
+public:
+    static constexpr const char* name() {
+        return "function-ptr";
+    }
+    static std::string toString(FunctionPtr ptr) {
+        auto out = std::ostringstream();
+        out << name() << ": " << ptr;
         return out.str();
     }
 };

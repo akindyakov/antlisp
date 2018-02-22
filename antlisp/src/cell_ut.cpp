@@ -32,8 +32,7 @@ void cellCheckTypeTag() {
     checkTagTempl<AntLisp::Symbol>();
     checkTagTempl<AntLisp::StringPtr>();
     checkTagTempl<AntLisp::ConsPtr>();
-    checkTagTempl<AntLisp::FunctionDefinitionPtr>();
-    checkTagTempl<AntLisp::ExtFunctionPtr>();
+    checkTagTempl<AntLisp::FunctionPtr>();
 }
 
 void cellGetError() {

@@ -32,62 +32,61 @@ void testFullCycle() {
             "third", AntLisp::Cell::integer(14)
         )
     );
-    auto fdef = std::make_shared<AntLisp::FunctionDefinition>();
-    auto frame = AntLisp::LocalStack{};
+    auto fdef = std::make_shared<AntLisp::NativeFunctionDefinition>();
     fdef->names.push_back("*");
     fdef->names.push_back("+");
     fdef->names.push_back("first");
     fdef->names.push_back("second");
     fdef->names.push_back("third");
     fdef->operations.push_back(
-        AntLisp::FunctionDefinition::Step(
-            AntLisp::FunctionDefinition::GetGlobal,
+        AntLisp::NativeFunctionDefinition::Step(
+            AntLisp::NativeFunctionDefinition::GetGlobal,
             0
         )
     );
     fdef->operations.push_back(
-        AntLisp::FunctionDefinition::Step(
-            AntLisp::FunctionDefinition::GetGlobal,
+        AntLisp::NativeFunctionDefinition::Step(
+            AntLisp::NativeFunctionDefinition::GetGlobal,
             1
         )
     );
     fdef->operations.push_back(
-        AntLisp::FunctionDefinition::Step(
-            AntLisp::FunctionDefinition::GetGlobal,
+        AntLisp::NativeFunctionDefinition::Step(
+            AntLisp::NativeFunctionDefinition::GetGlobal,
             2
         )
     );
     fdef->operations.push_back(
-        AntLisp::FunctionDefinition::Step(
-            AntLisp::FunctionDefinition::GetGlobal,
+        AntLisp::NativeFunctionDefinition::Step(
+            AntLisp::NativeFunctionDefinition::GetGlobal,
             3
         )
     );
     fdef->operations.push_back(
-        AntLisp::FunctionDefinition::Step(
-            AntLisp::FunctionDefinition::RunFunction,
+        AntLisp::NativeFunctionDefinition::Step(
+            AntLisp::NativeFunctionDefinition::RunFunction,
             2
         )
     );
     fdef->operations.push_back(
-        AntLisp::FunctionDefinition::Step(
-            AntLisp::FunctionDefinition::GetGlobal,
+        AntLisp::NativeFunctionDefinition::Step(
+            AntLisp::NativeFunctionDefinition::GetGlobal,
             4
         )
     );
     fdef->operations.push_back(
-        AntLisp::FunctionDefinition::Step(
-            AntLisp::FunctionDefinition::RunFunction,
+        AntLisp::NativeFunctionDefinition::Step(
+            AntLisp::NativeFunctionDefinition::RunFunction,
             2
         )
     );
     env.CallStack.push_back(
-        AntLisp::FunctionCall(
+        AntLisp::NativeFunctionCall{
             std::move(fdef),
-            std::move(frame)
-        )
+            AntLisp::Namespace{}
+        }
     );
-    while (AntLisp::FunctionDefinition::step(env)) {
+    while (AntLisp::NativeFunctionDefinition::step(env)) {
     }
     UT_ASSERT_EQUAL(
         env.ret.get<AntLisp::Integer>(),

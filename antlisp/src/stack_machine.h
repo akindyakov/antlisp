@@ -2,60 +2,69 @@
 
 #include "cell.h"
 
-#include <iostream>
-#include <string>
-#include <vector>
-#include <unordered_map>
 #include <exception>
+#include <iostream>
 #include <memory>
+#include <string>
+#include <unordered_map>
+#include <vector>
 
 
 namespace AntLisp {
 
 using TVarName = std::string;
 
-using LocalStack = std::vector<Cell>;
 using Namespace = std::unordered_map<TVarName, Cell>;
 
-class IExtFunction {
+using Arguments = std::vector<Cell>;
+
+class StackMachineError
+    : public Exception
+{
+};
+
+class LocalStack
+{
 public:
-    virtual Cell call(
-        LocalStack frame
-    ) const = 0;
-};
-
-class ExtSum
-    : public IExtFunction
-{
-    Cell call(
-        LocalStack frame
-    ) const override {
-        auto sum = Integer{0};
-        for (const auto& cell : frame) {
-            sum += cell.get<Integer>();
-        }
-        return Cell::integer(sum);
+    void push(Cell value) {
+        stackImpl.push_back(
+            std::move(value)
+        );
     }
-};
 
-class ExtPrint
-    : public IExtFunction
-{
-    Cell call(
-        LocalStack frame
-    ) const override {
-        auto m = Integer{1};
-        for (const auto& cell : frame) {
-            m *= cell.get<Integer>();
-        }
-        return Cell::integer(m);
+    Cell pop() {
+        auto value = std::move(
+            stackImpl.back()
+        );
+        stackImpl.pop_back();
+        return value;
     }
+
+    void skip(std::size_t count) {
+        if (stackImpl.size() < count) {
+            throw StackMachineError() << __FILE__ << ":" << __LINE__;
+        }
+        stackImpl.resize(
+            stackImpl.size() - count
+        );
+    }
+
+private:
+    std::vector<Cell> stackImpl;
 };
 
 struct Environment;
 
-struct FunctionDefinition {
-    virtual ~FunctionDefinition() = default;
+struct NativeFunctionDefinition {
+    NativeFunctionDefinition() = default;
+
+    NativeFunctionDefinition(const NativeFunctionDefinition&) = delete;
+    NativeFunctionDefinition(NativeFunctionDefinition&&) = default;
+
+    NativeFunctionDefinition& operator=(const NativeFunctionDefinition&) = delete;
+    NativeFunctionDefinition& operator=(NativeFunctionDefinition&&) = default;
+
+    virtual ~NativeFunctionDefinition() = default;
     enum EOperations {
         Nope,
         GetConst,
@@ -68,6 +77,7 @@ struct FunctionDefinition {
         SkipIfTrue,
         SkipIfFalse,
     };
+
     struct Step {
         explicit Step(
             EOperations op
@@ -81,40 +91,37 @@ struct FunctionDefinition {
         std::size_t position = 0;
     };
 
-    class Error
-        : public Exception
-    {
-    };
-
-    static constexpr auto InvalidPosition = std::numeric_limits<std::size_t>::max();
-
     std::vector<Step> operations;
-    std::size_t argnum;
-    std::vector<TVarName> argNames;
+    // std::size_t argnum;
+    // no! -> first argnum of it are names for arguments
     std::vector<TVarName> names;
-    LocalStack consts;
+    std::vector<Cell> consts;  // unnamed
 
     void getGlobalName(
         const TVarName& name
     );
 
+    class Error
+        : public StackMachineError
+    {
+    };
+
     static bool step(Environment& env);
 };
 
-struct PostponedFunction
-{
-    FunctionDefinitionPtr fdef;
-    LocalStack args;
-};
+using NativeFunctionDefinitionPtr = std::shared_ptr<NativeFunctionDefinition>;
 
-class FunctionCall {
+class ExtInstantFunction;
+using InstantFunctionPtr = std::shared_ptr<ExtInstantFunction>;
+
+class NativeFunctionCall {
 public:
-    explicit FunctionCall(
-        FunctionDefinitionPtr fdef
-        , LocalStack args
+    explicit NativeFunctionCall(
+        NativeFunctionDefinitionPtr fdef
+        , Namespace predefinedVars
     );
 
-    FunctionDefinition::EOperations getOperation() const;
+    NativeFunctionDefinition::EOperations getOperation() const;
 
     bool next() noexcept;
 
@@ -136,17 +143,282 @@ public:
 
     void skip();
 
-    LocalStack createArgs();
+    Arguments createArgs();
 
 private:
-    FunctionDefinitionPtr function;
+    NativeFunctionDefinitionPtr function;
     LocalStack localCallStack;
     Namespace vars;
     std::size_t runner = 0;
 };
 
+class IFunction {
+public:
+    ~IFunction() = default;
+
+    virtual bool isPostponed() const = 0;
+    virtual bool isNative() const = 0;
+
+    virtual FunctionPtr activate(
+        Namespace vars
+    ) const = 0;
+
+    virtual Cell instantCall(
+        Arguments frame
+    ) const = 0;
+
+    virtual NativeFunctionCall nativeCall(
+        Arguments args
+    ) const = 0;
+
+    static Namespace parseArguments(
+        Arguments args
+        , const std::vector<TVarName>& names
+    ) {
+        auto vars = Namespace{};
+        std::size_t nameIndex = 0;
+        auto rit = args.rbegin();
+        while (rit != args.rend()) {
+            const auto& argName = names[nameIndex];
+            vars[argName] = std::move(*rit);
+            ++rit;
+            ++nameIndex;
+        }
+        return vars;
+    }
+};
+
+class ExtInstantFunction
+    : public IFunction
+{
+public:
+    class Error
+        : public StackMachineError
+    {
+    };
+
+    bool isPostponed() const final {
+        return false;
+    }
+
+    bool isNative() const override final {
+        return false;
+    }
+
+    FunctionPtr activate(
+        Namespace vars
+    ) const override {
+        throw Error() << "Using activate for 'ExtInstantFunction' is not valid";
+        return nullptr;
+    }
+
+    virtual Cell instantCall(
+        Arguments frame
+    ) const = 0;
+
+    NativeFunctionCall nativeCall(
+        Arguments frame
+    ) const override final {
+        throw Error() << "Method 'nativeCall' is not valid for 'ExtInstantFunction'";
+        return NativeFunctionCall(nullptr, Namespace{});
+    }
+};
+
+class ExtSum
+    : public ExtInstantFunction
+{
+    Cell instantCall(
+        Arguments frame
+    ) const override {
+        auto sum = Integer{0};
+        for (const auto& cell : frame) {
+            sum += cell.get<Integer>();
+        }
+        return Cell::integer(sum);
+    }
+};
+
+class ExtPrint
+    : public ExtInstantFunction
+{
+    Cell instantCall(
+        Arguments frame
+    ) const override {
+        auto m = Integer{1};
+        for (const auto& cell : frame) {
+            m *= cell.get<Integer>();
+        }
+        return Cell::integer(m);
+    }
+};
+
+class NativeFunction
+    : public IFunction
+{
+public:
+    explicit NativeFunction(
+        NativeFunctionDefinitionPtr fdef_
+        , Namespace closures_
+    )
+        : fdef(
+            std::move(fdef_)
+        )
+        , closures(
+            std::move(closures_)
+        )
+    {
+    }
+
+    NativeFunction(const NativeFunction&) = delete;
+    NativeFunction(NativeFunction&&) = default;
+
+    NativeFunction& operator=(const NativeFunction&) = delete;
+    NativeFunction& operator=(NativeFunction&&) = default;
+
+    class Error
+        : public StackMachineError
+    {
+    };
+
+    bool isPostponed() const override {
+        return false;
+    }
+
+    bool isNative() const override final {
+        return true;
+    }
+
+    FunctionPtr activate(
+        Namespace vars
+    ) const override {
+        vars.insert(closures.begin(), closures.end());
+        return std::make_shared<NativeFunction>(fdef, std::move(vars));
+    }
+
+    Cell instantCall(
+        Arguments args
+    ) const override {
+        throw Error() << "Method 'nativeCall' is not valid for 'NativeFunction'";
+        return Cell::nil();
+    }
+
+    NativeFunctionCall nativeCall(
+        Arguments args
+    ) const override {
+        auto vars = IFunction::parseArguments(
+            std::move(args),
+            fdef->names
+        );
+        vars.insert(closures.begin(), closures.end());
+        return NativeFunctionCall(fdef, vars);
+    }
+
+private:
+    NativeFunctionDefinitionPtr fdef;
+    Namespace closures;
+};
+
+struct LambdaFunctionDefinition {
+    explicit LambdaFunctionDefinition(
+        FunctionPtr nextFunctionPtr_
+        , std::vector<TVarName> names_
+    )
+        : nextPtr(
+            std::move(nextFunctionPtr_)
+        )
+        , names(
+            std::move(names_)
+        )
+    {
+    }
+
+    FunctionPtr nextPtr;
+    std::vector<TVarName> names;
+};
+
+using LambdaFunctionDefinitionPtr = std::shared_ptr<LambdaFunctionDefinition>;
+
+class LambdaFunction
+    : public IFunction
+{
+public:
+    explicit LambdaFunction(
+        FunctionPtr functionPtr
+        , std::vector<TVarName> names_
+        , Namespace closures_
+    )
+        : def(
+            std::make_shared<LambdaFunctionDefinition>(
+                std::move(functionPtr),
+                std::move(names_)
+            )
+        )
+        , closures(std::move(closures_))
+    {
+    }
+
+    explicit LambdaFunction(
+        LambdaFunctionDefinitionPtr def_
+        , Namespace closures_
+    )
+        : def(std::move(def_))
+        , closures(std::move(closures_))
+    {
+    }
+
+    class Error
+        : public StackMachineError
+    {
+    };
+
+    bool isPostponed() const override {
+        return false;
+    }
+
+    bool isNative() const override {
+        return false;
+    }
+
+    FunctionPtr activate(
+        Namespace vars
+    ) const override {
+        vars.insert(closures.begin(), closures.end());
+        return std::make_shared<LambdaFunction>(
+            def,
+            std::move(vars)
+        );
+    }
+
+    Cell instantCall(
+        Arguments args
+    ) const override {
+        auto nextClosures = IFunction::parseArguments(
+            std::move(args),
+            def->names
+        );
+        nextClosures.insert(closures.begin(), closures.end());
+        return Cell::function(
+            def->nextPtr->activate(nextClosures)
+        );
+    }
+
+    NativeFunctionCall nativeCall(
+        Arguments frame
+    ) const override final {
+        throw Error() << "Method 'nativeCall' is not valid for 'LambdaFunction'";
+        return NativeFunctionCall{
+            nullptr,
+            Namespace{}
+        };
+    }
+
+private:
+    LambdaFunctionDefinitionPtr def;
+    Namespace closures;
+};
+
 struct Environment {
-    std::vector<FunctionCall> CallStack;
+    std::vector<NativeFunctionCall> CallStack;
     Namespace vars;
     Cell ret;
 
@@ -154,12 +426,12 @@ struct Environment {
         return this->CallStack.empty();
     }
 
-    FunctionCall* stackTop() {
+    NativeFunctionCall* stackTop() {
         return &this->CallStack.back();
     }
 
-    FunctionCall* stackPush(
-        FunctionCall frame
+    NativeFunctionCall* stackPush(
+        NativeFunctionCall frame
     ) {
         this->CallStack.push_back(
             std::move(frame)

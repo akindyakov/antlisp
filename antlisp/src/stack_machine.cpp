@@ -2,58 +2,49 @@
 
 namespace AntLisp {
 
-void FunctionDefinition::getGlobalName(
+void NativeFunctionDefinition::getGlobalName(
     const TVarName& name
 ) {
     auto pos = names.size();
     names.push_back(name);
     operations.emplace_back(
-        FunctionDefinition::GetGlobal,
+        NativeFunctionDefinition::GetGlobal,
         pos
     );
 }
 
-FunctionCall::FunctionCall(
-    FunctionDefinitionPtr fdef
-    // positional args
-    // named args - use tuple please for it
-    , LocalStack args
+NativeFunctionCall::NativeFunctionCall(
+    NativeFunctionDefinitionPtr fdef
+    , Namespace predefinedVars
 )
     : function(
         std::move(fdef)
     )
-    , localCallStack(
-        std::move(args)
+    , vars(
+        std::move(predefinedVars)
     )
 {
-    for (const auto& argName : this->function->argNames) {
-        vars.emplace(argName, this->popCallStack());
-    }
 }
 
-FunctionDefinition::EOperations FunctionCall::getOperation() const {
+NativeFunctionDefinition::EOperations NativeFunctionCall::getOperation() const {
     return function->operations[runner].operation;
 }
 
-bool FunctionCall::next() noexcept {
+bool NativeFunctionCall::next() noexcept {
     return ++runner < function->operations.size();
 }
 
-Cell FunctionCall::popCallStack() {
-    auto value = std::move(
-        localCallStack.back()
-    );
-    localCallStack.pop_back();
-    return value;
+Cell NativeFunctionCall::popCallStack() {
+    return localCallStack.pop();
 }
 
-void FunctionCall::pushCallStack(Cell cell) {
-    localCallStack.push_back(
+void NativeFunctionCall::pushCallStack(Cell cell) {
+    localCallStack.push(
         std::move(cell)
     );
 }
 
-void FunctionCall::getConst() {
+void NativeFunctionCall::getConst() {
     // copy
     auto cell = function->consts[
         function->operations[runner].position
@@ -63,7 +54,7 @@ void FunctionCall::getConst() {
     );
 }
 
-void FunctionCall::getLocal() {
+void NativeFunctionCall::getLocal() {
     // copy
     auto local = this->vars.at(
         this->function->names[
@@ -77,7 +68,7 @@ void FunctionCall::getLocal() {
     );
 }
 
-void FunctionCall::setLocal() {
+void NativeFunctionCall::setLocal() {
     const auto& name = function->names[
         this->function->operations[
             this->runner
@@ -86,7 +77,7 @@ void FunctionCall::setLocal() {
     this->vars[name] =  this->popCallStack();
 }
 
-void FunctionCall::getGlobal(const Namespace& global) {
+void NativeFunctionCall::getGlobal(const Namespace& global) {
     const auto& name = function->names[
         function->operations[runner].position
     ];
@@ -96,35 +87,35 @@ void FunctionCall::getGlobal(const Namespace& global) {
     );
 }
 
-void FunctionCall::setGlobal(Namespace& global) {
+void NativeFunctionCall::setGlobal(Namespace& global) {
     const auto& name = function->names[
         function->operations[runner].position
     ];
     global[name] = this->popCallStack();
 }
 
-void FunctionCall::stackRewind() {
-    localCallStack.resize(
-        localCallStack.size() - function->operations[runner].position
+void NativeFunctionCall::stackRewind() {
+    localCallStack.skip(
+        function->operations[runner].position
     );
 }
 
-void FunctionCall::skip() {
+void NativeFunctionCall::skip() {
     runner += function->operations[runner].position;
 }
 
-LocalStack FunctionCall::createArgs() {
+Arguments NativeFunctionCall::createArgs() {
     auto size = function->operations[runner].position;
-    auto newFrame = LocalStack{};
+    auto args = Arguments{};
     while (size--) {
-        newFrame.push_back(
+        args.push_back(
             popCallStack()
         );
     }
-    return newFrame;
+    return args;
 }
 
-bool FunctionDefinition::step(Environment& env) {
+bool NativeFunctionDefinition::step(Environment& env) {
     auto call = env.stackTop();
     switch (call->getOperation()) {
         case Nope:
@@ -148,21 +139,19 @@ bool FunctionDefinition::step(Environment& env) {
             {
                 auto args = call->createArgs();
                 auto toCall = call->popCallStack();
-                if (toCall.is<FunctionDefinitionPtr>()) {
-                    auto fdef = toCall.get<FunctionDefinitionPtr>();
-                    call = env.stackPush(
-                        FunctionCall(
-                            std::move(fdef),
-                            std::move(args)
-                        )
-                    );
-                } else if (toCall.is<ExtFunctionPtr>()) {
-                    auto extf = toCall.get<ExtFunctionPtr>();
-                    call->pushCallStack(
-                        extf->call(
-                            std::move(args)
-                        )
-                    );
+                if (toCall.is<FunctionPtr>()) {
+                    auto fnPtr = toCall.get<FunctionPtr>();
+                    if (fnPtr->isNative()) {
+                        call = env.stackPush(
+                            fnPtr->nativeCall(args)
+                        );
+                    } else {
+                        call->pushCallStack(
+                            fnPtr->instantCall(
+                                std::move(args)
+                            )
+                        );
+                    }
                 } else {
                     throw Error()
                         << __FILE__ << ":" << __LINE__
@@ -198,15 +187,13 @@ bool FunctionDefinition::step(Environment& env) {
         if (env.isStackEmpty()) {
             return false;
         }
-        if (env.ret.is<PostponedFunctionPtr>()) {
-            auto ptr = env.ret.get<PostponedFunctionPtr>();
-            call = env.stackPush(
-                FunctionCall(
-                    std::move(ptr->fdef),
-                    std::move(ptr->args)
-                )
-            );
-            call = env.stackTop();
+        if (env.ret.is<FunctionPtr>()) {
+            auto fnPtr = env.ret.get<FunctionPtr>();
+            if (fnPtr->isPostponed()) {
+                call = env.stackPush(
+                    fnPtr->nativeCall(Arguments{})
+                );
+            }
         } else {
             call = env.stackTop();
             call->pushCallStack(

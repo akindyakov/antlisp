@@ -12,13 +12,9 @@
 
 namespace AntLisp {
 
-class FunctionDefinition;
-class PostponedFunction;
-class IExtFunction;
+class IFunction;
 
-using FunctionDefinitionPtr = std::shared_ptr<FunctionDefinition>;
-using PostponedFunctionPtr  = std::shared_ptr<PostponedFunction>;
-using ExtFunctionPtr        = std::shared_ptr<IExtFunction>;
+using FunctionPtr = std::shared_ptr<IFunction>;
 
 class Nil
 {
@@ -54,9 +50,7 @@ public:
         , Symbol
         , StringPtr
         , ConsPtr
-        , FunctionDefinitionPtr
-        , PostponedFunctionPtr
-        , ExtFunctionPtr
+        , FunctionPtr
     >;
 
     enum class Tag {
@@ -66,9 +60,7 @@ public:
         Symbol,
         StringPtr,
         Cons,
-        FunctionDefinitionPtr,
-        PostponedFunctionPtr,
-        ExtFunctionPtr,
+        FunctionPtr,
     };
 
     ~Cell() = default;
@@ -121,29 +113,8 @@ public:
         };
     }
 
-    template<
-        typename... Args
-    >
-    static Cell function(Args&&... args) {
-        return Cell{
-            std::make_shared<FunctionDefinition>(
-                std::forward<Args>(args)...
-            )
-        };
-    }
-
-    template<
-        typename ExtFunctionType
-        , typename... Args
-    >
-    static Cell extFunction(Args&&... args) {
-        return Cell{
-            static_cast<ExtFunctionPtr>(
-                std::make_shared<ExtFunctionType>(
-                    std::forward<Args>(args)...
-                )
-            )
-        };
+    static Cell function(FunctionPtr shared) {
+        return Cell{shared};
     }
 
     explicit Cell(Nil v)
@@ -174,19 +145,12 @@ public:
         )
     {
     }
-    explicit Cell(FunctionDefinitionPtr ptr)
+    explicit Cell(FunctionPtr ptr)
         : value(
             std::move(ptr)
         )
     {
     }
-    explicit Cell(ExtFunctionPtr ptr)
-        : value(
-            std::move(ptr)
-        )
-    {
-    }
-
     Cell(Cell&&) = default;
     Cell(const Cell&) = default;
 
