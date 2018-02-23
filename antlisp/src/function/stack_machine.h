@@ -2,6 +2,7 @@
 
 #include <antlisp/src/cell/cell.h>
 
+#include <algorithm>
 #include <exception>
 #include <iostream>
 #include <memory>
@@ -69,8 +70,11 @@ struct NativeFunctionDefinition {
     NativeFunctionDefinition& operator=(NativeFunctionDefinition&&) = default;
 
     virtual ~NativeFunctionDefinition() = default;
-    enum EOperations {
-        Nope,
+
+    enum EOperations
+        : int
+    {
+        Nope = 0,
         GetConst,
         GetLocal,
         SetLocal,
@@ -95,14 +99,21 @@ struct NativeFunctionDefinition {
         std::size_t position = 0;
     };
 
-    std::vector<Step> operations;
-    std::size_t argnum;
-    std::vector<TVarName> names;
-    std::vector<Cell> consts;  // unnamed
-
     void getGlobalName(
         const TVarName& name
     );
+
+    std::size_t getNamePosition(
+        const TVarName& name
+    ) {
+        // TODO: we can use some index here
+        auto it = std::find(names.cbegin(), names.cend(), name);
+        if (it != names.cend()) {
+            return std::distance(names.cbegin(), it);
+        }
+        names.push_back(name);
+        return names.size() - 1;
+    }
 
     class Error
         : public StackMachineError
@@ -110,6 +121,11 @@ struct NativeFunctionDefinition {
     };
 
     static bool step(Environment& env);
+
+    std::vector<Step> operations;
+    std::size_t argnum = 0;
+    std::vector<TVarName> names;
+    std::vector<Cell> consts;  // unnamed
 };
 
 using NativeFunctionDefinitionPtr = std::shared_ptr<NativeFunctionDefinition>;
@@ -162,9 +178,9 @@ public:
     virtual bool isPostponed() const = 0;
     virtual bool isNative() const = 0;
 
-    virtual FunctionPtr activate(
-        Namespace vars
-    ) const = 0;
+    //virtual FunctionPtr activate(
+    //    Namespace vars
+    //) const = 0;
 
     virtual Cell instantCall(
         Arguments frame
@@ -175,7 +191,7 @@ public:
     ) const = 0;
 
     static Namespace parseArguments(
-        Arguments args
+        Arguments& args
         , const std::vector<TVarName>& names
         , const std::size_t argMaxNum
     ) {
@@ -209,12 +225,12 @@ public:
         return false;
     }
 
-    FunctionPtr activate(
-        Namespace vars
-    ) const override {
-        throw Error() << "Using 'activate' method for 'ExtInstantFunction' is not valid";
-        return nullptr;
-    }
+    //FunctionPtr activate(
+    //    Namespace vars
+    //) const override {
+    //    throw Error() << "Using 'activate' method for 'ExtInstantFunction' is not valid";
+    //    return nullptr;
+    //}
 
     virtual Cell instantCall(
         Arguments frame
@@ -260,6 +276,13 @@ class NativeFunction
     : public IFunction
 {
 public:
+    explicit NativeFunction()
+        : fdef(
+            std::make_shared<NativeFunctionDefinition>()
+        )
+    {
+    }
+
     explicit NativeFunction(
         NativeFunctionDefinitionPtr fdef_
         , Namespace closures_
@@ -294,7 +317,7 @@ public:
 
     FunctionPtr activate(
         Namespace vars
-    ) const override {
+    ) const { // override {
         vars.insert(closures.begin(), closures.end());
         return std::make_shared<NativeFunction>(fdef, std::move(vars));
     }
@@ -310,7 +333,7 @@ public:
         Arguments args
     ) const override {
         auto vars = IFunction::parseArguments(
-            std::move(args),
+            args,
             fdef->names,
             fdef->argnum
         );
@@ -325,11 +348,11 @@ private:
 
 struct LambdaFunctionDefinition {
     explicit LambdaFunctionDefinition(
-        FunctionPtr nextFunctionPtr_
+        NativeFunction nativeFunction
         , std::vector<TVarName> names_
     )
-        : nextPtr(
-            std::move(nextFunctionPtr_)
+        : nativeFn(
+            std::move(nativeFunction)
         )
         , names(
             std::move(names_)
@@ -337,7 +360,7 @@ struct LambdaFunctionDefinition {
     {
     }
 
-    FunctionPtr nextPtr;
+    NativeFunction nativeFn;
     std::vector<TVarName> names;
 };
 
@@ -348,25 +371,12 @@ class LambdaFunction
 {
 public:
     explicit LambdaFunction(
-        FunctionPtr functionPtr
+        NativeFunction native_
         , std::vector<TVarName> names_
         , Namespace closures_
     )
-        : def(
-            std::make_shared<LambdaFunctionDefinition>(
-                std::move(functionPtr),
-                std::move(names_)
-            )
-        )
-        , closures(std::move(closures_))
-    {
-    }
-
-    explicit LambdaFunction(
-        LambdaFunctionDefinitionPtr def_
-        , Namespace closures_
-    )
-        : def(std::move(def_))
+        : nativeFn(std::move(native_))
+        , names(std::move(names_))
         , closures(std::move(closures_))
     {
     }
@@ -384,27 +394,17 @@ public:
         return false;
     }
 
-    FunctionPtr activate(
-        Namespace vars
-    ) const override {
-        vars.insert(closures.begin(), closures.end());
-        return std::make_shared<LambdaFunction>(
-            def,
-            std::move(vars)
-        );
-    }
-
     Cell instantCall(
         Arguments args
     ) const override {
         auto nextClosures = IFunction::parseArguments(
-            std::move(args),
-            def->names,
-            def->names.size()
+            args,
+            names,
+            names.size()
         );
         nextClosures.insert(closures.begin(), closures.end());
         return Cell::function(
-            def->nextPtr->activate(nextClosures)
+            nativeFn.activate(nextClosures)
         );
     }
 
@@ -419,7 +419,8 @@ public:
     }
 
 private:
-    LambdaFunctionDefinitionPtr def;
+    NativeFunction nativeFn;
+    std::vector<TVarName> names;
     Namespace closures;
 };
 

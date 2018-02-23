@@ -145,27 +145,22 @@ void testLambdaFunction() {
             3  // number of arguments
         )
     );
-    auto lambdaCore = std::make_shared<AntLisp::NativeFunction>(
+    auto nativeCore = AntLisp::NativeFunction(
         std::move(corefdef),
         AntLisp::Namespace{
             {AntLisp::TVarName{"local_first"}, AntLisp::Cell::integer(81)},
         }
     );
     auto firstLambda = std::make_shared<AntLisp::LambdaFunction>(
-        lambdaCore,
-        std::vector<AntLisp::TVarName>{},
+        std::move(nativeCore),
+        std::vector<AntLisp::TVarName>{AntLisp::TVarName{"local_second"},},
         AntLisp::Namespace{
             {AntLisp::TVarName{"local_third"}, AntLisp::Cell::integer(1043)},
         }
     );
-    auto secondLambda = std::make_shared<AntLisp::LambdaFunction>(
-        firstLambda,
-        std::vector<AntLisp::TVarName>{AntLisp::TVarName{"local_second"},},
-        AntLisp::Namespace{}
-    );
     env.vars.insert(
         std::make_pair(
-            "second_function", AntLisp::Cell::function(secondLambda)
+            "second_function", AntLisp::Cell::function(firstLambda)
         )
     );
     auto gDef = std::make_shared<AntLisp::NativeFunctionDefinition>();
@@ -185,18 +180,11 @@ void testLambdaFunction() {
             1
         )
     );
-    // call second lambda
-    gDef->operations.push_back(
-        AntLisp::NativeFunctionDefinition::Step(
-            AntLisp::NativeFunctionDefinition::RunFunction,
-            1  // number of arguments
-        )
-    );
     // call first lambda
     gDef->operations.push_back(
         AntLisp::NativeFunctionDefinition::Step(
             AntLisp::NativeFunctionDefinition::RunFunction,
-            0  // number of arguments
+            1  // number of arguments
         )
     );
     // call core function
