@@ -7,7 +7,7 @@ def build(ctx):
         target="antlisp-src-parser",
         source = [
             "code_stream.cpp",
-            #"parser.cpp",
+            "parser.cpp",
         ],
         use=[
             "antlisp-src-function",

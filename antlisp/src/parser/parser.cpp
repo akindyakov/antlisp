@@ -1,4 +1,8 @@
-#include "code_stream.h"
+#include "parser.h"
+
+#include <antlisp/src/util/string.h>
+
+#include <iterator>
 
 
 namespace AntLisp {
@@ -93,12 +97,18 @@ namespace {
 class ConstructionParser {
 public:
     explicit ConstructionParser (
-        Namespace& global
+        const Namespace& global
     )
-        : global_(global)
     {
+        // may be put global here as closures?
         definitionStack.push_back(
-            std::make_shared<FunctionDefinition>()
+            std::make_shared<LambdaFunction>(
+                NativeFunction(
+                    std::make_shared<NativeFunctionDefinition>(),
+                    0, global
+                ),
+                std::vector<TVarName>{} // global arg names - should be empty
+            )
         );
     }
 
@@ -111,12 +121,11 @@ public:
         return *this;
     }
 
-    FunctionDefinitionPtr finish() {
-        for (auto& value : globalPatch_) {
-            global_[value.first] = std::move(value.second);
-        }
+    LambdaFunctionPtr finish() {
         if (definitionStack.size() != 1) {
-            throw Error() << __FILE__ << ":" << __LINE__ << " Definition stack should has size 1";
+            throw Error()
+                << __FILE__ << ":" << __LINE__
+                << " Definition stack should has size 1";
         }
         return std::move(
             definitionStack.back()
@@ -143,8 +152,7 @@ private:
             } else if ("cond" == token) {
                 condDef(std::move(pParser));
             } else {
-                auto& fdef = definitionStack.back();
-                fdef->getGlobalName(token);
+                tokenDef(token);
                 callDef(std::move(pParser));
             }
         } else {
@@ -218,9 +226,9 @@ private:
                 ++argCount;
             }
         }
-        auto& fdef = definitionStack.back();
-        fdef->operations.emplace_back(
-            FunctionDefinition::RunFunction,
+        auto core = definitionStack.back()->core();
+        core->operations.emplace_back(
+            NativeFunctionDefinition::RunFunction,
             argCount
         );
     }
@@ -228,15 +236,15 @@ private:
     void tokenDef(
         const std::string& token
     ) {
-        auto& fdef = definitionStack.back();
         auto cellOpt = tryFromString(token);
         if (cellOpt) {
-            auto pos = fdef->consts.size();
-            fdef->consts.push_back(
+            auto core = definitionStack.back()->core();
+            auto pos = core->consts.size();
+            core->consts.push_back(
                 std::move(cellOpt.get())
             );
-            fdef->operations.emplace_back(
-                FunctionDefinition::GetConst,
+            core->operations.emplace_back(
+                NativeFunctionDefinition::GetConst,
                 pos
             );
         } else {
@@ -247,26 +255,42 @@ private:
     void takeVarByName(
         const std::string& varName
     ) {
-        auto& fdef = definitionStack.back();
-        auto pos = fdef->names.size();
-        fdef->names.push_back(varName);
-        fdef->operations.emplace_back(
-            FunctionDefinition::GetLocal,
-            pos
-        );
+        auto to = definitionStack.rbegin();
+        while (
+            to != definitionStack.rend()
+            && not to->get()->hasName(varName)
+        ) {
+            to = std::next(to);
+        }
+        if (to == definitionStack.rend()) {
+            throw Error() << "There is no such variable " << Str::Quotes(varName);
+        }
+        for (auto it = definitionStack.rbegin(); it != to; ++it) {
+            it->get()->names.push_back(varName);
+        }
+        for (
+            auto it = definitionStack.rbegin();
+            it != std::prev(to); ++it
+        ) {
+            auto core = it->get()->core();
+            auto pos = core->names.size();
+            core->names.push_back(varName);
+            core->addStep(
+                NativeFunctionDefinition::GetLocal,
+                pos
+            );
+        }
     }
 
 private:
-    Namespace& global_;
-    Namespace globalPatch_;
-    std::vector<FunctionDefinitionPtr> definitionStack;
+    std::vector<LambdaFunctionPtr> definitionStack;
 };
 
 }  // namespace
 
-FunctionDefinitionPtr parseCode(
+LambdaFunctionPtr parseCode(
     std::istream& in
-    , Namespace& global
+    , const Namespace& global
 ) {
     auto codeStream = InCodeStream(in);
     return ConstructionParser(global).fromCodeStream(

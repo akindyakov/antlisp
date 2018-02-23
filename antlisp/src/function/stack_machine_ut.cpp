@@ -106,6 +106,11 @@ void testLambdaFunction() {
             "global_first", AntLisp::Cell::integer(2209)
         )
     );
+    env.vars.insert(
+        std::make_pair(
+            "global_second", AntLisp::Cell::integer(1043)
+        )
+    );
     auto corefdef = std::make_shared<AntLisp::NativeFunctionDefinition>();
     corefdef->names.push_back("+");
     corefdef->names.push_back("local_first");
@@ -146,16 +151,16 @@ void testLambdaFunction() {
         )
     );
     auto nativeCore = AntLisp::NativeFunction(
-        std::move(corefdef),
+        std::move(corefdef), 0,
         AntLisp::Namespace{
             {AntLisp::TVarName{"local_first"}, AntLisp::Cell::integer(81)},
         }
     );
     auto firstLambda = std::make_shared<AntLisp::LambdaFunction>(
         std::move(nativeCore),
-        std::vector<AntLisp::TVarName>{AntLisp::TVarName{"local_second"},},
-        AntLisp::Namespace{
-            {AntLisp::TVarName{"local_third"}, AntLisp::Cell::integer(1043)},
+        std::vector<AntLisp::TVarName>{
+            AntLisp::TVarName{"local_second"},
+            AntLisp::TVarName{"local_third"},
         }
     );
     env.vars.insert(
@@ -166,6 +171,7 @@ void testLambdaFunction() {
     auto gDef = std::make_shared<AntLisp::NativeFunctionDefinition>();
     gDef->names.push_back("second_function");
     gDef->names.push_back("global_first");
+    gDef->names.push_back("global_second");
     // get the native function def
     gDef->operations.push_back(
         AntLisp::NativeFunctionDefinition::Step(
@@ -180,11 +186,18 @@ void testLambdaFunction() {
             1
         )
     );
+    // get 1 arg from global
+    gDef->operations.push_back(
+        AntLisp::NativeFunctionDefinition::Step(
+            AntLisp::NativeFunctionDefinition::GetGlobal,
+            2
+        )
+    );
     // call first lambda
     gDef->operations.push_back(
         AntLisp::NativeFunctionDefinition::Step(
             AntLisp::NativeFunctionDefinition::RunFunction,
-            1  // number of arguments
+            2  // number of arguments
         )
     );
     // call core function

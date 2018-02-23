@@ -99,21 +99,24 @@ struct NativeFunctionDefinition {
         std::size_t position = 0;
     };
 
-    void getGlobalName(
-        const TVarName& name
-    );
-
-    std::size_t getNamePosition(
-        const TVarName& name
+    void addStep(
+        EOperations op
+        , std::size_t pos
     ) {
-        // TODO: we can use some index here
-        auto it = std::find(names.cbegin(), names.cend(), name);
-        if (it != names.cend()) {
-            return std::distance(names.cbegin(), it);
-        }
-        names.push_back(name);
-        return names.size() - 1;
+        operations.emplace_back(op, pos);
     }
+
+    //std::size_t getNamePosition(
+    //    const TVarName& name
+    //) {
+    //    // TODO: we can use some index here
+    //    auto it = std::find(names.cbegin(), names.cend(), name);
+    //    if (it != names.cend()) {
+    //        return std::distance(names.cbegin(), it);
+    //    }
+    //    names.push_back(name);
+    //    return names.size() - 1;
+    //}
 
     class Error
         : public StackMachineError
@@ -123,7 +126,6 @@ struct NativeFunctionDefinition {
     static bool step(Environment& env);
 
     std::vector<Step> operations;
-    std::size_t argnum = 0;
     std::vector<TVarName> names;
     std::vector<Cell> consts;  // unnamed
 };
@@ -225,13 +227,6 @@ public:
         return false;
     }
 
-    //FunctionPtr activate(
-    //    Namespace vars
-    //) const override {
-    //    throw Error() << "Using 'activate' method for 'ExtInstantFunction' is not valid";
-    //    return nullptr;
-    //}
-
     virtual Cell instantCall(
         Arguments frame
     ) const = 0;
@@ -285,9 +280,11 @@ public:
 
     explicit NativeFunction(
         NativeFunctionDefinitionPtr fdef_
+        , std::size_t argnum_
         , Namespace closures_
     )
-        : fdef(
+        : argnum(argnum_)
+        , fdef(
             std::move(fdef_)
         )
         , closures(
@@ -317,9 +314,9 @@ public:
 
     FunctionPtr activate(
         Namespace vars
-    ) const { // override {
+    ) const {
         vars.insert(closures.begin(), closures.end());
-        return std::make_shared<NativeFunction>(fdef, std::move(vars));
+        return std::make_shared<NativeFunction>(fdef, argnum, std::move(vars));
     }
 
     Cell instantCall(
@@ -335,36 +332,27 @@ public:
         auto vars = IFunction::parseArguments(
             args,
             fdef->names,
-            fdef->argnum
+            argnum
         );
         vars.insert(closures.begin(), closures.end());
         return NativeFunctionCall(fdef, vars);
     }
 
-private:
-    NativeFunctionDefinitionPtr fdef;
-    Namespace closures;
-};
-
-struct LambdaFunctionDefinition {
-    explicit LambdaFunctionDefinition(
-        NativeFunction nativeFunction
-        , std::vector<TVarName> names_
-    )
-        : nativeFn(
-            std::move(nativeFunction)
-        )
-        , names(
-            std::move(names_)
-        )
-    {
+    bool hasName(
+        const TVarName& name
+    ) const {
+        auto last = fdef->names.cbegin() + argnum;
+        return (
+            closures.count(name) != 0
+            || last != std::find(fdef->names.cbegin(), last, name)
+        );
     }
 
-    NativeFunction nativeFn;
-    std::vector<TVarName> names;
+public:
+    std::size_t argnum = 0;
+    NativeFunctionDefinitionPtr fdef;
+    Namespace closures;  // default arguments
 };
-
-using LambdaFunctionDefinitionPtr = std::shared_ptr<LambdaFunctionDefinition>;
 
 class LambdaFunction
     : public IFunction
@@ -373,11 +361,9 @@ public:
     explicit LambdaFunction(
         NativeFunction native_
         , std::vector<TVarName> names_
-        , Namespace closures_
     )
         : nativeFn(std::move(native_))
         , names(std::move(names_))
-        , closures(std::move(closures_))
     {
     }
 
@@ -402,7 +388,6 @@ public:
             names,
             names.size()
         );
-        nextClosures.insert(closures.begin(), closures.end());
         return Cell::function(
             nativeFn.activate(nextClosures)
         );
@@ -418,11 +403,26 @@ public:
         };
     }
 
-private:
+    NativeFunctionDefinition* core() {
+        return nativeFn.fdef.get();
+    }
+
+    bool hasName(
+        const TVarName& name
+    ) const {
+        return (
+            nativeFn.hasName(name)
+            || names.end() != std::find(names.begin(), names.end(), name)
+        );
+    }
+
+public:
+    // members visible only for parsers
     NativeFunction nativeFn;
     std::vector<TVarName> names;
-    Namespace closures;
 };
+
+using LambdaFunctionPtr = std::shared_ptr<LambdaFunction>;
 
 struct Environment {
     std::vector<NativeFunctionCall> CallStack;

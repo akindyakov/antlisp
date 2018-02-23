@@ -3,16 +3,16 @@
 
 namespace AntLisp {
 
-void NativeFunctionDefinition::getGlobalName(
-    const TVarName& name
-) {
-    auto pos = names.size();
-    names.push_back(name);
-    operations.emplace_back(
-        NativeFunctionDefinition::GetGlobal,
-        pos
-    );
-}
+//void NativeFunctionDefinition::getGlobalName(
+//    const TVarName& name
+//) {
+//    auto pos = names.size();
+//    names.push_back(name);
+//    operations.emplace_back(
+//        NativeFunctionDefinition::GetGlobal,
+//        pos
+//    );
+//}
 
 NativeFunctionCall::NativeFunctionCall(
     NativeFunctionDefinitionPtr fdef
