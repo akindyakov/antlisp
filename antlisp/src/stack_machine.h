@@ -96,8 +96,7 @@ struct NativeFunctionDefinition {
     };
 
     std::vector<Step> operations;
-    // std::size_t argnum;
-    // no! -> first argnum of it are names for arguments
+    std::size_t argnum;
     std::vector<TVarName> names;
     std::vector<Cell> consts;  // unnamed
 
@@ -178,11 +177,12 @@ public:
     static Namespace parseArguments(
         Arguments args
         , const std::vector<TVarName>& names
+        , const std::size_t argMaxNum
     ) {
         auto vars = Namespace{};
         std::size_t nameIndex = 0;
         auto rit = args.rbegin();
-        while (rit != args.rend()) {
+        while (rit != args.rend() && nameIndex < argMaxNum) {
             const auto& argName = names[nameIndex];
             vars[argName] = std::move(*rit);
             ++rit;
@@ -311,7 +311,8 @@ public:
     ) const override {
         auto vars = IFunction::parseArguments(
             std::move(args),
-            fdef->names
+            fdef->names,
+            fdef->argnum
         );
         vars.insert(closures.begin(), closures.end());
         return NativeFunctionCall(fdef, vars);
@@ -398,7 +399,8 @@ public:
     ) const override {
         auto nextClosures = IFunction::parseArguments(
             std::move(args),
-            def->names
+            def->names,
+            def->names.size()
         );
         nextClosures.insert(closures.begin(), closures.end());
         return Cell::function(
