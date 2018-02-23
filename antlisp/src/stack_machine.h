@@ -49,6 +49,10 @@ public:
         );
     }
 
+    std::size_t size() const noexcept {
+        return stackImpl.size();
+    }
+
 private:
     std::vector<Cell> stackImpl;
 };
@@ -208,7 +212,7 @@ public:
     FunctionPtr activate(
         Namespace vars
     ) const override {
-        throw Error() << "Using activate for 'ExtInstantFunction' is not valid";
+        throw Error() << "Using 'activate' method for 'ExtInstantFunction' is not valid";
         return nullptr;
     }
 
@@ -238,7 +242,7 @@ class ExtSum
     }
 };
 
-class ExtPrint
+class ExtMultiplication
     : public ExtInstantFunction
 {
     Cell instantCall(
