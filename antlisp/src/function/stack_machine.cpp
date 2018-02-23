@@ -1,4 +1,5 @@
-#include "antlisp/src/stack_machine.h"
+#include "stack_machine.h"
+
 
 namespace AntLisp {
 

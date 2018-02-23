@@ -1,6 +1,6 @@
-#include "ut.h"
-
 #include "string.h"
+
+#include <antlisp/src/test/ut.h>
 
 
 void testQuotes() {

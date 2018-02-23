@@ -1,8 +1,8 @@
 #pragma once
 
-#include "exception.h"
+#include <antlisp/src/util/exception.h>
 
-#include <antlisp/src/stack_machine.h>
+#include <antlisp/src/function/stack_machine.h>
 
 
 namespace AntLisp {

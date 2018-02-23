@@ -3,7 +3,6 @@
 
 
 def build(ctx):
-    print ctx.env.INCLUDES
     ctx.recurse([
         "src",
         "bin",

@@ -1,4 +1,5 @@
-#include "antlisp/src/exception.h"
+#include "exception.h"
+
 
 int main() {
     auto ex = AntLisp::Exception() << "abc" << 123 << "]";

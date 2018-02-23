@@ -1,6 +1,6 @@
 #pragma once
 
-#include "exception.h"
+#include <antlisp/src/util/exception.h>
 
 #include <boost/variant.hpp>
 #include <boost/variant/get.hpp>

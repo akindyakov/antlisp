@@ -1,7 +1,8 @@
-#include "stack_machine.h"
 #include "parser.h"
 
-#include "ut.h"
+#include <antlisp/src/function/stack_machine.h>
+
+#include <antlisp/src/test/ut.h>
 
 #include <iostream>
 
