@@ -394,7 +394,7 @@ public:
     }
 
     NativeFunctionCall nativeCall(
-        Arguments frame
+        Arguments
     ) const override final {
         throw Error() << "Method 'nativeCall' is not valid for 'LambdaFunction'";
         return NativeFunctionCall{

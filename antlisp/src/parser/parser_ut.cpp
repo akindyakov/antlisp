@@ -90,9 +90,10 @@ void testParenthesesRecursiveReader() {
 void test_parseCode() {
     auto global = AntLisp::Namespace{};
     std::istringstream in("  (sum 1.23 (* 2 3)) ");
-    auto body = AntLisp::parseCode(in, global);
-    UT_ASSERT_EQUAL(body->consts.size(), 3);
-    UT_ASSERT_EQUAL(body->names.size(), 2);
+    auto lambda = AntLisp::parseCode(in, global);
+    auto nativeDef = lambda->core();
+    UT_ASSERT_EQUAL(nativeDef->consts.size(), 3);
+    UT_ASSERT_EQUAL(nativeDef->names.size(), 2);
 }
 
 UT_LIST(

@@ -8,12 +8,7 @@
 
 
 void testFullCycle() {
-    auto global = AntLisp::Namespace{};
     std::istringstream in("  (+ 21 (* 2 3)) ");
-    auto body = AntLisp::parseCode(in, global);
-    UT_ASSERT_EQUAL(body->consts.size(), 3);
-    UT_ASSERT_EQUAL(body->names.size(), 2);
-
     AntLisp::Environment env;
     env.vars.insert(
         std::make_pair(
@@ -22,18 +17,20 @@ void testFullCycle() {
     );
     env.vars.insert(
         std::make_pair(
-            "*", AntLisp::Cell(std::make_shared<AntLisp::ExtPrint>())
+            "*", AntLisp::Cell(std::make_shared<AntLisp::ExtMultiplication>())
         )
     );
-
-    auto frame = AntLisp::LocalStack{};
+    auto lambda = AntLisp::parseCode(in, env.vars);
+    UT_ASSERT_EQUAL(lambda->core()->consts.size(), 3);
+    UT_ASSERT_EQUAL(lambda->core()->names.size(), 2);
     env.CallStack.push_back(
-        AntLisp::FunctionCall(
-            std::move(body),
-            std::move(frame)
-        )
+        lambda->
+            instantCall(AntLisp::Arguments{})
+            .get<AntLisp::FunctionPtr>()->nativeCall(
+                AntLisp::Arguments{}
+            )
     );
-    while (AntLisp::FunctionDefinition::step(env)) {
+    while (AntLisp::NativeFunctionDefinition::step(env)) {
     }
     UT_ASSERT_EQUAL(
         env.ret.get<AntLisp::Integer>(),

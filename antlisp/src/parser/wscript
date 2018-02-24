@@ -26,26 +26,26 @@ def build(ctx):
         source="code_stream_ut",
     )
 
-    #ctx.program(
-    #    target="parser_ut",
-    #    source="parser_ut.cpp",
-    #    use=[
-    #        "antlisp-src-parser",
-    #    ],
-    #)
-    #ctx(
-    #    rule="${SRC}",
-    #    source="parser_ut",
-    #)
-    #
-    #ctx.program(
-    #    target="parse_and_run_ut",
-    #    source="parse_and_run_ut.cpp",
-    #    use=[
-    #        "antlisp-src-parser",
-    #    ],
-    #)
-    #ctx(
-    #    rule="${SRC}",
-    #    source="parse_and_run_ut",
-    #)
+    ctx.program(
+        target="parser_ut",
+        source="parser_ut.cpp",
+        use=[
+            "antlisp-src-parser",
+        ],
+    )
+    ctx(
+        rule="${SRC}",
+        source="parser_ut",
+    )
+
+    ctx.program(
+        target="parse_and_run_ut",
+        source="parse_and_run_ut.cpp",
+        use=[
+            "antlisp-src-parser",
+        ],
+    )
+    ctx(
+        rule="${SRC}",
+        source="parse_and_run_ut",
+    )

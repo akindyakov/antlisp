@@ -54,9 +54,9 @@ private:
     int level = 0;
 };
 
-NativeFunction parseCode(
+LambdaFunctionPtr parseCode(
     std::istream& in
-    , Namespace& global
+    , const Namespace& global
 );
 
 }  // namespace AntLisp

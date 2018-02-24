@@ -260,17 +260,18 @@ private:
             to != definitionStack.rend()
             && not to->get()->hasName(varName)
         ) {
-            to = std::next(to);
+            ++to;
         }
         if (to == definitionStack.rend()) {
             throw Error() << "There is no such variable " << Str::Quotes(varName);
         }
-        for (auto it = definitionStack.rbegin(); it != to; ++it) {
+        for (
+            auto it = definitionStack.rbegin(); it != to; ++it
+        ) {
             it->get()->names.push_back(varName);
         }
         for (
-            auto it = definitionStack.rbegin();
-            it != std::prev(to); ++it
+            auto it = definitionStack.rbegin(); it <= to; ++it
         ) {
             auto core = it->get()->core();
             auto pos = core->names.size();
