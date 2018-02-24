@@ -40,6 +40,7 @@ bool ParenthesesParser::isLocked() const {
 }
 
 bool ParenthesesParser::good() const {
+    //**/ std::cerr << level << " == " << codeStream.pCount() << '\n';
     return (
         level == codeStream.pCount()
         && codeStream.good()
@@ -143,6 +144,7 @@ private:
     ) {
         auto token = std::string{};
         if (pParser.nextToken(token)) {
+            //**/ std::cerr << "next " << Str::Quotes(token) << '\n';
             if ("define" == token) {
                 functionDef(std::move(pParser));
             } else if ("lambda" == token) {
@@ -156,10 +158,12 @@ private:
                 callDef(std::move(pParser));
             }
         } else {
-            if (pParser.good()) {
+            //**/ std::cerr << "next go deeper\n";
+            if (pParser.isLocked()) {
                 next(pParser.nextParser());
                 callDef(std::move(pParser));
             } else {
+                //**/ std::cerr << "p\n";
                 throw Error();
             }
         }
@@ -180,7 +184,57 @@ private:
     void lambdaDef(
         ParenthesesParser pParser
     ) {
-        // TODO
+        auto argNames = ArgNames{};
+        auto token = std::string{};
+        if (pParser.nextToken(token)) {
+            throw Error() << __FILE__ << ":" << __LINE__ << " wtf? " << token;
+        }
+        {
+            auto argParser = pParser.nextParser();
+            while (argParser.nextToken(token)) {
+                //**/ std::cerr << "read arg name: " << token << '\n';
+                argNames.push_back(token);
+            }
+            if (argParser.good()) {
+                throw Error() << "Code stream of lambda arguments is suppose to be exhausted";
+            }
+        }
+        auto core = definitionStack.back()->core();
+        auto argnum = argNames.size();
+        auto newLambda = std::make_shared<LambdaFunction>(
+            NativeFunction(
+                std::make_shared<NativeFunctionDefinition>(
+                    std::move(argNames)
+                ),
+                argnum,
+                Namespace{}
+            ),
+            ArgNames{}
+        );
+        core->consts.push_back(
+            Cell::function(
+                newLambda
+            )
+        );
+        core->operations.emplace_back(
+            NativeFunctionDefinition::GetConst,
+            core->consts.size() - 1
+        );
+        definitionStack.push_back(newLambda);
+        if (pParser.nextToken(token)) {
+            throw Error() << __FILE__ << ":" << __LINE__ << " wtf?";
+        }
+        // read the body of lambda
+        next(pParser.nextParser());
+        // vvv FIXME: create flush or finish methods for this place
+        pParser.nextToken(token);
+        // ^^^
+        definitionStack.pop_back();
+        argnum = newLambda->names.size();
+        core->operations.emplace_back(
+            NativeFunctionDefinition::RunFunction,
+            argnum
+        );
     }
 
     void letDef(
@@ -215,17 +269,21 @@ private:
     void callDef(
         ParenthesesParser pParser
     ) {
+        //**/ std::cerr << "call def\n";
         auto argCount = std::size_t{0};
         auto token = std::string{};
         while (pParser.good()) {
             if (pParser.nextToken(token)) {
+                //**/ std::cerr << "token var (" << argCount << ") " << Str::Quotes(token) << "\n";
                 tokenDef(token);
                 ++argCount;
             } else if (pParser.isLocked()) {
+                //**/ std::cerr << "other var\n";
                 next(pParser.nextParser());
                 ++argCount;
             }
         }
+        //**/ std::cerr << "argnum: " << argCount << "\n";
         auto core = definitionStack.back()->core();
         core->operations.emplace_back(
             NativeFunctionDefinition::RunFunction,
@@ -238,6 +296,7 @@ private:
     ) {
         auto cellOpt = tryFromString(token);
         if (cellOpt) {
+            //**/ std::cerr << "add const (" << definitionStack.size() << ") " << cellOpt->toString() << '\n';
             auto core = definitionStack.back()->core();
             auto pos = core->consts.size();
             core->consts.push_back(

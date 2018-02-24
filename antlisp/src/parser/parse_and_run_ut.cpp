@@ -38,6 +38,30 @@ void testFullCycle() {
     );
 }
 
+void test_parseCode_lambda_call() {
+    auto global = AntLisp::Namespace{
+        {"+", AntLisp::Cell(std::make_shared<AntLisp::ExtSum>())},
+    };
+    std::istringstream in("((lambda (x y) (+ x y 1)) 4 2)");
+    auto lambda = AntLisp::parseCode(in, global);
+    AntLisp::Environment env;
+    env.CallStack.push_back(
+        lambda->
+            instantCall(AntLisp::Arguments{})
+            .get<AntLisp::FunctionPtr>()->nativeCall(
+                AntLisp::Arguments{}
+            )
+    );
+    while (AntLisp::NativeFunctionDefinition::step(env)) {
+    }
+    UT_ASSERT_EQUAL(
+        env.ret.get<AntLisp::Integer>(),
+        4 + 2 + 1
+    );
+}
+
+
 UT_LIST(
-    testFullCycle();
+    //testFullCycle();
+    test_parseCode_lambda_call();
 );

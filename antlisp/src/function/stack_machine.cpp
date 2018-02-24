@@ -1,18 +1,9 @@
 #include "stack_machine.h"
 
+#include <antlisp/src/util/string.h>
+
 
 namespace AntLisp {
-
-//void NativeFunctionDefinition::getGlobalName(
-//    const TVarName& name
-//) {
-//    auto pos = names.size();
-//    names.push_back(name);
-//    operations.emplace_back(
-//        NativeFunctionDefinition::GetGlobal,
-//        pos
-//    );
-//}
 
 NativeFunctionCall::NativeFunctionCall(
     NativeFunctionDefinitionPtr fdef
@@ -53,7 +44,7 @@ void NativeFunctionCall::getConst() {
     auto cell = function->consts[
         function->operations[runner].position
     ];
-    //**/std::cerr << "Get const: " << cell.toString() << " (" << runner << ")\n";
+    //**/ std::cerr << "Get const: " << cell.toString() << " (" << runner << ")\n";
     this->pushCallStack(
         std::move(cell)
     );
@@ -64,7 +55,7 @@ void NativeFunctionCall::getLocal() {
         this->runner
     ].position;
     const auto& name = this->function->names[pos];
-    //**/std::cerr << "Get: " << name << "  (" << runner << ")\n";
+    //**/ std::cerr << "Get: " << Str::Quotes(name) << "  (" << runner << ")\n";
     // copy
     auto local = this->vars.at(name);
     this->pushCallStack(
@@ -128,11 +119,11 @@ bool NativeFunctionDefinition::step(Environment& env) {
             //**/std::cerr << "nope\n";
             break;
         case GetConst:
-            //**/std::cerr << "get const\n";
+            //**/ std::cerr << "get const\n";
             call->getConst();
             break;
         case GetLocal:
-            //**/std::cerr << "get local\n";
+            //**/ std::cerr << "get local\n";
             call->getLocal();
             break;
         case SetLocal:
@@ -148,20 +139,20 @@ bool NativeFunctionDefinition::step(Environment& env) {
             break;
         case RunFunction:
             {
-                //**/std::cerr << "run function\n";
+                //**/ std::cerr << "run function\n";
                 auto args = call->createArgs();
                 auto toCall = call->popCallStack();
                 if (toCall.is<FunctionPtr>()) {
                     auto fnPtr = toCall.get<FunctionPtr>();
                     if (fnPtr->isNative()) {
-                        //**/std::cerr << "run native function\n";
+                        //**/ std::cerr << "run native function\n";
                         call->next();  // to get back to the right place on native return
                         call = env.stackPush(
                             fnPtr->nativeCall(args)
                         );
                         return true;
                     } else {
-                        //**/std::cerr << "run instant function\n";
+                        //**/ std::cerr << "run instant function\n";
                         call->pushCallStack(
                             fnPtr->instantCall(
                                 std::move(args)

@@ -18,6 +18,7 @@ using TVarName = std::string;
 using Namespace = std::unordered_map<TVarName, Cell>;
 
 using Arguments = std::vector<Cell>;
+using ArgNames = std::vector<TVarName>;
 
 class StackMachineError
     : public Exception
@@ -61,7 +62,14 @@ private:
 struct Environment;
 
 struct NativeFunctionDefinition {
-    NativeFunctionDefinition() = default;
+    explicit NativeFunctionDefinition() = default;
+
+    explicit NativeFunctionDefinition(
+        ArgNames names_
+    )
+        : names(std::move(names_))
+    {
+    }
 
     NativeFunctionDefinition(const NativeFunctionDefinition&) = delete;
     NativeFunctionDefinition(NativeFunctionDefinition&&) = default;
@@ -105,18 +113,6 @@ struct NativeFunctionDefinition {
     ) {
         operations.emplace_back(op, pos);
     }
-
-    //std::size_t getNamePosition(
-    //    const TVarName& name
-    //) {
-    //    // TODO: we can use some index here
-    //    auto it = std::find(names.cbegin(), names.cend(), name);
-    //    if (it != names.cend()) {
-    //        return std::distance(names.cbegin(), it);
-    //    }
-    //    names.push_back(name);
-    //    return names.size() - 1;
-    //}
 
     class Error
         : public StackMachineError
@@ -342,6 +338,11 @@ public:
         const TVarName& name
     ) const {
         auto last = fdef->names.cbegin() + argnum;
+        //**/ std::cerr << "native arg names (\n";
+        //**/ for (auto it = fdef->names.cbegin(); it != last; ++it) {
+        //**/     std::cerr << " " << *it;
+        //**/ }
+        //**/ std::cerr << ")\n";
         return (
             closures.count(name) != 0
             || last != std::find(fdef->names.cbegin(), last, name)
@@ -360,11 +361,16 @@ class LambdaFunction
 public:
     explicit LambdaFunction(
         NativeFunction native_
-        , std::vector<TVarName> names_
+        , ArgNames names_
     )
         : nativeFn(std::move(native_))
         , names(std::move(names_))
     {
+        //**/ std::cerr << "create lambda with arg names (\n";
+        //**/ for (const auto& name : names) {
+        //**/     std::cerr << " " << name;
+        //**/ }
+        //**/ std::cerr << ")\n";
     }
 
     class Error
@@ -410,6 +416,11 @@ public:
     bool hasName(
         const TVarName& name
     ) const {
+        //**/ std::cerr << "lambda arg names (\n";
+        //**/ for (const auto& name : names) {
+        //**/     std::cerr << " " << name;
+        //**/ }
+        //**/ std::cerr << ")\n";
         return (
             nativeFn.hasName(name)
             || names.end() != std::find(names.begin(), names.end(), name)

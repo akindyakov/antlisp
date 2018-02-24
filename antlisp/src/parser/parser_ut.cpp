@@ -48,6 +48,9 @@ void testParenthesesRecursiveReader() {
     UT_ASSERT(
         !parser2.good()
     );
+    UT_ASSERT(
+        !parser2.isLocked()
+    );
 
     UT_ASSERT(
         parser1.good()
@@ -88,7 +91,10 @@ void testParenthesesRecursiveReader() {
 }
 
 void test_parseCode() {
-    auto global = AntLisp::Namespace{};
+    auto global = AntLisp::Namespace{
+        {"*", AntLisp::Cell(std::make_shared<AntLisp::ExtMultiplication>())},
+        {"sum", AntLisp::Cell(std::make_shared<AntLisp::ExtSum>())},
+    };
     std::istringstream in("  (sum 1.23 (* 2 3)) ");
     auto lambda = AntLisp::parseCode(in, global);
     auto nativeDef = lambda->core();
@@ -96,6 +102,20 @@ void test_parseCode() {
     UT_ASSERT_EQUAL(nativeDef->names.size(), 2);
 }
 
+void test_parseCode_lambda() {
+    auto global = AntLisp::Namespace{
+        {"+", AntLisp::Cell(std::make_shared<AntLisp::ExtSum>())},
+    };
+    std::istringstream in("(lambda (x) (+ x 1))");
+    auto lambda = AntLisp::parseCode(in, global);
+    UT_ASSERT_EQUAL(lambda->names.size(), 0);
+    auto nativeDef = lambda->core();
+    UT_ASSERT_EQUAL(nativeDef->consts.size(), 1);
+    UT_ASSERT_EQUAL(nativeDef->names.size(), 1);
+}
+
 UT_LIST(
     testParenthesesRecursiveReader();
+    test_parseCode();
+    test_parseCode_lambda();
 );
