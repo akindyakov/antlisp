@@ -96,8 +96,20 @@ void NativeFunctionCall::stackRewind() {
     );
 }
 
-void NativeFunctionCall::skip() {
-    runner += function->operations[runner].position;
+void NativeFunctionCall::skipUntilMark() {
+    auto mark = function->operations[runner].position;
+    while (
+        this->next()
+    ) {
+        auto op = function->operations[runner];
+        if (
+            op.operation == NativeFunctionDefinition::GuardMark
+            && op.position == mark
+        ) {
+            this->next();  // skip the mark too
+            break;
+        }
+    }
 }
 
 Arguments NativeFunctionCall::createArgs() {
@@ -169,21 +181,15 @@ bool NativeFunctionDefinition::step(Environment& env) {
         case StackRewind:
             call->stackRewind();
             break;
-        case SkipIfTrue:
+        case SkipIfNil:
             {
                 auto guard = call->popCallStack();
                 if (guard.is<Nil>()) {
-                    call->skip();
+                    call->skipUntilMark();
                 }
             }
             break;
-        case SkipIfFalse:
-            {
-                auto guard = call->popCallStack();
-                if (!guard.is<Nil>()) {
-                    call->skip();
-                }
-            }
+        case GuardMark:
             break;
     }
     if (!call->next()) {

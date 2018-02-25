@@ -90,8 +90,8 @@ struct NativeFunctionDefinition {
         SetGlobal,
         RunFunction,
         StackRewind,
-        SkipIfTrue,
-        SkipIfFalse,
+        SkipIfNil,
+        GuardMark,
     };
 
     struct Step {
