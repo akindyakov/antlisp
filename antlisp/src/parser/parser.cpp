@@ -145,7 +145,7 @@ private:
         auto token = std::string{};
         if (pParser.nextToken(token)) {
             //**/ std::cerr << "next " << Str::Quotes(token) << '\n';
-            if ("define" == token) {
+            if ("defun" == token) {
                 functionDef(std::move(pParser));
             } else if ("lambda" == token) {
                 lambdaDef(std::move(pParser));
@@ -169,16 +169,21 @@ private:
         }
     }
 
-    void bodyDef(
-        ParenthesesParser pParser
-    ) {
-        // TODO
-    }
-
     void functionDef(
         ParenthesesParser pParser
     ) {
-        // TODO
+        auto fname = std::string{};
+        if (!pParser.nextToken(fname)) {
+            throw Error() << __FILE__ << ":" << __LINE__ << " there is suppose to be function name.";
+        }
+        lambdaDef(std::move(pParser));
+        auto core = definitionStack.back()->core();
+        auto pos = core->names.size();
+        core->names.push_back(fname);
+        core->operations.emplace_back(
+            NativeFunctionDefinition::SetLocal,
+            pos
+        );
     }
 
     void lambdaDef(

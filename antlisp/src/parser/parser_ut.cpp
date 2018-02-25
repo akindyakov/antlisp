@@ -114,8 +114,21 @@ void test_parseCode_lambda() {
     UT_ASSERT_EQUAL(nativeDef->names.size(), 1);
 }
 
+void test_parseCode_defun() {
+    auto global = AntLisp::Namespace{
+        {"+", AntLisp::Cell(std::make_shared<AntLisp::ExtSum>())},
+    };
+    std::istringstream in("(defun rinzler (x) (+ x 1 2))");
+    auto lambda = AntLisp::parseCode(in, global);
+    UT_ASSERT_EQUAL(lambda->names.size(), 0);
+    auto nativeDef = lambda->core();
+    UT_ASSERT_EQUAL(nativeDef->consts.size(), 1);
+    UT_ASSERT_EQUAL(nativeDef->names.size(), 2);  // + and rinzler
+}
+
 UT_LIST(
     testParenthesesRecursiveReader();
     test_parseCode();
     test_parseCode_lambda();
+    test_parseCode_defun();
 );
