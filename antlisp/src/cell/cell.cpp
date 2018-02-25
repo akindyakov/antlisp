@@ -57,6 +57,17 @@ public:
     }
 };
 
+class NilValueParser {
+public:
+    static bool checkPrefix(const std::string& str) {
+        static const auto literal = std::string{"nil"};
+        return str == literal;
+    }
+    static Cell parse(const std::string&) {
+        return Cell::nil();
+    }
+};
+
 class NumberValueParser
 {
 public:
@@ -160,6 +171,8 @@ boost::optional<Cell> tryFromString(
     }
     if (TrueValueParser::checkPrefix(str)) {
         out = TrueValueParser::parse(str);
+    } else if (NilValueParser::checkPrefix(str)) {
+        out = NilValueParser::parse(str);
     } else if (NumberValueParser::checkPrefix(str)) {
         out = NumberValueParser::parse(str);
     } else if (StringValueParser::checkPrefix(str)) {

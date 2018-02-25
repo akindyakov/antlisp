@@ -154,9 +154,10 @@ private:
     void next(
         ParenthesesParser& pParser
     ) {
+        /**/ std::cerr << "next\n";
         auto token = std::string{};
         if (pParser.nextToken(token)) {
-            //**/ std::cerr << "next " << Str::Quotes(token) << '\n';
+            /**/ std::cerr << "next " << Str::Quotes(token) << '\n';
             if ("defun" == token) {
                 functionDef(pParser);
             } else if ("lambda" == token) {
@@ -170,7 +171,7 @@ private:
                 callDef(pParser);
             }
         } else {
-            //**/ std::cerr << "next go deeper\n";
+            /**/ std::cerr << "next go deeper\n";
             if (pParser.isLocked()) {
                 {
                     auto nextParser = pParser.nextParser();
@@ -178,7 +179,7 @@ private:
                 }
                 callDef(pParser);
             } else {
-                //**/ std::cerr << "p\n";
+                /**/ std::cerr << "p\n";
                 throw Error();
             }
         }
@@ -281,12 +282,45 @@ private:
         ParenthesesParser& condParser
     ) {
         // TODO
-        //auto mark = getMarkUid();
-        //condParser.check();
-        //while (condParser.isLocked()) {
-        //    auto branchParser = condParser.nextParser();
-        //    condParser.check();
-        //}
+        auto core = definitionStack.back()->core();
+        auto mark = getMarkUid();
+        condParser.check();
+        while (condParser.isLocked()) {
+            auto branchParser = condParser.nextParser();
+            std::cerr << "read branch guard " << mark << "\n";
+            auto token = std::string{};
+            if (branchParser.nextToken(token)) {
+                tokenDef(token);
+            } else {
+                auto branchGuardParser = condParser.nextParser();
+                next(branchGuardParser);
+            }
+            core->operations.emplace_back(
+                NativeFunctionDefinition::SkipIfNil,
+                mark
+            );
+            branchParser.check();
+            std::cerr << "read branch " << mark << "\n";
+
+            if (branchParser.nextToken(token)) {
+                tokenDef(token);
+            } else {
+                auto branchBodyParser = branchParser.nextParser();
+                next(branchBodyParser);
+            }
+            core->operations.emplace_back(
+                NativeFunctionDefinition::Skip,
+                mark
+            );
+            // here!
+            branchParser.check();
+            condParser.check();
+        }
+        std::cerr << "add guard mark " << mark << "\n";
+        core->operations.emplace_back(
+            NativeFunctionDefinition::GuardMark,
+            mark
+        );
     }
 
     void callDef(
@@ -320,7 +354,7 @@ private:
     ) {
         auto cellOpt = tryFromString(token);
         if (cellOpt) {
-            //**/ std::cerr << "add const (" << definitionStack.size() << ") " << cellOpt->toString() << '\n';
+            /**/ std::cerr << "add const (" << definitionStack.size() << ") " << cellOpt->toString() << '\n';
             auto core = definitionStack.back()->core();
             auto pos = core->consts.size();
             core->consts.push_back(

@@ -178,10 +178,6 @@ public:
     virtual bool isPostponed() const = 0;
     virtual bool isNative() const = 0;
 
-    //virtual FunctionPtr activate(
-    //    Namespace vars
-    //) const = 0;
-
     virtual Cell instantCall(
         Arguments frame
     ) const = 0;

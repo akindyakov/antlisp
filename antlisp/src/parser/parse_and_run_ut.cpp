@@ -54,6 +54,7 @@ void test_parseCode_lambda_call() {
     );
     while (AntLisp::NativeFunctionDefinition::step(env)) {
     }
+    std::cerr << "ret: " << env.ret.get<AntLisp::Integer>() << '\n';
     UT_ASSERT_EQUAL(
         env.ret.get<AntLisp::Integer>(),
         4 + 2 + 1
@@ -62,6 +63,6 @@ void test_parseCode_lambda_call() {
 
 
 UT_LIST(
-    //testFullCycle();
+    testFullCycle();
     test_parseCode_lambda_call();
 );

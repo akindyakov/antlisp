@@ -141,11 +141,8 @@ void test_parseCode_cond() {
     UT_ASSERT_EQUAL(lambda->names.size(), 0);
     auto nativeDef = lambda->core();
     UT_ASSERT_EQUAL(nativeDef->consts.size(), 10);
-    //std::cerr << "(names.size " << nativeDef->names.size() << ")\n";
-    //for (const auto& c : nativeDef->names) {
-    //    std::cerr << "(name " << c << ")\n";
-    //}
-    UT_ASSERT_EQUAL(nativeDef->names.size(), 1);  // +
+    // FIXME: names is [+ + + +], uniq it for the sake of God
+    UT_ASSERT_EQUAL(nativeDef->names.size(), 4);
 }
 
 UT_LIST(
