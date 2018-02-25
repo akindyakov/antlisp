@@ -281,7 +281,6 @@ private:
     void condDef(
         ParenthesesParser& condParser
     ) {
-        // TODO
         auto core = definitionStack.back()->core();
         auto mark = getMarkUid();
         condParser.check();
