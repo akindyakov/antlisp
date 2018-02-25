@@ -46,6 +46,17 @@ bool operator != (
 
 namespace {
 
+class TrueValueParser {
+public:
+    static bool checkPrefix(const std::string& str) {
+        static const auto literal = std::string{"true"};
+        return str == literal;
+    }
+    static Cell parse(const std::string&) {
+        return Cell::t();
+    }
+};
+
 class NumberValueParser
 {
 public:
@@ -147,7 +158,9 @@ boost::optional<Cell> tryFromString(
     if (str.empty()) {
         return out;
     }
-    if (NumberValueParser::checkPrefix(str)) {
+    if (TrueValueParser::checkPrefix(str)) {
+        out = TrueValueParser::parse(str);
+    } else if (NumberValueParser::checkPrefix(str)) {
         out = NumberValueParser::parse(str);
     } else if (StringValueParser::checkPrefix(str)) {
         out = StringValueParser::parse(str);

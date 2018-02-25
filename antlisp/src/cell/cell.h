@@ -74,8 +74,13 @@ public:
         : value(Nil{})
     {
     }
+
     static Cell nil() {
         return Cell(Nil{});
+    }
+
+    static Cell t() {
+        return Cell::integer(1);
     }
 
     template<
