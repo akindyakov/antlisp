@@ -57,17 +57,8 @@ bool InCodeStream::nextToken(
     while (
         this->peek(ch)
         && std::isspace(ch) == false
-        /**/ && getParenthesesNumber(ch) == 0
+        && getParenthesesNumber(ch) == 0
     ) {
-        //if (getParenthesesNumber(ch) != 0) {
-        //    while (
-        //        this->peek(ch)
-        //        && getParenthesesNumber(ch) != 0
-        //    ) {
-        //        this->ignore();
-        //    }
-        //    break;
-        //}
         token.push_back(ch);
         this->ignore();
     }
