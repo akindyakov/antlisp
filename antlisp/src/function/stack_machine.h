@@ -90,11 +90,13 @@ struct NativeFunctionDefinition {
         SetGlobal,
         RunFunction,
         StackRewind,
+        Skip,
         SkipIfNil,
         GuardMark,
     };
 
     struct Step {
+        using Operand = std::size_t;
         explicit Step(
             EOperations op
             , std::size_t pos
@@ -104,7 +106,7 @@ struct NativeFunctionDefinition {
         {
         }
         EOperations operation;
-        std::size_t position = 0;
+        Operand position = 0;  // FIXME: rename it to operand
     };
 
     void addStep(
@@ -158,7 +160,7 @@ public:
 
     void stackRewind();
 
-    void skip();
+    void skipUntilMark();
 
     Arguments createArgs();
 

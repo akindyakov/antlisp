@@ -71,14 +71,16 @@ std::string ParenthesesParser::nextToken() {
     return token;
 }
 
-void ParenthesesParser::check() {
+bool ParenthesesParser::check() {
     if (this->good()) {
         auto token = std::string{};
         if (this->nextToken(token)) {
             throw Error() << __FILE__ << ":" << __LINE__
                 << " wtf, there is token " << Str::Quotes(token);
         }
+        return this->good();
     }
+    return false;
 }
 
 ParenthesesParser ParenthesesParser::nextParser() {
@@ -127,9 +129,8 @@ public:
     ConstructionParser& fromCodeStream(
         InCodeStream& inStream
     ) {
-        this->next(
-            ParenthesesParser::openFromCodeStream(inStream)
-        );
+        auto topLevel = ParenthesesParser::openFromCodeStream(inStream);
+        this->next(topLevel);
         return *this;
     }
 
@@ -151,28 +152,31 @@ public:
 
 private:
     void next(
-        ParenthesesParser pParser
+        ParenthesesParser& pParser
     ) {
         auto token = std::string{};
         if (pParser.nextToken(token)) {
             //**/ std::cerr << "next " << Str::Quotes(token) << '\n';
             if ("defun" == token) {
-                functionDef(std::move(pParser));
+                functionDef(pParser);
             } else if ("lambda" == token) {
-                lambdaDef(std::move(pParser));
+                lambdaDef(pParser);
             } else if ("let" == token) {
-                letDef(std::move(pParser));
+                letDef(pParser);
             } else if ("cond" == token) {
-                condDef(std::move(pParser));
+                condDef(pParser);
             } else {
                 tokenDef(token);
-                callDef(std::move(pParser));
+                callDef(pParser);
             }
         } else {
             //**/ std::cerr << "next go deeper\n";
             if (pParser.isLocked()) {
-                next(pParser.nextParser());
-                callDef(std::move(pParser));
+                {
+                    auto nextParser = pParser.nextParser();
+                    next(nextParser);
+                }
+                callDef(pParser);
             } else {
                 //**/ std::cerr << "p\n";
                 throw Error();
@@ -181,13 +185,13 @@ private:
     }
 
     void functionDef(
-        ParenthesesParser pParser
+        ParenthesesParser& pParser
     ) {
         auto fname = std::string{};
         if (!pParser.nextToken(fname)) {
             throw Error() << __FILE__ << ":" << __LINE__ << " there is suppose to be function name.";
         }
-        lambdaDef(std::move(pParser));
+        lambdaDef(pParser);
         auto core = definitionStack.back()->core();
         auto pos = core->names.size();
         core->names.push_back(fname);
@@ -198,7 +202,7 @@ private:
     }
 
     void lambdaDef(
-        ParenthesesParser pParser
+        ParenthesesParser& pParser
     ) {
         auto argNames = ArgNames{};
         auto token = std::string{};
@@ -236,8 +240,11 @@ private:
         );
         definitionStack.push_back(newLambda);
         pParser.check();
-        // read the body of lambda
-        next(pParser.nextParser());
+        {
+            // read the body of lambda
+            auto bodyParser = pParser.nextParser();
+            next(bodyParser);
+        }
         pParser.check();
         definitionStack.pop_back();
         argnum = newLambda->names.size();
@@ -248,7 +255,7 @@ private:
     }
 
     void letDef(
-        ParenthesesParser pParser
+        ParenthesesParser& pParser
     ) {
         // TODO
         auto token = std::string{};
@@ -271,13 +278,19 @@ private:
     }
 
     void condDef(
-        ParenthesesParser pParser
+        ParenthesesParser& condParser
     ) {
         // TODO
+        //auto mark = getMarkUid();
+        //condParser.check();
+        //while (condParser.isLocked()) {
+        //    auto branchParser = condParser.nextParser();
+        //    condParser.check();
+        //}
     }
 
     void callDef(
-        ParenthesesParser pParser
+        ParenthesesParser& pParser
     ) {
         //**/ std::cerr << "call def\n";
         auto argCount = std::size_t{0};
@@ -289,7 +302,8 @@ private:
                 ++argCount;
             } else if (pParser.isLocked()) {
                 //**/ std::cerr << "other var\n";
-                next(pParser.nextParser());
+                auto nextParser = pParser.nextParser();
+                next(nextParser);
                 ++argCount;
             }
         }
@@ -352,8 +366,19 @@ private:
         }
     }
 
+    NativeFunctionDefinition::Step::Operand
+    getMarkUid() {
+        ++markCounter;
+        const auto bitSize = 8 * sizeof(NativeFunctionDefinition::Step::Operand);
+        return (
+            (this->definitionStack.size() << (bitSize / 2))
+            | markCounter
+        );
+    }
+
 private:
     std::vector<LambdaFunctionPtr> definitionStack;
+    NativeFunctionDefinition::Step::Operand markCounter = 0;
 };
 
 }  // namespace

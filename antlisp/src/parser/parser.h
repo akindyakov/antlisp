@@ -41,9 +41,13 @@ public:
 
     std::string nextToken();
 
-    void check();
+    bool check();
 
     ParenthesesParser nextParser();
+
+    int getLevel() const noexcept {
+        return level;
+    }
 
 private:
     explicit ParenthesesParser(

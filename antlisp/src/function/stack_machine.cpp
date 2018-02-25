@@ -101,10 +101,10 @@ void NativeFunctionCall::skipUntilMark() {
     while (
         this->next()
     ) {
-        auto op = function->operations[runner];
+        auto step = function->operations[runner];
         if (
-            op.operation == NativeFunctionDefinition::GuardMark
-            && op.position == mark
+            step.operation == NativeFunctionDefinition::GuardMark
+            && step.position == mark
         ) {
             this->next();  // skip the mark too
             break;
@@ -180,6 +180,9 @@ bool NativeFunctionDefinition::step(Environment& env) {
             break;
         case StackRewind:
             call->stackRewind();
+            break;
+        case Skip:
+            call->skipUntilMark();
             break;
         case SkipIfNil:
             {
