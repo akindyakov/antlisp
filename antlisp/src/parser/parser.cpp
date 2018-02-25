@@ -74,7 +74,7 @@ std::string ParenthesesParser::nextToken() {
 void ParenthesesParser::check() {
     if (this->good()) {
         auto token = std::string{};
-        if (pParser.nextToken(token)) {
+        if (this->nextToken(token)) {
             throw Error() << __FILE__ << ":" << __LINE__
                 << " wtf, there is token " << Str::Quotes(token);
         }
@@ -238,9 +238,7 @@ private:
         pParser.check();
         // read the body of lambda
         next(pParser.nextParser());
-        // vvv FIXME: create flush or finish methods for this place
-        pParser.nextToken(token);
-        // ^^^
+        pParser.check();
         definitionStack.pop_back();
         argnum = newLambda->names.size();
         core->operations.emplace_back(
