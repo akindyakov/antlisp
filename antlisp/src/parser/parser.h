@@ -41,6 +41,8 @@ public:
 
     std::string nextToken();
 
+    void check();
+
     ParenthesesParser nextParser();
 
 private:

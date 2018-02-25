@@ -55,6 +55,7 @@ bool ParenthesesParser::nextToken(
             return true;
         }
         if (codeStream.good()) {
+            // skip the last parenthesis to close parser
             codeStream.ignore();
         }
         return false;
@@ -68,6 +69,16 @@ std::string ParenthesesParser::nextToken() {
         throw Error() << "Unexpected end of stream";
     }
     return token;
+}
+
+void ParenthesesParser::check() {
+    if (this->good()) {
+        auto token = std::string{};
+        if (pParser.nextToken(token)) {
+            throw Error() << __FILE__ << ":" << __LINE__
+                << " wtf, there is token " << Str::Quotes(token);
+        }
+    }
 }
 
 ParenthesesParser ParenthesesParser::nextParser() {
@@ -191,9 +202,7 @@ private:
     ) {
         auto argNames = ArgNames{};
         auto token = std::string{};
-        if (pParser.nextToken(token)) {
-            throw Error() << __FILE__ << ":" << __LINE__ << " wtf? " << token;
-        }
+        pParser.check();
         {
             auto argParser = pParser.nextParser();
             while (argParser.nextToken(token)) {
@@ -226,9 +235,7 @@ private:
             core->consts.size() - 1
         );
         definitionStack.push_back(newLambda);
-        if (pParser.nextToken(token)) {
-            throw Error() << __FILE__ << ":" << __LINE__ << " wtf?";
-        }
+        pParser.check();
         // read the body of lambda
         next(pParser.nextParser());
         // vvv FIXME: create flush or finish methods for this place
