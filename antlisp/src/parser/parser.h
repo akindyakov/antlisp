@@ -60,7 +60,7 @@ private:
     int level = 0;
 };
 
-LambdaFunctionPtr parseCode(
+NativeFunction parseCode(
     std::istream& in
     , const Namespace& global
 );

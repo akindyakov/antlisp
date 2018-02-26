@@ -96,10 +96,9 @@ void test_parseCode() {
         {"sum", AntLisp::Cell(std::make_shared<AntLisp::ExtSum>())},
     };
     std::istringstream in("  (sum 1.23 (* 2 3)) ");
-    auto lambda = AntLisp::parseCode(in, global);
-    auto nativeDef = lambda->core();
-    UT_ASSERT_EQUAL(nativeDef->consts.size(), 3);
-    UT_ASSERT_EQUAL(nativeDef->names.size(), 2);
+    auto native = AntLisp::parseCode(in, global);
+    UT_ASSERT_EQUAL(native.fdef->consts.size(), 3);
+    UT_ASSERT_EQUAL(native.fdef->names.size(), 2);
 }
 
 void test_parseCode_lambda() {
@@ -107,11 +106,9 @@ void test_parseCode_lambda() {
         {"+", AntLisp::Cell(std::make_shared<AntLisp::ExtSum>())},
     };
     std::istringstream in("(lambda (x) (+ x 1))");
-    auto lambda = AntLisp::parseCode(in, global);
-    UT_ASSERT_EQUAL(lambda->names.size(), 0);
-    auto nativeDef = lambda->core();
-    UT_ASSERT_EQUAL(nativeDef->consts.size(), 1);
-    UT_ASSERT_EQUAL(nativeDef->names.size(), 1);
+    auto native = AntLisp::parseCode(in, global);
+    UT_ASSERT_EQUAL(native.fdef->consts.size(), 1);
+    UT_ASSERT_EQUAL(native.fdef->names.size(), 1);
 }
 
 void test_parseCode_defun() {
@@ -119,11 +116,9 @@ void test_parseCode_defun() {
         {"+", AntLisp::Cell(std::make_shared<AntLisp::ExtSum>())},
     };
     std::istringstream in("(defun rinzler (x) (+ x 1 2))");
-    auto lambda = AntLisp::parseCode(in, global);
-    UT_ASSERT_EQUAL(lambda->names.size(), 0);
-    auto nativeDef = lambda->core();
-    UT_ASSERT_EQUAL(nativeDef->consts.size(), 1);
-    UT_ASSERT_EQUAL(nativeDef->names.size(), 2);  // + and rinzler
+    auto native = AntLisp::parseCode(in, global);
+    UT_ASSERT_EQUAL(native.fdef->consts.size(), 1);
+    UT_ASSERT_EQUAL(native.fdef->names.size(), 2);  // + and rinzler
 }
 
 void test_parseCode_cond() {
@@ -137,12 +132,10 @@ void test_parseCode_cond() {
         ((+ 1 0) (+ 3 4))
     )
     )antlisp-code");
-    auto lambda = AntLisp::parseCode(in, global);
-    UT_ASSERT_EQUAL(lambda->names.size(), 0);
-    auto nativeDef = lambda->core();
-    UT_ASSERT_EQUAL(nativeDef->consts.size(), 10);
+    auto native = AntLisp::parseCode(in, global);
+    UT_ASSERT_EQUAL(native.fdef->consts.size(), 10);
     // FIXME: names is [+ + + +], uniq it for the sake of God
-    UT_ASSERT_EQUAL(nativeDef->names.size(), 4);
+    UT_ASSERT_EQUAL(native.fdef->names.size(), 4);
 }
 
 UT_LIST(

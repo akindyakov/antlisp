@@ -134,14 +134,14 @@ public:
         return *this;
     }
 
-    LambdaFunctionPtr finish() {
+    NativeFunction finish() {
         if (definitionStack.size() != 1) {
             throw Error()
                 << __FILE__ << ":" << __LINE__
                 << " Definition stack should has size 1";
         }
         return std::move(
-            definitionStack.back()
+            definitionStack.back()->nativeFn
         );
     }
 
@@ -418,7 +418,7 @@ private:
 
 }  // namespace
 
-LambdaFunctionPtr parseCode(
+NativeFunction parseCode(
     std::istream& in
     , const Namespace& global
 ) {

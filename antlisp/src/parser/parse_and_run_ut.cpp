@@ -17,16 +17,8 @@ void testFullCycle() {
             "*", AntLisp::Cell(std::make_shared<AntLisp::ExtMultiplication>())
         }
     };
-    auto lambda = AntLisp::parseCode(in, global);
-    UT_ASSERT_EQUAL(lambda->core()->consts.size(), 3);
-    UT_ASSERT_EQUAL(lambda->core()->names.size(), 2);
-    auto env = AntLisp::Environment(
-        lambda->instantCall(
-            AntLisp::Arguments{}
-        ).get<AntLisp::FunctionPtr>()->nativeCall(
-            AntLisp::Arguments{}
-        )
-    );
+    auto native = AntLisp::parseCode(in, global);
+    auto env = AntLisp::Environment(native);
     env.run();
     UT_ASSERT_EQUAL(
         env.ret.get<AntLisp::Integer>(),
@@ -39,14 +31,8 @@ void test_parseCode_lambda_call() {
         {"+", AntLisp::Cell(std::make_shared<AntLisp::ExtSum>())},
     };
     std::istringstream in("((lambda (x y) (+ x y 1)) 4 2)");
-    auto lambda = AntLisp::parseCode(in, global);
-    auto env = AntLisp::Environment(
-        lambda->instantCall(
-            AntLisp::Arguments{}
-        ).get<AntLisp::FunctionPtr>()->nativeCall(
-            AntLisp::Arguments{}
-        )
-    );
+    auto native = AntLisp::parseCode(in, global);
+    auto env = AntLisp::Environment(native);
     env.run();
     //**/ std::cerr << "ret: " << env.ret.get<AntLisp::Integer>() << '\n';
     UT_ASSERT_EQUAL(
@@ -55,8 +41,33 @@ void test_parseCode_lambda_call() {
     );
 }
 
+void test_parseCode_cond() {
+    auto global = AntLisp::Namespace{
+        {"+", AntLisp::Cell(std::make_shared<AntLisp::ExtSum>())},
+    };
+    std::istringstream in(R"antlisp-code(
+    (cond
+        (nil  (+ 1 2))
+        (true (+ 2 3))
+        ((+ 1 0) (+ 3 4))
+    )
+    )antlisp-code");
+    auto native = AntLisp::parseCode(in, global);
+    UT_ASSERT_EQUAL(native.fdef->consts.size(), 10);
+    // FIXME: names is [+ + + +], uniq it for the sake of God
+    UT_ASSERT_EQUAL(native.fdef->names.size(), 4);
+    auto env = AntLisp::Environment(native);
+    env.run();
+    //**/ std::cerr << "ret: " << env.ret.toString() << '\n';
+    UT_ASSERT_EQUAL(
+        env.ret.get<AntLisp::Integer>(),
+        2 + 3
+    );
+}
+
 
 UT_LIST(
     testFullCycle();
     test_parseCode_lambda_call();
+    test_parseCode_cond();
 );

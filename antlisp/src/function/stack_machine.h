@@ -35,6 +35,7 @@ public:
     }
 
     Cell pop() {
+        std::cerr << "pop from " << stackImpl.size() << '\n';
         auto value = std::move(
             stackImpl.back()
         );
@@ -462,6 +463,7 @@ public:
 
     void run() {
         while (this->step()) {
+            std::cerr << "step\n";
         }
     }
 
