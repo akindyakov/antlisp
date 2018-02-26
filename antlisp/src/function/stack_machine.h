@@ -86,8 +86,6 @@ struct NativeFunctionDefinition {
         GetConst,
         GetLocal,
         SetLocal,
-        GetGlobal,
-        SetGlobal,
         RunFunction,
         StackRewind,
         Skip,
@@ -163,6 +161,12 @@ public:
     void skipUntilMark();
 
     Arguments createArgs();
+
+    Namespace releaseLocals() {
+        auto locals = std::move(vars);
+        vars.clear();
+        return locals;
+    }
 
 private:
     NativeFunctionDefinitionPtr function;
@@ -433,11 +437,40 @@ public:
 
 using LambdaFunctionPtr = std::shared_ptr<LambdaFunction>;
 
-struct Environment {
-    std::vector<NativeFunctionCall> CallStack;
-    Namespace vars;
-    Cell ret;
+class Environment {
+public:
+    explicit Environment(
+        NativeFunctionCall toRun
+    )
+    {
+        CallStack.push_back(
+            std::move(toRun)
+        );
+    }
+    explicit Environment(
+        const NativeFunction& toRun
+    )
+        : Environment(
+            toRun.nativeCall(
+                Arguments{}
+            )
+        )
+    {
+    }
 
+    bool step();
+
+    void run() {
+        while (this->step()) {
+        }
+    }
+
+    class Error
+        : public StackMachineError
+    {
+    };
+
+private:
     bool isStackEmpty() {
         return this->CallStack.empty();
     }
@@ -458,8 +491,14 @@ struct Environment {
     void stackPop() {
         return this->CallStack.pop_back();
     }
-};
 
+public:
+    Namespace vars;
+    Cell ret;
+
+private:
+    std::vector<NativeFunctionCall> CallStack;
+};
 
 
 /**

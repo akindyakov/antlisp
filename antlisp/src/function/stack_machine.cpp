@@ -16,7 +16,7 @@ NativeFunctionCall::NativeFunctionCall(
         std::move(predefinedVars)
     )
 {
-    //**/std::cerr << "Create NativeFunctionCall, runner: " << runner << '\n';
+    //**/ std::cerr << "Create NativeFunctionCall, runner: " << runner << '\n';
 }
 
 NativeFunctionDefinition::EOperations NativeFunctionCall::getOperation() const {
@@ -24,7 +24,7 @@ NativeFunctionDefinition::EOperations NativeFunctionCall::getOperation() const {
 }
 
 bool NativeFunctionCall::next() noexcept {
-    //**/std::cerr << "runner++: " << runner + 1 << '\n';
+    //**/ std::cerr << "runner++: " << runner + 1 << '\n';
     return ++runner < function->operations.size();
 }
 
@@ -33,7 +33,7 @@ Cell NativeFunctionCall::popCallStack() {
 }
 
 void NativeFunctionCall::pushCallStack(Cell cell) {
-    //**/std::cerr << "stack push(" << localCallStack.size() << "): " << cell.toString() << '\n';
+    //**/ std::cerr << "stack push(" << localCallStack.size() << "): " << cell.toString() << '\n';
     localCallStack.push(
         std::move(cell)
     );
@@ -72,24 +72,6 @@ void NativeFunctionCall::setLocal() {
     this->vars[name] =  this->popCallStack();
 }
 
-void NativeFunctionCall::getGlobal(const Namespace& global) {
-    const auto& name = function->names[
-        function->operations[runner].position
-    ];
-    //**/std::cerr << "Get: " << name << "  (" << runner << ")\n";
-    // copy
-    this->pushCallStack(
-        global.at(name)
-    );
-}
-
-void NativeFunctionCall::setGlobal(Namespace& global) {
-    const auto& name = function->names[
-        function->operations[runner].position
-    ];
-    global[name] = this->popCallStack();
-}
-
 void NativeFunctionCall::stackRewind() {
     localCallStack.skip(
         function->operations[runner].position
@@ -123,33 +105,26 @@ Arguments NativeFunctionCall::createArgs() {
     return args;
 }
 
-bool NativeFunctionDefinition::step(Environment& env) {
-    auto call = env.stackTop();
-    //**/std::cerr << "next\n";
+bool Environment::step() {
+    auto call = this->stackTop();
+    //**/ std::cerr << "next\n";
     switch (call->getOperation()) {
-        case Nope:
-            //**/std::cerr << "nope\n";
+        case NativeFunctionDefinition::Nope:
+            //**/ std::cerr << "nope\n";
             break;
-        case GetConst:
+        case NativeFunctionDefinition::GetConst:
             //**/ std::cerr << "get const\n";
             call->getConst();
             break;
-        case GetLocal:
+        case NativeFunctionDefinition::GetLocal:
             //**/ std::cerr << "get local\n";
             call->getLocal();
             break;
-        case SetLocal:
+        case NativeFunctionDefinition::SetLocal:
             //**/std::cerr << "set local\n";
             call->setLocal();
             break;
-        case GetGlobal:
-            //**/std::cerr << "get global\n";
-            call->getGlobal(env.vars);
-            break;
-        case SetGlobal:
-            call->setGlobal(env.vars);
-            break;
-        case RunFunction:
+        case NativeFunctionDefinition::RunFunction:
             {
                 //**/ std::cerr << "run function\n";
                 auto args = call->createArgs();
@@ -159,7 +134,7 @@ bool NativeFunctionDefinition::step(Environment& env) {
                     if (fnPtr->isNative()) {
                         //**/ std::cerr << "run native function\n";
                         call->next();  // to get back to the right place on native return
-                        call = env.stackPush(
+                        call = this->stackPush(
                             fnPtr->nativeCall(args)
                         );
                         return true;
@@ -178,13 +153,13 @@ bool NativeFunctionDefinition::step(Environment& env) {
                 }
             }
             break;
-        case StackRewind:
+        case NativeFunctionDefinition::StackRewind:
             call->stackRewind();
             break;
-        case Skip:
+        case NativeFunctionDefinition::Skip:
             call->skipUntilMark();
             break;
-        case SkipIfNil:
+        case NativeFunctionDefinition::SkipIfNil:
             {
                 auto guard = call->popCallStack();
                 if (guard.is<Nil>()) {
@@ -192,34 +167,36 @@ bool NativeFunctionDefinition::step(Environment& env) {
                 }
             }
             break;
-        case GuardMark:
+        case NativeFunctionDefinition::GuardMark:
             break;
     }
     if (!call->next()) {
-        //**/std::cerr << "no next\n";
-        env.ret = std::move(
+        //**/ std::cerr << "no next\n";
+        this->ret = std::move(
             call->popCallStack()
         );
-        env.stackPop();
-        if (env.isStackEmpty()) {
-            //**/std::cerr << "stack is empty\n";
+        this->vars = std::move(
+            call->releaseLocals()
+        );
+        this->stackPop();
+        if (this->isStackEmpty()) {
+            //**/ std::cerr << "stack is empty\n";
             return false;
         }
-        if (env.ret.is<FunctionPtr>()) {
-            auto fnPtr = env.ret.get<FunctionPtr>();
+        if (this->ret.is<FunctionPtr>()) {
+            auto fnPtr = this->ret.get<FunctionPtr>();
             if (fnPtr->isPostponed()) {
-                call = env.stackPush(
+                call = this->stackPush(
                     fnPtr->nativeCall(Arguments{})
                 );
-                env.ret = Cell::nil();
                 return true;
             }
         }
-        call = env.stackTop();
+        call = this->stackTop();
         call->pushCallStack(
-            std::move(env.ret)
+            std::move(this->ret)
         );
-        env.ret = Cell::nil();
+        this->ret = Cell::nil();
     }
     return true;
 }

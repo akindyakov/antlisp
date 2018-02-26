@@ -6,32 +6,23 @@
 
 
 void testFullCycle() {
-    AntLisp::Environment env;
-    env.vars.insert(
-        std::make_pair(
+    auto global = AntLisp::Namespace{
+        {
             "+", AntLisp::Cell(std::make_shared<AntLisp::ExtSum>())
-        )
-    );
-    env.vars.insert(
-        std::make_pair(
+        },
+        {
             "*", AntLisp::Cell(std::make_shared<AntLisp::ExtMultiplication>())
-        )
-    );
-    env.vars.insert(
-        std::make_pair(
+        },
+        {
             "first", AntLisp::Cell::integer(12)
-        )
-    );
-    env.vars.insert(
-        std::make_pair(
+        },
+        {
             "second", AntLisp::Cell::integer(13)
-        )
-    );
-    env.vars.insert(
-        std::make_pair(
+        },
+        {
             "third", AntLisp::Cell::integer(14)
-        )
-    );
+        },
+    };
     auto fdef = std::make_shared<AntLisp::NativeFunctionDefinition>();
     fdef->names.push_back("*");
     fdef->names.push_back("+");
@@ -40,25 +31,25 @@ void testFullCycle() {
     fdef->names.push_back("third");
     fdef->operations.push_back(
         AntLisp::NativeFunctionDefinition::Step(
-            AntLisp::NativeFunctionDefinition::GetGlobal,
+            AntLisp::NativeFunctionDefinition::GetLocal,
             0
         )
     );
     fdef->operations.push_back(
         AntLisp::NativeFunctionDefinition::Step(
-            AntLisp::NativeFunctionDefinition::GetGlobal,
+            AntLisp::NativeFunctionDefinition::GetLocal,
             1
         )
     );
     fdef->operations.push_back(
         AntLisp::NativeFunctionDefinition::Step(
-            AntLisp::NativeFunctionDefinition::GetGlobal,
+            AntLisp::NativeFunctionDefinition::GetLocal,
             2
         )
     );
     fdef->operations.push_back(
         AntLisp::NativeFunctionDefinition::Step(
-            AntLisp::NativeFunctionDefinition::GetGlobal,
+            AntLisp::NativeFunctionDefinition::GetLocal,
             3
         )
     );
@@ -70,7 +61,7 @@ void testFullCycle() {
     );
     fdef->operations.push_back(
         AntLisp::NativeFunctionDefinition::Step(
-            AntLisp::NativeFunctionDefinition::GetGlobal,
+            AntLisp::NativeFunctionDefinition::GetLocal,
             4
         )
     );
@@ -80,14 +71,12 @@ void testFullCycle() {
             2
         )
     );
-    env.CallStack.push_back(
-        AntLisp::NativeFunctionCall{
-            std::move(fdef),
-            AntLisp::Namespace{}
-        }
+    auto env = AntLisp::Environment(
+        AntLisp::NativeFunction(
+            std::move(fdef), 0, global
+        )
     );
-    while (AntLisp::NativeFunctionDefinition::step(env)) {
-    }
+    env.run();
     UT_ASSERT_EQUAL(
         env.ret.get<AntLisp::Integer>(),
         (12 + 13) * 14
@@ -95,22 +84,17 @@ void testFullCycle() {
 }
 
 void testLambdaFunction() {
-    AntLisp::Environment env;
-    env.vars.insert(
-        std::make_pair(
+    auto global = AntLisp::Namespace{
+        {
             "+", AntLisp::Cell(std::make_shared<AntLisp::ExtSum>())
-        )
-    );
-    env.vars.insert(
-        std::make_pair(
+        },
+        {
             "global_first", AntLisp::Cell::integer(2209)
-        )
-    );
-    env.vars.insert(
-        std::make_pair(
+        },
+        {
             "global_second", AntLisp::Cell::integer(1043)
-        )
-    );
+        }
+    };
     auto corefdef = std::make_shared<AntLisp::NativeFunctionDefinition>();
     corefdef->names.push_back("+");
     corefdef->names.push_back("local_first");
@@ -119,7 +103,7 @@ void testLambdaFunction() {
     // get the native function def
     corefdef->operations.push_back(
         AntLisp::NativeFunctionDefinition::Step(
-            AntLisp::NativeFunctionDefinition::GetGlobal,
+            AntLisp::NativeFunctionDefinition::GetLocal,
             0
         )
     );
@@ -150,11 +134,12 @@ void testLambdaFunction() {
             3  // number of arguments
         )
     );
+    auto coreLocal = global;
+    coreLocal.emplace(
+        AntLisp::TVarName{"local_first"}, AntLisp::Cell::integer(81)
+    );
     auto nativeCore = AntLisp::NativeFunction(
-        std::move(corefdef), 0,
-        AntLisp::Namespace{
-            {AntLisp::TVarName{"local_first"}, AntLisp::Cell::integer(81)},
-        }
+        std::move(corefdef), 0, coreLocal
     );
     auto firstLambda = std::make_shared<AntLisp::LambdaFunction>(
         std::move(nativeCore),
@@ -163,7 +148,7 @@ void testLambdaFunction() {
             AntLisp::TVarName{"local_third"},
         }
     );
-    env.vars.insert(
+    global.insert(
         std::make_pair(
             "second_function", AntLisp::Cell::function(firstLambda)
         )
@@ -175,21 +160,21 @@ void testLambdaFunction() {
     // get the native function def
     gDef->operations.push_back(
         AntLisp::NativeFunctionDefinition::Step(
-            AntLisp::NativeFunctionDefinition::GetGlobal,
+            AntLisp::NativeFunctionDefinition::GetLocal,
             0
         )
     );
     // get 0 arg from global
     gDef->operations.push_back(
         AntLisp::NativeFunctionDefinition::Step(
-            AntLisp::NativeFunctionDefinition::GetGlobal,
+            AntLisp::NativeFunctionDefinition::GetLocal,
             1
         )
     );
     // get 1 arg from global
     gDef->operations.push_back(
         AntLisp::NativeFunctionDefinition::Step(
-            AntLisp::NativeFunctionDefinition::GetGlobal,
+            AntLisp::NativeFunctionDefinition::GetLocal,
             2
         )
     );
@@ -207,14 +192,12 @@ void testLambdaFunction() {
             0  // number of arguments
         )
     );
-    env.CallStack.push_back(
-        AntLisp::NativeFunctionCall{
-            std::move(gDef),
-            AntLisp::Namespace{}
+    auto env = AntLisp::Environment(
+        AntLisp::NativeFunction{
+            std::move(gDef), 0, global
         }
     );
-    while (AntLisp::NativeFunctionDefinition::step(env)) {
-    }
+    env.run();
     UT_ASSERT_EQUAL(
         env.ret.get<AntLisp::Integer>(),
         (81 + 1043 + 2209)
