@@ -1,1 +1,3 @@
-# `e0priph4` Fi reading raw quoted strings with space and escape characters inside
+# `e0priph4` Reading raw quoted strings with space and escape characters inside
+
+Fix reading raw quoted strings with space and escape characters inside
