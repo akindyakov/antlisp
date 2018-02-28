@@ -138,6 +138,26 @@ void test_parseCode_cond() {
     UT_ASSERT_EQUAL(native.fdef->names.size(), 4);
 }
 
+void test_parseCode_let() {
+    auto global = AntLisp::Namespace{
+        {"+", AntLisp::Cell(std::make_shared<AntLisp::ExtSum>())},
+    };
+    std::istringstream in(R"antlisp-code(
+    (let
+      (
+        (y -7)
+        z: 12
+        {x 12}
+      )
+      (+ y 2 z)
+    )
+    )antlisp-code");
+    auto native = AntLisp::parseCode(in, global);
+    UT_ASSERT_EQUAL(native.fdef->consts.size(), 10);
+    // FIXME: names is [+ + + +], uniq it for the sake of God
+    UT_ASSERT_EQUAL(native.fdef->names.size(), 4);
+}
+
 UT_LIST(
     testParenthesesRecursiveReader();
     test_parseCode();

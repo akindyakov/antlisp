@@ -148,7 +148,8 @@ bool Environment::step() {
                 } else {
                     throw Error()
                         << __FILE__ << ":" << __LINE__
-                        << " " << toCall.toString();
+                        << " Type error: cell (" << toCall.toString()
+                        << ") is not callable";
                 }
             }
             break;
