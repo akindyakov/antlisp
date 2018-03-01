@@ -411,8 +411,7 @@ private:
         ++markCounter;
         const auto bitSize = 8 * sizeof(NativeFunctionDefinition::Step::Operand);
         return (
-            (this->definitionStack.size() << (bitSize / 2))
-            | markCounter
+            (this->definitionStack.size() << (bitSize / 2)) ^ markCounter
         );
     }
 
