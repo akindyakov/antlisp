@@ -35,7 +35,6 @@ public:
     }
 
     Cell pop() {
-        std::cerr << "pop from " << stackImpl.size() << '\n';
         auto value = std::move(
             stackImpl.back()
         );
@@ -88,10 +87,10 @@ struct NativeFunctionDefinition {
         GetLocal,
         SetLocal,
         RunFunction,
-        StackRewind,
         Skip,
         SkipIfNil,
         GuardMark,
+        LocalStackRewind,
     };
 
     struct Step {
@@ -112,6 +111,7 @@ struct NativeFunctionDefinition {
         EOperations op
         , std::size_t pos
     ) {
+        //**/ std::cerr << "add step: " << op << '\n';
         operations.emplace_back(op, pos);
     }
 
@@ -463,7 +463,6 @@ public:
 
     void run() {
         while (this->step()) {
-            std::cerr << "step\n";
         }
     }
 

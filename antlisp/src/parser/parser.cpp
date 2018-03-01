@@ -42,7 +42,7 @@ bool ParenthesesParser::isLocked() const {
 bool ParenthesesParser::good() const {
     //**/ std::cerr << level << " == " << codeStream.pCount() << '\n';
     return (
-        level == codeStream.pCount()
+        level <= codeStream.pCount()
         && codeStream.good()
     );
 }
@@ -54,8 +54,10 @@ bool ParenthesesParser::nextToken(
         if (codeStream.nextToken(token)) {
             return true;
         }
-        if (codeStream.good()) {
-            // skip the last parenthesis to close parser
+        auto ch = codeStream.peek();
+        if (0 != InCodeStream::getParenthesesNumber(ch)) {
+            //**/ std::cerr << "skip the last parenthesis to close parser " << ch << "\n";
+            // FIXME: move to to code stream class
             codeStream.ignore();
         }
         return false;
@@ -68,6 +70,7 @@ std::string ParenthesesParser::nextToken() {
     if (!this->nextToken(token)) {
         throw Error() << "Unexpected end of stream";
     }
+    //**/ std::cerr << "new token " << Str::Quotes(token) << '\n';
     return token;
 }
 
@@ -99,13 +102,6 @@ ParenthesesParser::ParenthesesParser(
 {
 }
 
-/**
-* function call
-* function definition
-* let
-* cond
-* lambda
-*/
 namespace {
 
 class ConstructionParser {
@@ -114,7 +110,6 @@ public:
         const Namespace& global
     )
     {
-        // may be put global here as closures?
         definitionStack.push_back(
             std::make_shared<LambdaFunction>(
                 NativeFunction(
@@ -129,8 +124,8 @@ public:
     ConstructionParser& fromCodeStream(
         InCodeStream& inStream
     ) {
-        auto topLevel = ParenthesesParser::openFromCodeStream(inStream);
-        this->next(topLevel);
+        auto topLevel = ParenthesesParser::fromCodeStream(inStream);
+        this->expression(topLevel);
         return *this;
     }
 
@@ -151,38 +146,69 @@ public:
     };
 
 private:
-    void next(
+    bool parenthesesExpression(
+        ParenthesesParser& pParser
+    ) {
+        //**/ std::cerr << "parentheses next\n";
+        auto nextParser = pParser.nextParser();
+        auto token = std::string{};
+        if (nextParser.nextToken(token)) {
+            //**/ std::cerr << "next parser " << Str::Quotes(token) << '\n';
+            if ("defun" == token) {
+                functionDef(nextParser);
+            } else if ("lambda" == token) {
+                lambdaDef(nextParser);
+            } else if ("let" == token) {
+                letDef(nextParser);
+            } else if ("cond" == token) {
+                condDef(nextParser);
+            } else if ("progn" == token) {
+                prognDef(nextParser);
+            } else {
+                //**/ std::cerr << "call (\n";
+                tokenDef(token);
+                callDef(nextParser);
+                //**/ std::cerr << ")\n";
+            }
+        } else {
+            //**/ std::cerr << "next -> next\n";
+            if (not parenthesesExpression(nextParser)) {
+                return false;
+            }
+            callDef(nextParser);
+        }
+        return true;
+    }
+
+    bool expression(
         ParenthesesParser& pParser
     ) {
         //**/ std::cerr << "next\n";
         auto token = std::string{};
         if (pParser.nextToken(token)) {
-            //**/ std::cerr << "next " << Str::Quotes(token) << '\n';
-            if ("defun" == token) {
-                functionDef(pParser);
-            } else if ("lambda" == token) {
-                lambdaDef(pParser);
-            } else if ("let" == token) {
-                letDef(pParser);
-            } else if ("cond" == token) {
-                condDef(pParser);
-            } else {
-                tokenDef(token);
-                callDef(pParser);
-            }
+            //**/ std::cerr << "next token " << Str::Quotes(token) << "\n";
+            tokenDef(token);
         } else {
-            //**/ std::cerr << "next go deeper\n";
-            if (pParser.isLocked()) {
-                {
-                    auto nextParser = pParser.nextParser();
-                    next(nextParser);
-                }
-                callDef(pParser);
-            } else {
-                //**/ std::cerr << "p\n";
-                throw Error();
+            if (not pParser.good()) {
+                //**/ std::cerr << "next -> false\n";
+                return false;
             }
+            return parenthesesExpression(pParser);
         }
+        return true;
+    }
+
+    void prognDef(
+        ParenthesesParser& pParser
+    ) {
+        auto core = definitionStack.back()->core();
+        while (expression(pParser)) {
+            core->addStep(
+                NativeFunctionDefinition::LocalStackRewind,
+                1
+            );
+        }
+        core->operations.pop_back();  // do not remove last return value
     }
 
     void functionDef(
@@ -196,7 +222,7 @@ private:
         auto core = definitionStack.back()->core();
         auto pos = core->names.size();
         core->names.push_back(fname);
-        core->operations.emplace_back(
+        core->addStep(
             NativeFunctionDefinition::SetLocal,
             pos
         );
@@ -218,6 +244,7 @@ private:
                 throw Error() << "Code stream of lambda arguments is suppose to be exhausted";
             }
         }
+        //**/ std::cerr << "end of args list\n";
         auto core = definitionStack.back()->core();
         auto argnum = argNames.size();
         auto newLambda = std::make_shared<LambdaFunction>(
@@ -235,24 +262,20 @@ private:
                 newLambda
             )
         );
-        core->operations.emplace_back(
+        core->addStep(
             NativeFunctionDefinition::GetConst,
             core->consts.size() - 1
         );
         definitionStack.push_back(newLambda);
-        pParser.check();
-        {
-            // read the body of lambda
-            auto bodyParser = pParser.nextParser();
-            next(bodyParser);
-        }
+        expression(pParser);
         pParser.check();
         definitionStack.pop_back();
         argnum = newLambda->names.size();
-        core->operations.emplace_back(
+        core->addStep(
             NativeFunctionDefinition::RunFunction,
             argnum
         );
+        //**/ std::cerr << "end of lambda definition\n";
     }
 
     void letDef(
@@ -285,32 +308,23 @@ private:
         auto endMark = getMarkUid();
         condParser.check();
         while (condParser.isLocked()) {
+            //**/ std::cerr << "create branchParser\n";
             auto branchParser = condParser.nextParser();
             auto token = std::string{};
-            if (branchParser.nextToken(token)) {
-                tokenDef(token);
-            } else {
-                auto branchGuardParser = condParser.nextParser();
-                next(branchGuardParser);
-            }
+            expression(branchParser);
             auto branchEndMark = getMarkUid();
-            core->operations.emplace_back(
+            core->addStep(
                 NativeFunctionDefinition::SkipIfNil,
                 branchEndMark
             );
-            branchParser.check();
+            //**/ std::cerr << "branchParser.check()\n";
 
-            if (branchParser.nextToken(token)) {
-                tokenDef(token);
-            } else {
-                auto branchBodyParser = branchParser.nextParser();
-                next(branchBodyParser);
-            }
-            core->operations.emplace_back(
+            expression(branchParser);
+            core->addStep(
                 NativeFunctionDefinition::Skip,
                 endMark
             );
-            core->operations.emplace_back(
+            core->addStep(
                 NativeFunctionDefinition::GuardMark,
                 branchEndMark
             );
@@ -318,7 +332,7 @@ private:
             branchParser.check();
             condParser.check();
         }
-        core->operations.emplace_back(
+        core->addStep(
             NativeFunctionDefinition::GuardMark,
             endMark
         );
@@ -330,21 +344,12 @@ private:
         //**/ std::cerr << "call def\n";
         auto argCount = std::size_t{0};
         auto token = std::string{};
-        while (pParser.good()) {
-            if (pParser.nextToken(token)) {
-                //**/ std::cerr << "token var (" << argCount << ") " << Str::Quotes(token) << "\n";
-                tokenDef(token);
-                ++argCount;
-            } else if (pParser.isLocked()) {
-                //**/ std::cerr << "other var\n";
-                auto nextParser = pParser.nextParser();
-                next(nextParser);
-                ++argCount;
-            }
+        while (expression(pParser)) {
+            ++argCount;
         }
         //**/ std::cerr << "argnum: " << argCount << "\n";
         auto core = definitionStack.back()->core();
-        core->operations.emplace_back(
+        core->addStep(
             NativeFunctionDefinition::RunFunction,
             argCount
         );
@@ -361,7 +366,7 @@ private:
             core->consts.push_back(
                 std::move(cellOpt.get())
             );
-            core->operations.emplace_back(
+            core->addStep(
                 NativeFunctionDefinition::GetConst,
                 pos
             );

@@ -55,9 +55,11 @@ void NativeFunctionCall::getLocal() {
         this->runner
     ].position;
     const auto& name = this->function->names[pos];
-    //**/ std::cerr << "Get: " << Str::Quotes(name) << "  (" << runner << ")\n";
     // copy
     auto local = this->vars.at(name);
+    //**/ std::cerr << "Get local: " << Str::Quotes(name)
+    //**/ << " = " << local.toString()
+    //**/ << " (" << runner << ")\n";
     this->pushCallStack(
         std::move(local)
     );
@@ -112,33 +114,33 @@ bool Environment::step() {
             //**/ std::cerr << "nope\n";
             break;
         case NativeFunctionDefinition::GetConst:
-            /**/ std::cerr << "get const\n";
+            //**/ std::cerr << "get const\n";
             call->getConst();
             break;
         case NativeFunctionDefinition::GetLocal:
-            /**/ std::cerr << "get local\n";
+            //**/ std::cerr << "get local\n";
             call->getLocal();
             break;
         case NativeFunctionDefinition::SetLocal:
-            /**/std::cerr << "set local\n";
+            //**/std::cerr << "set local\n";
             call->setLocal();
             break;
         case NativeFunctionDefinition::RunFunction:
             {
-                /**/ std::cerr << "run function\n";
+                //**/ std::cerr << "run function\n";
                 auto args = call->createArgs();
                 auto toCall = call->popCallStack();
                 if (toCall.is<FunctionPtr>()) {
                     auto fnPtr = toCall.get<FunctionPtr>();
                     if (fnPtr->isNative()) {
-                        /**/ std::cerr << "run native function\n";
+                        //**/ std::cerr << "run native function\n";
                         call->next();  // to get back to the right place on native return
                         call = this->stackPush(
                             fnPtr->nativeCall(args)
                         );
                         return true;
                     } else {
-                        /**/ std::cerr << "run instant function\n";
+                        //**/ std::cerr << "run instant function\n";
                         call->pushCallStack(
                             fnPtr->instantCall(
                                 std::move(args)
@@ -153,26 +155,25 @@ bool Environment::step() {
                 }
             }
             break;
-        case NativeFunctionDefinition::StackRewind:
-            /**/ std::cerr << "StackRewind\n";
-            call->stackRewind();
-            break;
         case NativeFunctionDefinition::Skip:
-            /**/ std::cerr << "Skip\n";
+            //**/ std::cerr << "Skip\n";
             call->skipUntilMark();
             break;
         case NativeFunctionDefinition::SkipIfNil:
             {
-                /**/ std::cerr << "SkipIfNil\n";
+                //**/ std::cerr << "SkipIfNil\n";
                 auto guard = call->popCallStack();
                 if (guard.is<Nil>()) {
-                    /**/ std::cerr << "skip ->\n";
+                    //**/ std::cerr << "skip ->\n";
                     call->skipUntilMark();
                 }
             }
             break;
         case NativeFunctionDefinition::GuardMark:
-            /**/ std::cerr << "GuardMark\n";
+            //**/ std::cerr << "GuardMark\n";
+            break;
+        case NativeFunctionDefinition::LocalStackRewind:
+            call->stackRewind();
             break;
     }
     if (!call->next()) {
