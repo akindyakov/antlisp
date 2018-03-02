@@ -8,6 +8,7 @@ def build(ctx):
         source = [
             "code_stream.cpp",
             "parser.cpp",
+            "parentheses_parser.cpp",
         ],
         use=[
             "antlisp-src-function",
@@ -24,6 +25,18 @@ def build(ctx):
     ctx(
         rule="${SRC}",
         source="code_stream_ut",
+    )
+
+    ctx.program(
+        target="parentheses_parser_ut",
+        source="parentheses_parser_ut.cpp",
+        use=[
+            "antlisp-src-parser",
+        ],
+    )
+    ctx(
+        rule="${SRC}",
+        source="parentheses_parser_ut",
     )
 
     ctx.program(
