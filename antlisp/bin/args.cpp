@@ -8,42 +8,52 @@
 #include <iostream>
 
 
-namespace Args = boost::program_options;
+namespace Bpo = boost::program_options;
 
 ArgumentsOpt Argparse(int argn, char** argv) {
-    auto general = Args::options_description{"Options"};
+    auto general = Bpo::options_description{"Options"};
     general.add_options()
-        ("cmd,c", "program passed in as string")
         (
-            "strip-docstrings",
-            Args::value<bool>()->default_value(false),
-            "remove doc-strings from translated code."
+            "cmd,c",
+            Bpo::value<std::string>(),
+            "program passed in as string"
+        ) (
+            "print-global",
+            Bpo::value<bool>()->zero_tokens(),
+            "pring global namespace after execution"
+        ) (
+            "help,h",
+            Bpo::value<bool>()->zero_tokens(),
+            "produce help message"
+        ) (
+            "version,v",
+            Bpo::value<bool>()->zero_tokens(),
+            "print version string"
         )
-        ("help,h", "produce help message")
-        ("version,v", "print version string")
     ;
-    auto hidden = Args::options_description{"Options"};
+    auto hidden = Bpo::options_description{"Options"};
     hidden.add_options()
         (
             "script-file",
+            Bpo::value<std::string>(),
             "read script from file, use '-' to read script from stdin."
         )
     ;
-    auto posOptions = Args::positional_options_description{};
+    auto posOptions = Bpo::positional_options_description{};
     posOptions.add("script-file", 1);
 
-    auto allOptions = Args::options_description{};
+    auto allOptions = Bpo::options_description{};
     allOptions.add(general).add(hidden);
 
-    auto args = Args::variables_map{};
-    Args::store(
-        Args::command_line_parser(argn, argv)
-            .options(general)
+    auto args = Bpo::variables_map{};
+    Bpo::store(
+        Bpo::command_line_parser(argn, argv)
+            .options(allOptions)
             .positional(posOptions)
             .run(),
         args
     );
-    Args::notify(args);
+    Bpo::notify(args);
 
     auto argsOpt = ArgumentsOpt{};
     if (args.count("help")) {
