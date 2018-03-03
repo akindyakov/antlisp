@@ -1,5 +1,6 @@
 #include "parser.h"
 
+#include "cell_in_string.h"
 #include "parentheses_parser.h"
 
 #include <antlisp/lib/util/string.h>
@@ -38,7 +39,7 @@ public:
 
     NativeFunction finish() {
         if (definitionStack.size() != 1) {
-            throw ParserError()
+            throw ParseError()
                 << __FILE__ << ":" << __LINE__
                 << " Definition stack should have size 1";
         }
@@ -194,10 +195,10 @@ private:
                 }
                 auto argParser = argListParser.nextParser();
                 if (!argParser.nextToken(token)) {
-                    throw ParserError() << __FILE__ << ":" << __LINE__;
+                    throw ParseError() << __FILE__ << ":" << __LINE__;
                 }
                 if (!argParser.nextToken(token)) {
-                    throw ParserError() << __FILE__ << ":" << __LINE__;
+                    throw ParseError() << __FILE__ << ":" << __LINE__;
                 }
             }
         }
@@ -260,7 +261,7 @@ private:
     void tokenDef(
         const std::string& token
     ) {
-        auto cellOpt = tryFromString(token);
+        auto cellOpt = tryCellFromString(token);
         if (cellOpt) {
             //**/ std::cerr << "add const (" << definitionStack.size() << ") " << cellOpt->toString() << '\n';
             auto core = definitionStack.back()->core();

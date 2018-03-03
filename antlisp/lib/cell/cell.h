@@ -270,15 +270,6 @@ public:
 
 const auto True = Cell{Integer{1}};
 
-class ParserError
-    : public Exception
-{
-};
-
-boost::optional<Cell> tryFromString(
-    const std::string& str
-);
-
 }  // namespace AntLisp
 
 #include "cell_impl.h"

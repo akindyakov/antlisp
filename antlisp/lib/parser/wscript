@@ -9,6 +9,7 @@ def build(ctx):
             "code_stream.cpp",
             "parser.cpp",
             "parentheses_parser.cpp",
+            "cell_in_string.cpp",
         ],
         use=[
             "antlisp-lib-function",
@@ -61,4 +62,16 @@ def build(ctx):
     ctx(
         rule="${SRC}",
         source="parse_and_run_ut",
+    )
+
+    ctx.program(
+        target="cell_in_string_ut",
+        source="cell_in_string_ut.cpp",
+        use=[
+            "antlisp-lib-parser",
+        ],
+    )
+    ctx(
+        rule="${SRC}",
+        source="cell_in_string_ut",
     )
