@@ -42,17 +42,14 @@ public:
         return value;
     }
 
-    void skip(std::size_t count) {
-        if (stackImpl.size() < count) {
-            throw StackMachineError() << __FILE__ << ":" << __LINE__;
-        }
-        stackImpl.resize(
-            stackImpl.size() - count
-        );
-    }
-
     std::size_t size() const noexcept {
         return stackImpl.size();
+    }
+
+    void print(std::ostream& out) {
+        for (const auto& c : stackImpl) {
+            out << "( " << c.toString() << " )\n";
+        }
     }
 
 private:
@@ -84,13 +81,13 @@ struct NativeFunctionDefinition {
     {
         Nope = 0,
         GetConst,
-        GetLocal,
+        GetLocal,  // 2
         SetLocal,
-        RunFunction,
+        RunFunction,  //4
         Skip,
-        SkipIfNil,
+        SkipIfNil,    // 6
         GuardMark,
-        LocalStackRewind,
+        LocalStackRewind,  // 8
     };
 
     struct Step {
@@ -141,6 +138,8 @@ public:
 
     NativeFunctionDefinition::EOperations getOperation() const;
 
+    bool good() noexcept;
+
     bool next() noexcept;
 
     Cell popCallStack();
@@ -163,11 +162,7 @@ public:
 
     Arguments createArgs();
 
-    Namespace releaseLocals() {
-        auto locals = std::move(vars);
-        vars.clear();
-        return locals;
-    }
+    Namespace releaseLocals();
 
 private:
     NativeFunctionDefinitionPtr function;
@@ -340,7 +335,8 @@ public:
     bool hasName(
         const TVarName& name
     ) const {
-        auto last = fdef->names.cbegin() + argnum;
+        //auto last = fdef->names.cbegin() + argnum;
+        auto last = fdef->names.cend();
         //**/ std::cerr << "native arg names (\n";
         //**/ for (auto it = fdef->names.cbegin(); it != last; ++it) {
         //**/     std::cerr << " " << *it;
@@ -486,11 +482,13 @@ private:
         this->CallStack.push_back(
             std::move(frame)
         );
+        std::cerr << this->CallStack.size() << " >>>>>>>>>>>>>> \n";
         return this->stackTop();
     }
 
     void stackPop() {
-        return this->CallStack.pop_back();
+        std::cerr << "stackPop() " << this->CallStack.size() << "\n";
+        this->CallStack.pop_back();
     }
 
 public:

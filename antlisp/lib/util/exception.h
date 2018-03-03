@@ -54,7 +54,7 @@ template<
         >::value
     >::type
 >
-inline Err&& operator<<(
+inline Err operator<<(
     Err&& err
     , const Val& val
 ) {

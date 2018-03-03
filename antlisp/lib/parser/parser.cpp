@@ -105,13 +105,19 @@ private:
         ParenthesesParser& pParser
     ) {
         auto core = definitionStack.back()->core();
+        std::cerr << "progn parse start\n";
         while (expression(pParser)) {
+            std::cerr << "progn line\n";
             core->addStep(
                 NativeFunctionDefinition::LocalStackRewind,
                 1
             );
         }
-        core->operations.pop_back();  // do not remove last return value
+        core->operations.pop_back();
+        std::cerr << "progn pop back\n";
+        for (const auto& op : core->operations) {
+            std::cerr << int(op.operation) << ": " << op.position << "\n";
+        }
     }
 
     void functionDef(
@@ -289,7 +295,8 @@ private:
             ++to;
         }
         if (to == definitionStack.rend()) {
-            throw NameError() << "There is no such variable " << Str::Quotes(varName);
+            throw NameError()
+                << "There is no such variable " << Str::Quotes(varName);
         }
         for (
             auto it = definitionStack.rbegin(); it != to; ++it

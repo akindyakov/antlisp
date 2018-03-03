@@ -23,17 +23,25 @@ NativeFunctionDefinition::EOperations NativeFunctionCall::getOperation() const {
     return function->operations[runner].operation;
 }
 
+bool NativeFunctionCall::good() noexcept {
+    return runner < function->operations.size();
+}
+
 bool NativeFunctionCall::next() noexcept {
-    //**/ std::cerr << "runner++: " << runner + 1 << '\n';
     return ++runner < function->operations.size();
 }
 
 Cell NativeFunctionCall::popCallStack() {
-    return localCallStack.pop();
+    //**/ std::cerr << "localCallStack.pop() " << localCallStack.size() << "\n";
+    return (
+        localCallStack.size() == 0
+        ? Cell::nil()
+        : localCallStack.pop()
+    );
 }
 
 void NativeFunctionCall::pushCallStack(Cell cell) {
-    //**/ std::cerr << "stack push(" << localCallStack.size() << "): " << cell.toString() << '\n';
+    /**/ std::cerr << "stack push(" << localCallStack.size() << "): " << cell.toString() << '\n';
     localCallStack.push(
         std::move(cell)
     );
@@ -44,7 +52,7 @@ void NativeFunctionCall::getConst() {
     auto cell = function->consts[
         function->operations[runner].position
     ];
-    //**/ std::cerr << "Get const: " << cell.toString() << " (" << runner << ")\n";
+    /**/ std::cerr << "Get const: " << cell.toString() << " (" << runner << ")\n";
     this->pushCallStack(
         std::move(cell)
     );
@@ -57,9 +65,9 @@ void NativeFunctionCall::getLocal() {
     const auto& name = this->function->names[pos];
     // copy
     auto local = this->vars.at(name);
-    //**/ std::cerr << "Get local: " << Str::Quotes(name)
-    //**/ << " = " << local.toString()
-    //**/ << " (" << runner << ")\n";
+    /**/ std::cerr << "Get local: " << Str::Quotes(name)
+    /**/ << " = " << local.toString()
+    /**/ << " (" << runner << ")\n";
     this->pushCallStack(
         std::move(local)
     );
@@ -71,13 +79,17 @@ void NativeFunctionCall::setLocal() {
             this->runner
         ].position
     ];
-    this->vars[name] =  this->popCallStack();
+    std::cerr << "name: " << name << "\n";
+    this->vars[name] = this->popCallStack();
+    std::cerr << "end of set local\n";
 }
 
 void NativeFunctionCall::stackRewind() {
-    localCallStack.skip(
-        function->operations[runner].position
-    );
+    std::cerr << "rewind " << function->operations[runner].position << " " << runner << "\n";
+    for (auto i = function->operations[runner].position; i != 0; --i) {
+        std::cerr << "rewind -> " << i << "\n";
+        this->popCallStack();
+    }
 }
 
 void NativeFunctionCall::skipUntilMark() {
@@ -97,6 +109,7 @@ void NativeFunctionCall::skipUntilMark() {
 
 Arguments NativeFunctionCall::createArgs() {
     auto size = function->operations[runner].position;
+    localCallStack.print(std::cerr);
     auto args = Arguments{};
     while (size--) {
         args.push_back(
@@ -106,41 +119,48 @@ Arguments NativeFunctionCall::createArgs() {
     return args;
 }
 
+Namespace NativeFunctionCall::releaseLocals() {
+    auto locals = std::move(vars);
+    vars.clear();
+    return locals;
+}
+
 bool Environment::step() {
     auto call = this->stackTop();
-    //**/ std::cerr << "next\n";
+    /**/ std::cerr << "next\n";
+    if (call->good()) {
     switch (call->getOperation()) {
         case NativeFunctionDefinition::Nope:
-            //**/ std::cerr << "nope\n";
+            /**/ std::cerr << "nope\n";
             break;
         case NativeFunctionDefinition::GetConst:
-            //**/ std::cerr << "get const\n";
+            /**/ std::cerr << "get const\n";
             call->getConst();
             break;
         case NativeFunctionDefinition::GetLocal:
-            //**/ std::cerr << "get local\n";
+            /**/ std::cerr << "get local\n";
             call->getLocal();
             break;
         case NativeFunctionDefinition::SetLocal:
-            //**/std::cerr << "set local\n";
+            /**/std::cerr << "set local\n";
             call->setLocal();
             break;
         case NativeFunctionDefinition::RunFunction:
             {
-                //**/ std::cerr << "run function\n";
+                /**/ std::cerr << "run function\n";
                 auto args = call->createArgs();
                 auto toCall = call->popCallStack();
                 if (toCall.is<FunctionPtr>()) {
                     auto fnPtr = toCall.get<FunctionPtr>();
                     if (fnPtr->isNative()) {
-                        //**/ std::cerr << "run native function\n";
+                        /**/ std::cerr << "run native function >> \n";
                         call->next();  // to get back to the right place on native return
                         call = this->stackPush(
                             fnPtr->nativeCall(args)
                         );
                         return true;
                     } else {
-                        //**/ std::cerr << "run instant function\n";
+                        /**/ std::cerr << "run instant function\n";
                         call->pushCallStack(
                             fnPtr->instantCall(
                                 std::move(args)
@@ -156,42 +176,41 @@ bool Environment::step() {
             }
             break;
         case NativeFunctionDefinition::Skip:
-            //**/ std::cerr << "Skip\n";
+            /**/ std::cerr << "Skip\n";
             call->skipUntilMark();
             break;
         case NativeFunctionDefinition::SkipIfNil:
             {
-                //**/ std::cerr << "SkipIfNil\n";
+                /**/ std::cerr << "SkipIfNil\n";
                 auto guard = call->popCallStack();
                 if (guard.is<Nil>()) {
-                    //**/ std::cerr << "skip ->\n";
+                    /**/ std::cerr << "skip ->\n";
                     call->skipUntilMark();
                 }
             }
             break;
         case NativeFunctionDefinition::GuardMark:
-            //**/ std::cerr << "GuardMark\n";
+            /**/ std::cerr << "GuardMark\n";
             break;
         case NativeFunctionDefinition::LocalStackRewind:
+            /**/ std::cerr << "LocalStackRewind\n";
             call->stackRewind();
             break;
     }
+    }
     if (!call->next()) {
-        //**/ std::cerr << "no next\n";
-        this->ret = std::move(
-            call->popCallStack()
-        );
-        this->vars = std::move(
-            call->releaseLocals()
-        );
+        this->ret = call->popCallStack();
+        /**/ std::cerr << "no next " << this->ret.toString() << " << \n";
+        this->vars = call->releaseLocals();
         this->stackPop();
         if (this->isStackEmpty()) {
-            //**/ std::cerr << "stack is empty\n";
+            /**/ std::cerr << "stack is empty\n";
             return false;
         }
         if (this->ret.is<FunctionPtr>()) {
             auto fnPtr = this->ret.get<FunctionPtr>();
             if (fnPtr->isPostponed()) {
+                /**/ std::cerr << "postponed\n";
                 call = this->stackPush(
                     fnPtr->nativeCall(Arguments{})
                 );

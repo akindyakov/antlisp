@@ -120,11 +120,38 @@ void test_parseCode_progn() {
     );
 }
 
+void test_parseCode_defun_call() {
+    auto global = AntLisp::Namespace{
+        {"+", AntLisp::Cell(std::make_shared<AntLisp::ExtSum>())},
+    };
+    std::istringstream in(R"antlisp-code(
+    (progn
+        (defun ballad (of bull)
+            (+ of bull 35)
+        )
+        (ballad 192 168)
+    )
+    )antlisp-code");
+    auto native = AntLisp::parseCode(in, global);
+    /**/ std::cerr << "native:\n";
+        for (const auto& op : native.fdef->operations) {
+            std::cerr << int(op.operation) << ": " << op.position << "\n";
+        }
+    auto env = AntLisp::Environment(native);
+    /**/ std::cerr << "run\n";
+    env.run();
+    /**/ std::cerr << "ret: " << env.ret.toString() << '\n';
+    UT_ASSERT_EQUAL(
+        env.ret.get<AntLisp::Integer>(),
+        192 + 168 + 35
+    );
+}
 
 UT_LIST(
-    testFullCycle();
-    test_parseCode_lambda_call();
-    //test_parseCode_lambda_multi_call();
-    test_parseCode_cond();
-    test_parseCode_progn();
+    //testFullCycle();
+    //test_parseCode_lambda_call();
+    ////test_parseCode_lambda_multi_call();
+    //test_parseCode_cond();
+    //test_parseCode_progn();
+    test_parseCode_defun_call();
 );
