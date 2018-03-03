@@ -26,16 +26,6 @@ void test_parseCode_lambda() {
     UT_ASSERT_EQUAL(native.fdef->names.size(), 1);
 }
 
-void test_parseCode_defun() {
-    auto global = AntLisp::Namespace{
-        {"+", AntLisp::Cell(std::make_shared<AntLisp::ExtSum>())},
-    };
-    std::istringstream in("(defun rinzler (x) (+ x 1 2))");
-    auto native = AntLisp::parseCode(in, global);
-    UT_ASSERT_EQUAL(native.fdef->consts.size(), 1);
-    UT_ASSERT_EQUAL(native.fdef->names.size(), 2);  // + and rinzler
-}
-
 void test_parseCode_cond() {
     auto global = AntLisp::Namespace{
         {"+", AntLisp::Cell(std::make_shared<AntLisp::ExtSum>())},
@@ -89,10 +79,24 @@ void test_parseCode_progn() {
     UT_ASSERT_EQUAL(native.fdef->names.size(), 3);
 }
 
+void test_parseCode_defun() {
+    auto global = AntLisp::Namespace{
+        {"+", AntLisp::Cell(std::make_shared<AntLisp::ExtSum>())},
+    };
+    std::istringstream in(R"antlisp-code(
+    (defun first (x) (
+        ( + x 2  )
+    )
+    )antlisp-code");
+    auto native = AntLisp::parseCode(in, global);
+    UT_ASSERT_EQUAL(native.fdef->consts.size(), 1);
+    UT_ASSERT_EQUAL(native.fdef->names.size(), 2);  // [+ first]
+}
+
 UT_LIST(
     test_parseCode();
     test_parseCode_lambda();
-    test_parseCode_defun();
     test_parseCode_cond();
     test_parseCode_progn();
+    test_parseCode_defun();
 );
