@@ -3,6 +3,18 @@
 
 
 def build(ctx):
+    ctx.stlib(
+        target="antlisp-lib",
+        source = [
+            "interface.cpp",
+        ],
+        use=[
+            "antlisp-src-cell",
+            "antlisp-src-function",
+            "antlisp-src-parser",
+            "antlisp-src-util",
+        ],
+    )
     ctx.recurse([
         "cell",
         "function",

@@ -13,7 +13,6 @@ def build(ctx):
             "boost_program_options",
         ],
         use=[
-            "antlisp-src-parser",
-            "antlisp-src-function",
+            "antlisp-lib",
         ],
     )
