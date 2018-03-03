@@ -7,13 +7,21 @@
 
 
 AntLisp::Namespace interactive() {
+    auto global = AntLisp::Namespace{};
     auto line = std::string{};
     while (std::cin) {
+        std::cout << "> " << std::flush;
         std::getline(std::cin, line, '\n');
-        std::cout << "(line \"" << line << "\")\n";
+        //**/ std::cout << "(line \"" << line << "\")\n";
+        std::istringstream in(line);
+        auto env = AntLisp::Environment(
+            AntLisp::parseCode(in, global)
+        );
+        env.run();
+        std::cout << env.ret.toString() << std::endl;
+        global = std::move(env.vars);
     }
-    // TODO
-    return AntLisp::Namespace{};
+    return global;
 }
 
 AntLisp::Namespace fromFile(
