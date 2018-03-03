@@ -3,6 +3,7 @@
 #include <antlisp/lib/parser/parser.h>
 #include <antlisp/lib/function/stack_machine.h>
 
+#include <fstream>
 #include <iostream>
 
 
@@ -24,20 +25,29 @@ AntLisp::Namespace interactive() {
     return global;
 }
 
+AntLisp::Namespace fromStream(
+    std::istream& in
+) {
+    auto global = AntLisp::Namespace{};
+    auto env = AntLisp::Environment(
+        AntLisp::parseCode(in, global)
+    );
+    env.run();
+    return std::move(env.vars);
+}
+
 AntLisp::Namespace fromFile(
     const std::string& filename
 ) {
-    // TODO
-    std::cout << "There is a code file " << filename << "\n";
-    return AntLisp::Namespace{};
+    std::ifstream in(filename);
+    return fromStream(in);
 }
 
 AntLisp::Namespace fromString(
     const std::string& code
 ) {
-    // TODO
-    std::cout << "There is a code " << code << "\n";
-    return AntLisp::Namespace{};
+    std::istringstream in(code);
+    return fromStream(in);
 }
 
 int main(int argn, char** argv) {
