@@ -40,7 +40,7 @@ public:
         if (definitionStack.size() != 1) {
             throw Error()
                 << __FILE__ << ":" << __LINE__
-                << " Definition stack should has size 1";
+                << " Definition stack should have size 1";
         }
         return std::move(
             definitionStack.back()->nativeFn
