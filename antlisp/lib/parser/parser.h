@@ -4,13 +4,10 @@
 
 #include <antlisp/lib/function/stack_machine.h>
 
+#include "error.h"
+
 
 namespace AntLisp {
-
-class SyntaxError
-    : public Exception
-{
-};
 
 NativeFunction parseCode(
     std::istream& in

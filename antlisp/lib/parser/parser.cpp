@@ -38,7 +38,7 @@ public:
 
     NativeFunction finish() {
         if (definitionStack.size() != 1) {
-            throw Error()
+            throw ParserError()
                 << __FILE__ << ":" << __LINE__
                 << " Definition stack should have size 1";
         }
@@ -46,11 +46,6 @@ public:
             definitionStack.back()->nativeFn
         );
     }
-
-    class Error
-        : public Exception
-    {
-    };
 
 private:
     bool parenthesesExpression(
@@ -123,7 +118,7 @@ private:
     ) {
         auto fname = std::string{};
         if (!pParser.nextToken(fname)) {
-            throw Error() << __FILE__ << ":" << __LINE__ << " there is suppose to be function name.";
+            throw SyntaxError() << __FILE__ << ":" << __LINE__ << " there is suppose to be function name.";
         }
         lambdaDef(pParser);
         auto core = definitionStack.back()->core();
@@ -148,7 +143,7 @@ private:
                 argNames.push_back(token);
             }
             if (argParser.good()) {
-                throw Error() << "Code stream of lambda arguments is suppose to be exhausted";
+                throw SyntaxError() << "Code stream of lambda arguments is suppose to be exhausted";
             }
         }
         //**/ std::cerr << "end of args list\n";
@@ -199,10 +194,10 @@ private:
                 }
                 auto argParser = argListParser.nextParser();
                 if (!argParser.nextToken(token)) {
-                    throw Error() << __FILE__ << ":" << __LINE__;
+                    throw ParserError() << __FILE__ << ":" << __LINE__;
                 }
                 if (!argParser.nextToken(token)) {
-                    throw Error() << __FILE__ << ":" << __LINE__;
+                    throw ParserError() << __FILE__ << ":" << __LINE__;
                 }
             }
         }
@@ -293,7 +288,7 @@ private:
             ++to;
         }
         if (to == definitionStack.rend()) {
-            throw Error() << "There is no such variable " << Str::Quotes(varName);
+            throw NameError() << "There is no such variable " << Str::Quotes(varName);
         }
         for (
             auto it = definitionStack.rbegin(); it != to; ++it
