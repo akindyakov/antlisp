@@ -1,6 +1,6 @@
 #pragma once
 
-#include <antlisp/src/cell/cell.h>
+#include <antlisp/lib/cell/cell.h>
 
 #include <algorithm>
 #include <exception>

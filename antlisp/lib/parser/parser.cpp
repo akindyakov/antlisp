@@ -2,7 +2,7 @@
 
 #include "parentheses_parser.h"
 
-#include <antlisp/src/util/string.h>
+#include <antlisp/lib/util/string.h>
 
 #include <iterator>
 

@@ -4,20 +4,20 @@
 
 def build(ctx):
     ctx.stlib(
-        target="antlisp-src-function",
+        target="antlisp-lib-function",
         source = [
             "stack_machine.cpp",
             "interface.cpp",
         ],
         use=[
-            "antlisp-src-cell",
+            "antlisp-lib-cell",
         ],
     )
     ctx.program(
         target="stack_machine_ut",
         source="stack_machine_ut.cpp",
         use=[
-            "antlisp-src-function"
+            "antlisp-lib-function"
         ],
     )
     ctx(

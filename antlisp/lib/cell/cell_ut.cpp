@@ -1,6 +1,6 @@
 #include "cell.h"
 
-#include <antlisp/src/test/ut.h>
+#include <antlisp/lib/test/ut.h>
 
 #include <iostream>
 

@@ -4,12 +4,12 @@
 
 def build(ctx):
     ctx.stlib(
-        target="antlisp-src-cell",
+        target="antlisp-lib-cell",
         source = [
             "cell.cpp",
         ],
         use=[
-            "antlisp-src-util",
+            "antlisp-lib-util",
         ],
     )
 
@@ -17,7 +17,7 @@ def build(ctx):
         target="cell_ut",
         source="cell_ut.cpp",
         use=[
-            "antlisp-src-cell"
+            "antlisp-lib-cell"
         ],
     )
     ctx(

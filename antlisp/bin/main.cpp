@@ -1,7 +1,7 @@
 #include "args.h"
 
-#include <antlisp/src/parser/parser.h>
-#include <antlisp/src/function/stack_machine.h>
+#include <antlisp/lib/parser/parser.h>
+#include <antlisp/lib/function/stack_machine.h>
 
 #include <iostream>
 

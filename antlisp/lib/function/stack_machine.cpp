@@ -1,6 +1,6 @@
 #include "stack_machine.h"
 
-#include <antlisp/src/util/string.h>
+#include <antlisp/lib/util/string.h>
 
 
 namespace AntLisp {

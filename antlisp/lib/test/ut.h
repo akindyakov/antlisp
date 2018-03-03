@@ -1,4 +1,4 @@
-#include <antlisp/src/util/exception.h>
+#include <antlisp/lib/util/exception.h>
 
 
 namespace AntLisp {

@@ -1,8 +1,8 @@
 #pragma once
 
-#include <antlisp/src/util/exception.h>
+#include <antlisp/lib/util/exception.h>
 
-#include <antlisp/src/function/stack_machine.h>
+#include <antlisp/lib/function/stack_machine.h>
 
 #include "code_stream.h"
 

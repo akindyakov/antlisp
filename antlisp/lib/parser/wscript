@@ -4,14 +4,14 @@
 
 def build(ctx):
     ctx.stlib(
-        target="antlisp-src-parser",
+        target="antlisp-lib-parser",
         source = [
             "code_stream.cpp",
             "parser.cpp",
             "parentheses_parser.cpp",
         ],
         use=[
-            "antlisp-src-function",
+            "antlisp-lib-function",
         ],
     )
 
@@ -19,7 +19,7 @@ def build(ctx):
         target="code_stream_ut",
         source="code_stream_ut.cpp",
         use=[
-            "antlisp-src-parser",
+            "antlisp-lib-parser",
         ],
     )
     ctx(
@@ -31,7 +31,7 @@ def build(ctx):
         target="parentheses_parser_ut",
         source="parentheses_parser_ut.cpp",
         use=[
-            "antlisp-src-parser",
+            "antlisp-lib-parser",
         ],
     )
     ctx(
@@ -43,7 +43,7 @@ def build(ctx):
         target="parser_ut",
         source="parser_ut.cpp",
         use=[
-            "antlisp-src-parser",
+            "antlisp-lib-parser",
         ],
     )
     ctx(
@@ -55,7 +55,7 @@ def build(ctx):
         target="parse_and_run_ut",
         source="parse_and_run_ut.cpp",
         use=[
-            "antlisp-src-parser",
+            "antlisp-lib-parser",
         ],
     )
     ctx(

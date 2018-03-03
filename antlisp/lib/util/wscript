@@ -4,7 +4,7 @@
 
 def build(ctx):
     ctx.stlib(
-        target="antlisp-src-util",
+        target="antlisp-lib-util",
         source = [
             "string.cpp",
         ],
@@ -27,7 +27,7 @@ def build(ctx):
         target="string_ut",
         source="string_ut.cpp",
         use=[
-            "antlisp-src-util"
+            "antlisp-lib-util"
         ],
     )
     ctx(
