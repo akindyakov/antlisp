@@ -52,11 +52,9 @@ private:
     bool parenthesesExpression(
         ParenthesesParser& pParser
     ) {
-        //**/ std::cerr << "parentheses next\n";
         auto nextParser = pParser.nextParser();
         auto token = std::string{};
         if (nextParser.nextToken(token)) {
-            //**/ std::cerr << "next parser " << Str::Quotes(token) << '\n';
             if ("defun" == token) {
                 functionDef(nextParser);
             } else if ("lambda" == token) {
@@ -68,13 +66,10 @@ private:
             } else if ("progn" == token) {
                 prognDef(nextParser);
             } else {
-                //**/ std::cerr << "call (\n";
                 tokenDef(token);
                 callDef(nextParser);
-                //**/ std::cerr << ")\n";
             }
         } else {
-            //**/ std::cerr << "next -> next\n";
             if (not parenthesesExpression(nextParser)) {
                 return false;
             }
@@ -86,14 +81,11 @@ private:
     bool expression(
         ParenthesesParser& pParser
     ) {
-        //**/ std::cerr << "next\n";
         auto token = std::string{};
         if (pParser.nextToken(token)) {
-            //**/ std::cerr << "next token " << Str::Quotes(token) << "\n";
             tokenDef(token);
         } else {
             if (not pParser.good()) {
-                //**/ std::cerr << "next -> false\n";
                 return false;
             }
             return parenthesesExpression(pParser);
@@ -105,19 +97,13 @@ private:
         ParenthesesParser& pParser
     ) {
         auto core = definitionStack.back()->core();
-        std::cerr << "progn parse start\n";
         while (expression(pParser)) {
-            std::cerr << "progn line\n";
             core->addStep(
                 NativeFunctionDefinition::LocalStackRewind,
                 1
             );
         }
         core->operations.pop_back();
-        std::cerr << "progn pop back\n";
-        for (const auto& op : core->operations) {
-            std::cerr << int(op.operation) << ": " << op.position << "\n";
-        }
     }
 
     void functionDef(
@@ -146,14 +132,12 @@ private:
         {
             auto argParser = pParser.nextParser();
             while (argParser.nextToken(token)) {
-                //**/ std::cerr << "read arg name: " << token << '\n';
                 argNames.push_back(token);
             }
             if (argParser.good()) {
                 throw SyntaxError() << "Code stream of lambda arguments is suppose to be exhausted";
             }
         }
-        //**/ std::cerr << "end of args list\n";
         auto core = definitionStack.back()->core();
         auto argnum = argNames.size();
         auto newLambda = std::make_shared<LambdaFunction>(
@@ -184,7 +168,6 @@ private:
             NativeFunctionDefinition::RunFunction,
             argnum
         );
-        //**/ std::cerr << "end of lambda definition\n";
     }
 
     void letDef(
@@ -217,7 +200,6 @@ private:
         auto endMark = getMarkUid();
         condParser.check();
         while (condParser.isLocked()) {
-            //**/ std::cerr << "create branchParser\n";
             auto branchParser = condParser.nextParser();
             auto token = std::string{};
             expression(branchParser);
@@ -226,7 +208,6 @@ private:
                 NativeFunctionDefinition::SkipIfNil,
                 branchEndMark
             );
-            //**/ std::cerr << "branchParser.check()\n";
 
             expression(branchParser);
             core->addStep(
@@ -250,13 +231,11 @@ private:
     void callDef(
         ParenthesesParser& pParser
     ) {
-        //**/ std::cerr << "call def\n";
         auto argCount = std::size_t{0};
         auto token = std::string{};
         while (expression(pParser)) {
             ++argCount;
         }
-        //**/ std::cerr << "argnum: " << argCount << "\n";
         auto core = definitionStack.back()->core();
         core->addStep(
             NativeFunctionDefinition::RunFunction,
@@ -269,7 +248,6 @@ private:
     ) {
         auto cellOpt = tryCellFromString(token);
         if (cellOpt) {
-            //**/ std::cerr << "add const (" << definitionStack.size() << ") " << cellOpt->toString() << '\n';
             auto core = definitionStack.back()->core();
             auto pos = core->consts.size();
             core->consts.push_back(

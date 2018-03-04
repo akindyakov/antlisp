@@ -108,7 +108,6 @@ struct NativeFunctionDefinition {
         EOperations op
         , std::size_t pos
     ) {
-        //**/ std::cerr << "add step: " << op << '\n';
         operations.emplace_back(op, pos);
     }
 
@@ -335,13 +334,7 @@ public:
     bool hasName(
         const TVarName& name
     ) const {
-        //auto last = fdef->names.cbegin() + argnum;
         auto last = fdef->names.cend();
-        //**/ std::cerr << "native arg names (\n";
-        //**/ for (auto it = fdef->names.cbegin(); it != last; ++it) {
-        //**/     std::cerr << " " << *it;
-        //**/ }
-        //**/ std::cerr << ")\n";
         return (
             closures.count(name) != 0
             || last != std::find(fdef->names.cbegin(), last, name)
@@ -365,11 +358,6 @@ public:
         : nativeFn(std::move(native_))
         , names(std::move(names_))
     {
-        //**/ std::cerr << "create lambda with arg names (\n";
-        //**/ for (const auto& name : names) {
-        //**/     std::cerr << " " << name;
-        //**/ }
-        //**/ std::cerr << ")\n";
     }
 
     class Error
@@ -415,11 +403,6 @@ public:
     bool hasName(
         const TVarName& name
     ) const {
-        //**/ std::cerr << "lambda arg names (\n";
-        //**/ for (const auto& name : names) {
-        //**/     std::cerr << " " << name;
-        //**/ }
-        //**/ std::cerr << ")\n";
         return (
             nativeFn.hasName(name)
             || names.end() != std::find(names.begin(), names.end(), name)
@@ -482,12 +465,10 @@ private:
         this->CallStack.push_back(
             std::move(frame)
         );
-        std::cerr << this->CallStack.size() << " >>>>>>>>>>>>>> \n";
         return this->stackTop();
     }
 
     void stackPop() {
-        std::cerr << "stackPop() " << this->CallStack.size() << "\n";
         this->CallStack.pop_back();
     }
 
@@ -498,32 +479,5 @@ public:
 private:
     std::vector<NativeFunctionCall> CallStack;
 };
-
-
-/**
-* Как быть с заполнением let ?
-* GetFunction
-* ...GetLocalVar...
-* ...GetGlobalVar...
-* RunFunction - результат run нужно положить в LocalScope наверх, как в стек
-* когда выйдем за скобку let - stackRewind на количество переменных
-*/
-
-/**
-* Что с возвращаемым значением?
-* Мы его кладем в stack самым последним - так ведь?
-* Выйдя из функции мы будем иметь заполненый LocalScope - в вызывающей функции можем взять столько сколько нужно аргументов.
-*
-* Где записать количество возвращаемых аргументов?
-* position для RunFunction будет означать сколько переменных с конца LocalScope забрать себе.
-* Вызываемая функция может вызывать сколько угодно значений, только вызывающая определяет сколько оттуда взять. Но всегда с конца.
-* Но как она это поймет?
-* Нее, пусть возвращается только последниее значение.
-*/
-
-/**
-* Все не POD типы передаются по указателю. Может быть в том числе строки. ХЗ пока.
-* Для передачи в качестве аргумента копии объекта необходимы специальные функции (copy x) и (deep-copy x)
-*/
 
 }  // namespace AntLisp

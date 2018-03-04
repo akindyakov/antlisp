@@ -40,7 +40,6 @@ bool ParenthesesParser::isLocked() const {
 }
 
 bool ParenthesesParser::good() const {
-    //**/ std::cerr << level << " == " << codeStream.pCount() << '\n';
     return (
         level <= codeStream.pCount()
         && codeStream.good()
@@ -56,7 +55,6 @@ bool ParenthesesParser::nextToken(
         }
         auto ch = codeStream.peek();
         if (0 != InCodeStream::getParenthesesNumber(ch)) {
-            //**/ std::cerr << "skip the last parenthesis to close parser " << ch << "\n";
             // FIXME: move to to code stream class
             codeStream.ignore();
         }
@@ -70,7 +68,6 @@ std::string ParenthesesParser::nextToken() {
     if (!this->nextToken(token)) {
         throw Error() << "Unexpected end of stream";
     }
-    //**/ std::cerr << "new token " << Str::Quotes(token) << '\n';
     return token;
 }
 
