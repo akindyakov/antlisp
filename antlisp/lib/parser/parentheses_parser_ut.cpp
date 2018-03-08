@@ -43,14 +43,14 @@ void testParenthesesRecursiveReader() {
         !parser2.nextToken(token)
     );
     UT_ASSERT(
-        !parser2.good()
+        parser2.isEnd()
     );
     UT_ASSERT(
         !parser2.isLocked()
     );
 
     UT_ASSERT(
-        parser1.good()
+        not parser1.isEnd()
     );
     UT_ASSERT(
         !parser1.isLocked()
@@ -72,11 +72,11 @@ void testParenthesesRecursiveReader() {
         !parser3.nextToken(token)
     );
     UT_ASSERT(
-        !parser3.good()
+        parser3.isEnd()
     );
 
     UT_ASSERT(
-        parser1.good()
+        not parser1.isEnd()
     );
     UT_ASSERT(
         !parser1.isLocked()

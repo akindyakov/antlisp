@@ -61,6 +61,8 @@ private:
                 lambdaDef(nextParser);
             } else if ("let" == token) {
                 letDef(nextParser);
+            } else if ("set" == token) {
+                setDef(nextParser);
             } else if ("cond" == token) {
                 condDef(nextParser);
             } else if ("progn" == token) {
@@ -70,6 +72,9 @@ private:
                 callDef(nextParser);
             }
         } else {
+            if (pParser.isEnd()) {
+                return false;
+            }
             if (not parenthesesExpression(nextParser)) {
                 return false;
             }
@@ -85,7 +90,8 @@ private:
         if (pParser.nextToken(token)) {
             tokenDef(token);
         } else {
-            if (not pParser.good()) {
+            // TODO: may be useless
+            if (pParser.isEnd()) {
                 return false;
             }
             return parenthesesExpression(pParser);
@@ -134,7 +140,7 @@ private:
             while (argParser.nextToken(token)) {
                 argNames.push_back(token);
             }
-            if (argParser.good()) {
+            if (not argParser.isEnd()) {
                 throw SyntaxError() << "Code stream of lambda arguments is suppose to be exhausted";
             }
         }
@@ -191,6 +197,23 @@ private:
                 }
             }
         }
+    }
+
+    void setDef(
+        ParenthesesParser& setParser
+    ) {
+        auto name = std::string{};
+        if (!setParser.nextToken(name)) {
+            throw SyntaxError() << __FILE__ << ":" << __LINE__ << " there is suppose to be name.";
+        }
+        this->expression(setParser);
+        auto core = definitionStack.back()->core();
+        auto pos = core->names.size();
+        core->names.push_back(name);
+        core->addStep(
+            NativeFunctionDefinition::SetLocal,
+            pos
+        );
     }
 
     void condDef(

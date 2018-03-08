@@ -33,7 +33,7 @@ public:
 
     bool isLocked() const;
 
-    bool good() const;
+    bool isEnd() const;
 
     bool nextToken(
         std::string& token

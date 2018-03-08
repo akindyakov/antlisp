@@ -13,6 +13,7 @@ InCodeStream::InCodeStream(
 bool InCodeStream::good() const {
     return (
         istream.good()
+        && not istream.eof()
         && parenthesesCounter >= 0
     );
 }

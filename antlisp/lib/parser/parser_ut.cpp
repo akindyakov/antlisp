@@ -93,10 +93,26 @@ void test_parseCode_defun() {
     UT_ASSERT_EQUAL(native.fdef->names.size(), 2);  // [+ first]
 }
 
+void test_parseCode_set() {
+    auto global = AntLisp::Namespace{
+        {"+", AntLisp::Cell(std::make_shared<AntLisp::ExtSum>())},
+    };
+    std::istringstream in(R"antlisp-code(
+    (progn
+      (set xx 1)
+      (set xy (+ xx 2))
+    )
+    )antlisp-code");
+    auto native = AntLisp::parseCode(in, global);
+    UT_ASSERT_EQUAL(native.fdef->consts.size(), 2);
+    UT_ASSERT_EQUAL(native.fdef->names.size(), 4);  // [xx xy + xx]
+}
+
 UT_LIST(
-    test_parseCode();
-    test_parseCode_lambda();
-    test_parseCode_cond();
-    test_parseCode_progn();
-    test_parseCode_defun();
+    RUN_TEST(test_parseCode);
+    RUN_TEST(test_parseCode_lambda);
+    RUN_TEST(test_parseCode_cond);
+    RUN_TEST(test_parseCode_progn);
+    RUN_TEST(test_parseCode_defun);
+    RUN_TEST(test_parseCode_set);
 );

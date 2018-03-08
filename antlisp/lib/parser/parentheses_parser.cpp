@@ -36,20 +36,21 @@ ParenthesesParser ParenthesesParser::fromCodeStream(
 }
 
 bool ParenthesesParser::isLocked() const {
-    return level < codeStream.pCount();
+    return this->level < codeStream.pCount();
 }
 
-bool ParenthesesParser::good() const {
+bool ParenthesesParser::isEnd() const {
     return (
-        level <= codeStream.pCount()
-        && codeStream.good()
+        codeStream.pCount() < this->level
+        || not codeStream.good()
     );
 }
 
 bool ParenthesesParser::nextToken(
     std::string& token
 ) {
-    if (this->good()) {
+    //if (not this->isLocked() && this->good()) {
+    if (not this->isEnd()) {
         if (codeStream.nextToken(token)) {
             return true;
         }
@@ -72,13 +73,13 @@ std::string ParenthesesParser::nextToken() {
 }
 
 bool ParenthesesParser::check() {
-    if (this->good()) {
+    if (not this->isEnd()) {
         auto token = std::string{};
         if (this->nextToken(token)) {
             throw Error() << __FILE__ << ":" << __LINE__
                 << " wtf, there is token " << Str::Quotes(token);
         }
-        return this->good();
+        return not this->isEnd();
     }
     return false;
 }

@@ -77,3 +77,22 @@ int main() { \
     } \
     return 0; \
 }
+
+#define RUN_TEST(test_function) {\
+    auto success = true; \
+    auto reason = std::string{}; \
+    std::cerr << "  - [" #test_function "] "; \
+    try { \
+        test_function(); \
+    } catch (const std::exception& err) { \
+        success = false; \
+        reason = err.what(); \
+    } \
+    if (success) { \
+        std::cerr << ": ok\n"; \
+    } else { \
+        std::cerr << ": failed " << reason << "\n"; \
+        throw AntLisp::UnitTestException(); \
+    } \
+}
+

@@ -137,11 +137,31 @@ void test_parseCode_defun_call() {
     );
 }
 
+void test_parseCode_set() {
+    auto global = AntLisp::Namespace{
+        {"+", AntLisp::Cell(std::make_shared<AntLisp::ExtSum>())},
+    };
+    std::istringstream in(R"antlisp-code(
+    (progn
+      (set xx 181)
+      (set xy (+ xx 39))
+    )
+    )antlisp-code");
+    auto native = AntLisp::parseCode(in, global);
+    auto env = AntLisp::Environment(native);
+    env.run();
+    UT_ASSERT_EQUAL(
+        env.ret.get<AntLisp::Integer>(),
+        181 + 39
+    );
+}
+
 UT_LIST(
-    //testFullCycle();
-    //test_parseCode_lambda_call();
-    ////test_parseCode_lambda_multi_call();
-    //test_parseCode_cond();
-    //test_parseCode_progn();
-    test_parseCode_defun_call();
+    //RUN_TEST(testFullCycle);
+    //RUN_TEST(test_parseCode_lambda_call);
+    //RUN_TEST(test_parseCode_lambda_multi_call);
+    //RUN_TEST(test_parseCode_cond);
+    //RUN_TEST(test_parseCode_progn);
+    RUN_TEST(test_parseCode_defun_call);
+    RUN_TEST(test_parseCode_set);
 );
