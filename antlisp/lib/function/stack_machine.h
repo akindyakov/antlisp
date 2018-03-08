@@ -80,13 +80,13 @@ struct NativeFunctionDefinition {
         : int
     {
         Nope = 0,
-        GetConst,
-        GetLocal,  // 2
-        SetLocal,
-        RunFunction,  //4
-        Skip,
-        SkipIfNil,    // 6
-        GuardMark,
+        GetConst,       // 1
+        GetLocal,       // 2
+        SetLocal,       // 3
+        RunFunction,    // 4
+        Skip,           // 5
+        SkipIfNil,      // 6
+        GuardMark,      // 7
         LocalStackRewind,  // 8
     };
 
