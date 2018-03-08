@@ -185,6 +185,8 @@ public:
         Arguments args
     ) const = 0;
 
+    virtual std::string toString() const = 0;
+
     static Namespace parseArguments(
         Arguments& args
         , const std::vector<TVarName>& names
@@ -229,6 +231,11 @@ public:
     ) const override final {
         throw Error() << "Method 'nativeCall' is not valid for 'ExtInstantFunction'";
         return NativeFunctionCall(nullptr, Namespace{});
+    }
+
+    std::string toString() const override {
+        // TODO(akindyakov)
+        return std::string{"ext instant function"};
     }
 };
 
@@ -341,6 +348,25 @@ public:
         );
     }
 
+    std::string toString() const override {
+        std::ostringstream out;
+        {
+            out << "( ";
+            auto last = fdef->names.cbegin() + argnum;
+            for (auto it = fdef->names.cbegin(); it != last; ++it) {
+                out << *it << " ";
+            }
+            out << ")\n";
+        }
+        for (const auto& closure : closures) {
+            out << "{ " << closure.first << " " << closure.second.toString() << " }\n";
+        }
+        for (const auto& op : fdef->operations) {
+            out << int(op.operation) << " : " << int(op.position) << "\n";
+        }
+        return out.str();
+    }
+
 public:
     std::size_t argnum = 0;
     NativeFunctionDefinitionPtr fdef;
@@ -407,6 +433,17 @@ public:
             nativeFn.hasName(name)
             || names.end() != std::find(names.begin(), names.end(), name)
         );
+    }
+
+    std::string toString() const override {
+        std::ostringstream out;
+        out << "lambda: ( ";
+        for (const auto& name : names) {
+            out << name << " ";
+        }
+        out << ")\n";
+        out << nativeFn.toString();
+        return out.str();
     }
 
 public:
