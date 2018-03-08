@@ -72,7 +72,7 @@ private:
                 callDef(nextParser);
             }
         } else {
-            if (pParser.isEnd()) {
+            if (nextParser.isEnd()) {
                 return false;
             }
             if (not parenthesesExpression(nextParser)) {
@@ -80,6 +80,7 @@ private:
             }
             callDef(nextParser);
         }
+        nextParser.close();
         return true;
     }
 
@@ -222,7 +223,7 @@ private:
         auto core = definitionStack.back()->core();
         auto endMark = getMarkUid();
         condParser.check();
-        while (condParser.isLocked()) {
+        while (condParser.isLocked() && not condParser.isEnd()) {
             auto branchParser = condParser.nextParser();
             auto token = std::string{};
             expression(branchParser);
@@ -241,8 +242,7 @@ private:
                 NativeFunctionDefinition::GuardMark,
                 branchEndMark
             );
-            // here!
-            branchParser.check();
+            branchParser.close();
             condParser.check();
         }
         core->addStep(

@@ -7,25 +7,6 @@
 
 namespace AntLisp {
 
-ParenthesesParser ParenthesesParser::openFromCodeStream(
-    InCodeStream& codeStream
-) {
-    codeStream.skipSpaces();
-    auto startLevel = codeStream.pCount();
-    if (!codeStream.ignore()) {
-        throw Error();
-    }
-    if (
-        !(startLevel < codeStream.pCount())
-    ) {
-        throw Error() << "'";
-    }
-    return ParenthesesParser(
-        codeStream,
-        codeStream.pCount()
-    );
-}
-
 ParenthesesParser ParenthesesParser::fromCodeStream(
     InCodeStream& codeStream
 ) {
@@ -36,7 +17,7 @@ ParenthesesParser ParenthesesParser::fromCodeStream(
 }
 
 bool ParenthesesParser::isLocked() const {
-    return this->level < codeStream.pCount();
+    return this->level != codeStream.pCount();
 }
 
 bool ParenthesesParser::isEnd() const {
@@ -46,18 +27,19 @@ bool ParenthesesParser::isEnd() const {
     );
 }
 
+bool ParenthesesParser::good() const {
+    return not (
+        this->isEnd()
+        || this->isLocked()
+    );
+}
+
 bool ParenthesesParser::nextToken(
     std::string& token
 ) {
-    //if (not this->isLocked() && this->good()) {
-    if (not this->isEnd()) {
+    if (this->good()) {
         if (codeStream.nextToken(token)) {
             return true;
-        }
-        auto ch = codeStream.peek();
-        if (0 != InCodeStream::getParenthesesNumber(ch)) {
-            // FIXME: move to to code stream class
-            codeStream.ignore();
         }
         return false;
     }
@@ -73,7 +55,7 @@ std::string ParenthesesParser::nextToken() {
 }
 
 bool ParenthesesParser::check() {
-    if (not this->isEnd()) {
+    if (this->good()) {
         auto token = std::string{};
         if (this->nextToken(token)) {
             throw Error() << __FILE__ << ":" << __LINE__
@@ -84,7 +66,23 @@ bool ParenthesesParser::check() {
     return false;
 }
 
+void ParenthesesParser::close() {
+    if (this->good()) {
+        codeStream.skipSpaces();
+        auto ch = codeStream.peek();
+        if (InCodeStream::getParenthesesNumber(ch) < 0) {
+            // skip last closing ')'
+            codeStream.ignore();
+        } else {
+            throw Error() << "Closing parenthes is expected here, got " << ch << "\n";
+        }
+    }
+}
+
 ParenthesesParser ParenthesesParser::nextParser() {
+    if (not this->isLocked()) {
+        throw Error() << "Parser should be locked to go deeper";
+    }
     return ParenthesesParser(
         codeStream,
         codeStream.pCount()

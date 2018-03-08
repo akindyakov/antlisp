@@ -40,34 +40,6 @@ void test_parseCode_lambda_call() {
     );
 }
 
-void test_parseCode_lambda_multi_call() {
-    auto global = AntLisp::Namespace{
-        {"+", AntLisp::Cell(std::make_shared<AntLisp::ExtSum>())},
-    };
-    std::istringstream in(R"code(
-(
-  (
-    lambda (x y) (
-      (progn
-        (+ x y 1)
-        nil
-        true
-        (+ x y 1)
-      )
-    )
-  )
-  4 2
-)
-)code");
-    auto native = AntLisp::parseCode(in, global);
-    auto env = AntLisp::Environment(native);
-    env.run();
-    UT_ASSERT_EQUAL(
-        env.ret.get<AntLisp::Integer>(),
-        4 + 2 + 1
-    );
-}
-
 void test_parseCode_cond() {
     auto global = AntLisp::Namespace{
         {"+", AntLisp::Cell(std::make_shared<AntLisp::ExtSum>())},
@@ -88,6 +60,26 @@ void test_parseCode_cond() {
     UT_ASSERT_EQUAL(
         env.ret.get<AntLisp::Integer>(),
         2 + 3
+    );
+}
+
+void test_parseCode_progn_simple() {
+    auto global = AntLisp::Namespace{
+        {"+", AntLisp::Cell(std::make_shared<AntLisp::ExtSum>())},
+    };
+    std::istringstream in(R"antlisp-code(
+    (progn
+      true
+      nil
+      (+ 4 44)
+    )
+    )antlisp-code");
+    auto native = AntLisp::parseCode(in, global);
+    auto env = AntLisp::Environment(native);
+    env.run();
+    UT_ASSERT_EQUAL(
+        env.ret.get<AntLisp::Integer>(),
+        4 + 44
     );
 }
 
@@ -137,6 +129,34 @@ void test_parseCode_defun_call() {
     );
 }
 
+void test_parseCode_lambda_multi_call() {
+    auto global = AntLisp::Namespace{
+        {"+", AntLisp::Cell(std::make_shared<AntLisp::ExtSum>())},
+    };
+    std::istringstream in(R"code(
+(
+  (
+    lambda (x y) (
+      progn
+        (+ x y 1)
+        nil
+        true
+        (+ x y 1)
+    )
+  )
+  4 2
+)
+)code");
+    auto native = AntLisp::parseCode(in, global);
+    auto env = AntLisp::Environment(native);
+    env.run();
+    UT_ASSERT_EQUAL(
+        env.ret.get<AntLisp::Integer>(),
+        4 + 2 + 1
+    );
+}
+
+
 void test_parseCode_set() {
     auto global = AntLisp::Namespace{
         {"+", AntLisp::Cell(std::make_shared<AntLisp::ExtSum>())},
@@ -145,6 +165,7 @@ void test_parseCode_set() {
     (progn
       (set xx 181)
       (set xy (+ xx 39))
+      xy
     )
     )antlisp-code");
     auto native = AntLisp::parseCode(in, global);
@@ -157,11 +178,12 @@ void test_parseCode_set() {
 }
 
 UT_LIST(
-    //RUN_TEST(testFullCycle);
-    //RUN_TEST(test_parseCode_lambda_call);
-    //RUN_TEST(test_parseCode_lambda_multi_call);
-    //RUN_TEST(test_parseCode_cond);
-    //RUN_TEST(test_parseCode_progn);
+    RUN_TEST(testFullCycle);
+    RUN_TEST(test_parseCode_lambda_call);
+    RUN_TEST(test_parseCode_cond);
+    RUN_TEST(test_parseCode_progn);
+    RUN_TEST(test_parseCode_progn_simple);
+    RUN_TEST(test_parseCode_lambda_multi_call);
     RUN_TEST(test_parseCode_defun_call);
     RUN_TEST(test_parseCode_set);
 );

@@ -91,7 +91,7 @@ void test_tryFromString_simple_char() {
 }
 
 UT_LIST(
-    test_tryFromString_number();
-    test_tryFromString_string();
-    test_tryFromString_simple_char();
+    RUN_TEST(test_tryFromString_number);
+    RUN_TEST(test_tryFromString_string);
+    RUN_TEST(test_tryFromString_simple_char);
 );

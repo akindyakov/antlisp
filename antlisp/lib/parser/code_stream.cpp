@@ -50,7 +50,7 @@ bool InCodeStream::nextToken(
     std::string& token
 ) {
     token.clear();
-    if (!this->good()) {
+    if (not this->good()) {
         throw Error() << "TODO: " << __FILE__ << __LINE__;
     }
     this->skipSpaces();
@@ -62,6 +62,12 @@ bool InCodeStream::nextToken(
     ) {
         token.push_back(ch);
         this->ignore();
+    }
+    this->skipSpaces();
+    this->peek(ch);
+    if (0 != InCodeStream::getParenthesesNumber(ch)) {
+        this->ignore();
+        this->skipSpaces();
     }
     return !token.empty();
 }

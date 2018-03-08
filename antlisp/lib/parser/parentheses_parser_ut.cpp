@@ -11,20 +11,18 @@ void testParenthesesRecursiveReader() {
     UT_ASSERT(
         codeStream.good()
     );
-    auto parser1 = AntLisp::ParenthesesParser::openFromCodeStream(codeStream);
-    UT_ASSERT(
-        codeStream.good()
-    );
     auto token = std::string();
+    auto parser0 = AntLisp::ParenthesesParser::fromCodeStream(codeStream);
+    UT_ASSERT(
+        not parser0.nextToken(token)
+    );
+    auto parser1 = parser0.nextParser();
     UT_ASSERT(
         parser1.nextToken(token)
     );
     UT_ASSERT_EQUAL(token, "sum");
     UT_ASSERT(
-        !parser1.nextToken(token)
-    );
-    UT_ASSERT(
-        codeStream.good()
+        not parser1.nextToken(token)
     );
     UT_ASSERT(
         parser1.isLocked()
@@ -40,23 +38,28 @@ void testParenthesesRecursiveReader() {
     );
     UT_ASSERT_EQUAL(token, "2");
     UT_ASSERT(
-        !parser2.nextToken(token)
+        not parser2.nextToken(token)
+    );
+    UT_ASSERT(
+        not parser2.good()
     );
     UT_ASSERT(
         parser2.isEnd()
     );
     UT_ASSERT(
-        !parser2.isLocked()
+        parser2.isLocked()
     );
-
+    UT_ASSERT(
+        parser1.good()
+    );
     UT_ASSERT(
         not parser1.isEnd()
     );
     UT_ASSERT(
-        !parser1.isLocked()
+        not parser1.isLocked()
     );
     UT_ASSERT(
-        !parser1.nextToken(token)
+        not parser1.nextToken(token)
     );
 
     auto parser3 = parser1.nextParser();
@@ -69,24 +72,33 @@ void testParenthesesRecursiveReader() {
     );
     UT_ASSERT_EQUAL(token, "5");
     UT_ASSERT(
-        !parser3.nextToken(token)
+        not parser3.nextToken(token)
     );
     UT_ASSERT(
         parser3.isEnd()
+    );
+    UT_ASSERT(
+        not parser3.good()
     );
 
     UT_ASSERT(
         not parser1.isEnd()
     );
     UT_ASSERT(
-        !parser1.isLocked()
+        not parser1.isLocked()
     );
     UT_ASSERT(
         parser1.nextToken(token)
     );
     UT_ASSERT_EQUAL(token, "15");
+    UT_ASSERT(
+        not parser1.good()
+    );
+    UT_ASSERT(
+        parser1.isEnd()
+    );
 }
 
 UT_LIST(
-    testParenthesesRecursiveReader();
+    RUN_TEST(testParenthesesRecursiveReader);
 );

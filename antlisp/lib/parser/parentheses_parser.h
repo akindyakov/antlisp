@@ -24,9 +24,6 @@ public:
     {
     };
 
-    static ParenthesesParser openFromCodeStream(
-        InCodeStream& codeStream
-    );
     static ParenthesesParser fromCodeStream(
         InCodeStream& codeStream
     );
@@ -35,6 +32,8 @@ public:
 
     bool isEnd() const;
 
+    bool good() const;
+
     bool nextToken(
         std::string& token
     );
@@ -42,6 +41,8 @@ public:
     std::string nextToken();
 
     bool check();
+
+    void close();
 
     ParenthesesParser nextParser();
 
