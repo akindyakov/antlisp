@@ -110,6 +110,26 @@ Namespace NativeFunctionCall::releaseLocals() {
     return locals;
 }
 
+Environment::Environment(
+    NativeFunctionCall toRun
+)
+{
+    CallStack.push_back(
+        std::move(toRun)
+    );
+}
+
+Environment::Environment(
+    const NativeFunction& toRun
+)
+    : Environment(
+        toRun.nativeCall(
+            Arguments{}
+        )
+    )
+{
+}
+
 bool Environment::step() {
     auto call = this->stackTop();
     if (call->next()) {

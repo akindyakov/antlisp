@@ -458,22 +458,10 @@ class Environment {
 public:
     explicit Environment(
         NativeFunctionCall toRun
-    )
-    {
-        CallStack.push_back(
-            std::move(toRun)
-        );
-    }
+    );
     explicit Environment(
         const NativeFunction& toRun
-    )
-        : Environment(
-            toRun.nativeCall(
-                Arguments{}
-            )
-        )
-    {
-    }
+    );
 
     bool step();
 
