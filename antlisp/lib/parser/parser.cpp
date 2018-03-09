@@ -183,23 +183,7 @@ private:
         ParenthesesParser& pParser
     ) {
         // TODO
-        auto token = std::string{};
-        {
-            auto argListParser = pParser.nextParser();
-            while (true) {
-                argListParser.nextToken(token);
-                if (!argListParser.isLocked()) {
-                    break;
-                }
-                auto argParser = argListParser.nextParser();
-                if (!argParser.nextToken(token)) {
-                    throw ParseError() << __FILE__ << ":" << __LINE__;
-                }
-                if (!argParser.nextToken(token)) {
-                    throw ParseError() << __FILE__ << ":" << __LINE__;
-                }
-            }
-        }
+        throw ParseError() << "let construction is not implemented";
     }
 
     void setDef(

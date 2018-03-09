@@ -79,10 +79,10 @@ void test_parseCode_let() {
       (+ y 2 z)
     )
     )antlisp-code");
-    auto native = AntLisp::parseCode(in, global);
-    UT_ASSERT_EQUAL(native.fdef->consts.size(), 10);
-    // FIXME: names is [+ + + +], uniq it for the sake of God
-    UT_ASSERT_EQUAL(native.fdef->names.size(), 4);
+    UT_ASSERT_EXCEPTION_TYPE(
+        AntLisp::parseCode(in, global),
+        AntLisp::ParseError
+    );
 }
 
 void test_parseCode_progn() {
