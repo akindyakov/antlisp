@@ -9,11 +9,17 @@ out = "build-waf"
 
 
 def options(opt):
-    opt.load("compiler_cxx")
+    opt.load([
+        "compiler_cxx",
+        "waf_unit_test",
+    ])
 
 
 def configure(ctx):
-    ctx.load("compiler_cxx")
+    ctx.load([
+        "compiler_cxx",
+        "waf_unit_test",
+    ])
     ctx.env.append_unique(
         "CXXFLAGS", [
             #"-O2",

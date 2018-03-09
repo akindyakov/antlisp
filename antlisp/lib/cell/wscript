@@ -15,12 +15,9 @@ def build(ctx):
 
     ctx.program(
         target="cell_ut",
+        features="test",
         source="cell_ut.cpp",
         use=[
             "antlisp-lib-cell"
         ],
-    )
-    ctx(
-        rule="${SRC}",
-        source="cell_ut",
     )

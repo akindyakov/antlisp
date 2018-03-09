@@ -15,12 +15,9 @@ def build(ctx):
     )
     ctx.program(
         target="stack_machine_ut",
+        features="test",
         source="stack_machine_ut.cpp",
         use=[
             "antlisp-lib-function"
         ],
-    )
-    ctx(
-        rule="${SRC}",
-        source="stack_machine_ut",
     )

@@ -18,60 +18,41 @@ def build(ctx):
 
     ctx.program(
         target="code_stream_ut",
+        features="test",
         source="code_stream_ut.cpp",
         use=[
             "antlisp-lib-parser",
         ],
     )
-    ctx(
-        rule="${SRC}",
-        source="code_stream_ut",
-    )
-
     ctx.program(
         target="parentheses_parser_ut",
+        features="test",
         source="parentheses_parser_ut.cpp",
         use=[
             "antlisp-lib-parser",
         ],
     )
-    ctx(
-        rule="${SRC}",
-        source="parentheses_parser_ut",
-    )
-
     ctx.program(
         target="parser_ut",
+        features="test",
         source="parser_ut.cpp",
         use=[
             "antlisp-lib-parser",
         ],
     )
-    ctx(
-        rule="${SRC}",
-        source="parser_ut",
-    )
-
     ctx.program(
         target="parse_and_run_ut",
+        features="test",
         source="parse_and_run_ut.cpp",
         use=[
             "antlisp-lib-parser",
         ],
     )
-    ctx(
-        rule="${SRC}",
-        source="parse_and_run_ut",
-    )
-
     ctx.program(
         target="cell_in_string_ut",
+        features="test",
         source="cell_in_string_ut.cpp",
         use=[
             "antlisp-lib-parser",
         ],
-    )
-    ctx(
-        rule="${SRC}",
-        source="cell_in_string_ut",
     )

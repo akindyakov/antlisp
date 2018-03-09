@@ -14,23 +14,16 @@ def build(ctx):
 
     ctx.program(
         target="exception_ut",
+        features="test",
         source="exception_ut.cpp",
         use=[
         ],
     )
-    ctx(
-        rule="${SRC}",
-        source="exception_ut",
-    )
-
     ctx.program(
         target="string_ut",
+        features="test",
         source="string_ut.cpp",
         use=[
             "antlisp-lib-util"
         ],
-    )
-    ctx(
-        rule="${SRC}",
-        source="string_ut",
     )

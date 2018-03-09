@@ -7,3 +7,7 @@ def build(ctx):
         "lib",
         "bin",
     ])
+    # tests result
+    from waflib.Tools import waf_unit_test
+    ctx.add_post_fun(waf_unit_test.summary)
+    ctx.add_post_fun(waf_unit_test.set_exit_code)

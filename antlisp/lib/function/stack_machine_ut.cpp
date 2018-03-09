@@ -205,6 +205,6 @@ void testLambdaFunction() {
 }
 
 UT_LIST(
-    testFullCycle();
-    testLambdaFunction();
+    RUN_TEST(testFullCycle);
+    RUN_TEST(testLambdaFunction);
 );
