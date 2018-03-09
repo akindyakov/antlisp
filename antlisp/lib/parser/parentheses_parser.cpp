@@ -17,12 +17,12 @@ ParenthesesParser ParenthesesParser::fromCodeStream(
 }
 
 bool ParenthesesParser::isLocked() const {
-    return this->level != codeStream.getStat().parentheses;
+    return this->level != this->getStat().parentheses;
 }
 
 bool ParenthesesParser::isEnd() const {
     return (
-        codeStream.getStat().parentheses < this->level
+        this->getStat().parentheses < this->level
         || not codeStream.good()
     );
 }
@@ -49,7 +49,7 @@ bool ParenthesesParser::nextToken(
 std::string ParenthesesParser::nextToken() {
     auto token = std::string{};
     if (!this->nextToken(token)) {
-        throw Error() << "Unexpected end of stream";
+        throw Error() << "Unexpected end of stream " << this->getStat().toString();
     }
     return token;
 }
@@ -58,8 +58,9 @@ bool ParenthesesParser::check() {
     if (this->good()) {
         auto token = std::string{};
         if (this->nextToken(token)) {
-            throw Error() << __FILE__ << ":" << __LINE__
-                << " wtf, there is token " << Str::Quotes(token);
+            throw Error() << this->getStat().toString()
+                << " wtf, there is token " << Str::Quotes(token)
+                << " noting is expected";
         }
         return not this->isEnd();
     }
@@ -74,18 +75,18 @@ void ParenthesesParser::close() {
             // skip last closing ')'
             codeStream.ignore();
         } else {
-            throw Error() << "Closing parenthes is expected here, got " << ch << "\n";
+            throw Error() << this->getStat().toString() << " closing parenthes is expected here, got " << ch << "\n";
         }
     }
 }
 
 ParenthesesParser ParenthesesParser::nextParser() {
     if (not this->isLocked()) {
-        throw Error() << "Parser should be locked to go deeper";
+        throw Error() << this->getStat().toString() << " parser should be locked to go deeper";
     }
     return ParenthesesParser(
         codeStream,
-        codeStream.getStat().parentheses
+        this->getStat().parentheses
     );
 }
 

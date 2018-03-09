@@ -54,7 +54,7 @@ public:
         } catch (const exception_type&) { \
             success = true; \
         } catch (...) { \
-            reason = "wrong exception type, expected " #exception_type; \
+            reason = ", wrong exception type, expected " #exception_type; \
         } \
         if (!success) { \
             if (reason == nullptr) { \

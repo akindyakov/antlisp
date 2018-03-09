@@ -118,7 +118,7 @@ private:
     ) {
         auto fname = std::string{};
         if (!pParser.nextToken(fname)) {
-            throw SyntaxError() << __FILE__ << ":" << __LINE__ << " there is suppose to be function name.";
+            throw SyntaxError() << pParser.getStat().toString() << " there is suppose to be function name.";
         }
         lambdaDef(pParser);
         auto core = definitionStack.back()->core();
@@ -142,7 +142,7 @@ private:
                 argNames.push_back(token);
             }
             if (not argParser.isEnd()) {
-                throw SyntaxError() << "Code stream of lambda arguments is suppose to be exhausted";
+                throw SyntaxError() << argParser.getStat().toString() << ", code stream of lambda arguments is suppose to be exhausted";
             }
         }
         auto core = definitionStack.back()->core();
@@ -167,7 +167,9 @@ private:
             core->consts.size() - 1
         );
         definitionStack.push_back(newLambda);
-        expression(pParser);
+        if (not expression(pParser)) {
+            throw SyntaxError() << pParser.getStat().toString() << ", there is suppose to be lambda body";
+        }
         pParser.check();
         definitionStack.pop_back();
         argnum = newLambda->names.size();
@@ -205,7 +207,7 @@ private:
     ) {
         auto name = std::string{};
         if (!setParser.nextToken(name)) {
-            throw SyntaxError() << __FILE__ << ":" << __LINE__ << " there is suppose to be name.";
+            throw SyntaxError() << setParser.getStat().toString() << ", there is suppose to be name.";
         }
         this->expression(setParser);
         auto core = definitionStack.back()->core();

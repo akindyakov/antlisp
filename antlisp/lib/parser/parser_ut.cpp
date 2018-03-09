@@ -26,6 +26,28 @@ void test_parseCode_lambda() {
     UT_ASSERT_EQUAL(native.fdef->names.size(), 1);
 }
 
+void test_parseCode_wrong_labda__body_is_absent() {
+    auto global = AntLisp::Namespace{
+        {"+", AntLisp::Cell(std::make_shared<AntLisp::ExtSum>())},
+    };
+    std::istringstream in("(lambda (x))");
+    UT_ASSERT_EXCEPTION_TYPE(
+        AntLisp::parseCode(in, global),
+        AntLisp::SyntaxError
+    );
+}
+
+void test_parseCode_wrong_labda__args_and_body_is_absent() {
+    auto global = AntLisp::Namespace{
+        {"+", AntLisp::Cell(std::make_shared<AntLisp::ExtSum>())},
+    };
+    std::istringstream in("(lambda)");
+    UT_ASSERT_EXCEPTION_TYPE(
+        AntLisp::parseCode(in, global),
+        AntLisp::SyntaxError
+    );
+}
+
 void test_parseCode_cond() {
     auto global = AntLisp::Namespace{
         {"+", AntLisp::Cell(std::make_shared<AntLisp::ExtSum>())},
@@ -69,9 +91,9 @@ void test_parseCode_progn() {
     };
     std::istringstream in(R"antlisp-code(
     (progn
-        (( + 1 2 ) )
-        ((+  2  3))
-        ((  +  3  4))
+        ( + 1 2 )
+        (+  2  3)
+        (  +  3  4)
     )
     )antlisp-code");
     auto native = AntLisp::parseCode(in, global);
@@ -111,6 +133,8 @@ void test_parseCode_set() {
 UT_LIST(
     RUN_TEST(test_parseCode);
     RUN_TEST(test_parseCode_lambda);
+    RUN_TEST(test_parseCode_wrong_labda__body_is_absent);
+    RUN_TEST(test_parseCode_wrong_labda__args_and_body_is_absent);
     RUN_TEST(test_parseCode_cond);
     RUN_TEST(test_parseCode_progn);
     RUN_TEST(test_parseCode_defun);

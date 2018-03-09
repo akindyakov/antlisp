@@ -99,6 +99,25 @@ void testParenthesesRecursiveReader() {
     );
 }
 
+void testParenthesesReaderCheck() {
+    std::istringstream in("  sum div)");
+    auto codeStream = AntLisp::InCodeStream(in);
+    UT_ASSERT(
+        codeStream.good()
+    );
+    auto token = std::string();
+    auto parser0 = AntLisp::ParenthesesParser::fromCodeStream(codeStream);
+    UT_ASSERT(
+        parser0.nextToken(token)
+    );
+    UT_ASSERT_EQUAL(token, "sum");
+    UT_ASSERT_EXCEPTION_TYPE(
+        parser0.close(),
+        AntLisp::ParenthesesParser::Error
+    );
+}
+
 UT_LIST(
     RUN_TEST(testParenthesesRecursiveReader);
+    RUN_TEST(testParenthesesReaderCheck);
 );

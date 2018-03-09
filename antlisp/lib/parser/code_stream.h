@@ -13,6 +13,12 @@ struct CodeStat {
     int parentheses = 0;
     std::size_t lines = 1;
     std::size_t characters = 0;
+
+    std::string toString() const {
+        auto out = std::ostringstream{};
+        out << "line " << lines << ", column " << characters;
+        return out.str();
+    }
 };
 
 class InCodeStream

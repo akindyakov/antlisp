@@ -46,8 +46,8 @@ public:
 
     ParenthesesParser nextParser();
 
-    int getLevel() const noexcept {
-        return level;
+    const CodeStat& getStat() const {
+        return codeStream.getStat();
     }
 
 private:
