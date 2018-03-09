@@ -9,6 +9,12 @@ namespace AntLisp {
 
 using Char = char;
 
+struct CodeStat {
+    int parentheses = 0;
+    std::size_t lines = 1;
+    std::size_t characters = 0;
+};
+
 class InCodeStream
 {
 public:
@@ -22,8 +28,6 @@ public:
     };
 
     bool good() const;
-
-    int pCount() const;
 
     Char peek() const;
     bool peek(Char& ch) const;
@@ -46,11 +50,16 @@ public:
         CHAR_CLOSE = ')',
     };
 
+    const CodeStat& getStat() const;
+
     static int getParenthesesNumber(Char ch);
 
 private:
+    void updateStat(Char ch);
+
+private:
     std::istream& istream;
-    int parenthesesCounter = 0;
+    CodeStat stat;
 };
 
 }  // namespace AntLisp

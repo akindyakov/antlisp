@@ -12,17 +12,17 @@ ParenthesesParser ParenthesesParser::fromCodeStream(
 ) {
     return ParenthesesParser(
         codeStream,
-        codeStream.pCount()
+        codeStream.getStat().parentheses
     );
 }
 
 bool ParenthesesParser::isLocked() const {
-    return this->level != codeStream.pCount();
+    return this->level != codeStream.getStat().parentheses;
 }
 
 bool ParenthesesParser::isEnd() const {
     return (
-        codeStream.pCount() < this->level
+        codeStream.getStat().parentheses < this->level
         || not codeStream.good()
     );
 }
@@ -85,7 +85,7 @@ ParenthesesParser ParenthesesParser::nextParser() {
     }
     return ParenthesesParser(
         codeStream,
-        codeStream.pCount()
+        codeStream.getStat().parentheses
     );
 }
 

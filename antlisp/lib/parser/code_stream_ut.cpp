@@ -22,7 +22,7 @@ void testSpaces() {
         code.nextToken(), "1.23"
     );
     UT_ASSERT_EQUAL(
-        code.pCount(), 2
+        code.getStat().parentheses, 2
     );
     UT_ASSERT_EQUAL(
         code.nextToken(), "*"
@@ -33,9 +33,17 @@ void testSpaces() {
     UT_ASSERT_EQUAL(
         code.nextToken(), "3"
     );
-    code.ignore();
+    UT_ASSERT(
+        not code.nextToken(token)
+    );
     UT_ASSERT_EQUAL(
-        code.pCount(), 0
+        code.getStat().parentheses, 0
+    );
+    UT_ASSERT_EQUAL(
+        code.getStat().lines, 1
+    );
+    UT_ASSERT_EQUAL(
+        code.getStat().characters, 25
     );
 }
 
@@ -56,7 +64,7 @@ void testMinorSpaces() {
         code.nextToken(), "1.23"
     );
     UT_ASSERT_EQUAL(
-        code.pCount(), 2
+        code.getStat().parentheses, 2
     );
     UT_ASSERT_EQUAL(
         code.nextToken(), "*"
@@ -67,9 +75,17 @@ void testMinorSpaces() {
     UT_ASSERT_EQUAL(
         code.nextToken(), "3"
     );
-    code.ignore();
+    UT_ASSERT(
+        not code.nextToken(token)
+    );
     UT_ASSERT_EQUAL(
-        code.pCount(), 0
+        code.getStat().parentheses, 0
+    );
+    UT_ASSERT_EQUAL(
+        code.getStat().lines, 1
+    );
+    UT_ASSERT_EQUAL(
+        code.getStat().characters, 18
     );
 }
 

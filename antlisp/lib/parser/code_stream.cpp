@@ -14,12 +14,8 @@ bool InCodeStream::good() const {
     return (
         istream.good()
         && not istream.eof()
-        && parenthesesCounter >= 0
+        && stat.parentheses >= 0
     );
-}
-
-int InCodeStream::pCount() const {
-    return parenthesesCounter;
 }
 
 Char InCodeStream::peek() const {
@@ -33,9 +29,15 @@ bool InCodeStream::peek(Char& ch) const {
     return this->good();
 }
 
+void InCodeStream::updateStat(Char ch) {
+    ++stat.characters;
+    stat.parentheses += getParenthesesNumber(ch);
+    stat.lines += (ch == '\n') ? 1 : 0;
+}
+
 bool InCodeStream::next(Char& ch) {
     if (this->good() && istream.get(ch).good()) {
-        parenthesesCounter += getParenthesesNumber(ch);
+        updateStat(ch);
         return true;
     }
     return false;
@@ -87,8 +89,12 @@ void InCodeStream::skipSpaces() {
             istream.peek()
         )
     ) {
-        istream.ignore();
+        this->ignore();
     }
+}
+
+const CodeStat& InCodeStream::getStat() const {
+    return stat;
 }
 
 int InCodeStream::getParenthesesNumber(Char ch) {
