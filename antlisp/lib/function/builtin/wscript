@@ -1,0 +1,22 @@
+#!/usr/bin/env python
+# encoding: utf-8
+
+
+def build(ctx):
+    ctx.stlib(
+        target="antlisp-lib-function-builtin",
+        source = [
+            "math.cpp",
+        ],
+        use=[
+            "antlisp-lib-function",
+        ],
+    )
+    ctx.program(
+        target="builtin_math_ut",
+        features="test",
+        source="math_ut.cpp",
+        use=[
+            "antlisp-lib-function-builtin",
+        ],
+    )
