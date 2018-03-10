@@ -145,11 +145,49 @@ std::string Cell::toString() const {
     );
 }
 
+namespace {
+
+class CellEqualityVisitor
+{
+private:
+    const Cell& first;
+
+public:
+    using result_type = bool;
+
+public:
+    explicit CellEqualityVisitor(
+        const Cell& first_
+    )
+        : first(first_)
+    {
+    }
+
+    template<typename T>
+    bool operator()(const T& value) const {
+        return (
+            Cell::tagOf<T>() == first.tag()
+            && value == first.get<T>()
+        );
+    }
+
+    bool operator()(const StringPtr& value) const {
+        return (
+            Cell::tagOf<StringPtr>() == first.tag()
+            && *value == *first.get<StringPtr>()
+        );
+    }
+};
+
+}
+
 bool operator == (
     const Cell& first
     , const Cell& second
 ) {
-    return first.value == second.value;
+    return first.visit(
+        CellEqualityVisitor(second)
+    );
 }
 
 std::ostream& operator<<(std::ostream& os, const Nil& v) {

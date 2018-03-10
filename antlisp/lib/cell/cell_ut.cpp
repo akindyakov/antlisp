@@ -287,6 +287,15 @@ void testCell_cast_copy_string() {
     );
 }
 
+void testCell_string_eq() {
+    auto first = AntLisp::Cell::string("act");
+    auto second = AntLisp::Cell::string("act");
+    UT_ASSERT_EQUAL(
+        first,
+        second
+    );
+}
+
 UT_LIST(
     RUN_TEST(nilEqualTest);
     RUN_TEST(cellCheckTypeTag);
@@ -300,4 +309,5 @@ UT_LIST(
     RUN_TEST(testCell_cast_function);
     RUN_TEST(testCell_cast_copy_integer);
     RUN_TEST(testCell_cast_copy_string);
+    RUN_TEST(testCell_string_eq);
 );
