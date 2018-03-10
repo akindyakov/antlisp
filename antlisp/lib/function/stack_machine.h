@@ -178,7 +178,7 @@ public:
     virtual bool isNative() const = 0;
 
     virtual Cell instantCall(
-        Arguments frame
+        Arguments args
     ) const = 0;
 
     virtual NativeFunctionCall nativeCall(
@@ -223,11 +223,11 @@ public:
     }
 
     virtual Cell instantCall(
-        Arguments frame
+        Arguments args
     ) const = 0;
 
     NativeFunctionCall nativeCall(
-        Arguments frame
+        Arguments args
     ) const override final {
         throw Error() << "Method 'nativeCall' is not valid for 'ExtInstantFunction'";
         return NativeFunctionCall(nullptr, Namespace{});
