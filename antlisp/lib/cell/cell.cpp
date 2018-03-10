@@ -110,6 +110,18 @@ Cell Cell::cast<FunctionPtr>() const {
     return *this;
 }
 
+Cell Cell::copy() const {
+    if (this->is<StringPtr>()) {
+        return Cell::string(
+            *this->get<StringPtr>()
+        );
+    } else if (this->is<ExtTypePtr>()) {
+        return Cell{
+            this->get<ExtTypePtr>()->copy()
+        };
+    }
+    return *this;
+}
 
 namespace {
 

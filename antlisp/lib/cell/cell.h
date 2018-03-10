@@ -28,12 +28,15 @@ constexpr inline bool operator == (Nil, Nil) noexcept {
 
 std::ostream& operator<<(std::ostream& os, const Nil& v);
 
+class IExtType;
+using ExtTypePtr = std::shared_ptr<IExtType>;
+
 class IExtType {
 public:
     virtual std::string toString() const = 0;
+    virtual ExtTypePtr copy() const = 0;
 };
 
-using ExtTypePtr = std::shared_ptr<IExtType>;
 
 using StringPtr = std::shared_ptr<std::string>;
 
@@ -217,6 +220,8 @@ public:
             ;
         }
     }
+
+    Cell copy() const;
 
     template<typename T>
     using Visitor = boost::static_visitor<T>;

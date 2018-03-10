@@ -258,6 +258,35 @@ void testCell_cast_function() {
     );
 }
 
+void testCell_cast_copy_integer() {
+    auto value = AntLisp::Cell::integer(167);
+    auto cValue = value.copy();
+    cValue.get<AntLisp::Integer>() += 12;
+    UT_ASSERT_EQUAL(
+        value.get<AntLisp::Integer>(),
+        167
+    );
+    UT_ASSERT_EQUAL(
+        cValue.get<AntLisp::Integer>(),
+        12 + 167
+    );
+}
+
+void testCell_cast_copy_string() {
+    auto value = AntLisp::Cell::string("act");
+    auto cValue = value.copy();
+    cValue.get<AntLisp::StringPtr>()->append(" local");
+    value.get<AntLisp::StringPtr>()->append("!");
+    UT_ASSERT_EQUAL(
+        *value.get<AntLisp::StringPtr>(),
+        "act!"
+    );
+    UT_ASSERT_EQUAL(
+        *cValue.get<AntLisp::StringPtr>(),
+        "act local"
+    );
+}
+
 UT_LIST(
     RUN_TEST(nilEqualTest);
     RUN_TEST(cellCheckTypeTag);
@@ -269,4 +298,6 @@ UT_LIST(
     RUN_TEST(testCell_cast_string);
     RUN_TEST(testCell_cast_ext);
     RUN_TEST(testCell_cast_function);
+    RUN_TEST(testCell_cast_copy_integer);
+    RUN_TEST(testCell_cast_copy_string);
 );
