@@ -101,6 +101,10 @@ public:
         };
     }
 
+    static Cell symbol(Symbol ch) {
+        return Cell{ch};
+    }
+
     template<
         typename SomeStringType
     >
