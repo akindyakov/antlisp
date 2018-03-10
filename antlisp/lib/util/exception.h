@@ -64,4 +64,9 @@ inline Err operator<<(
     return std::forward<Err>(err);
 }
 
+class RuntimeError
+    : public Exception
+{
+};
+
 }  // namespace AntLisp
