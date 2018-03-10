@@ -27,7 +27,7 @@ bool NativeFunctionCall::next() noexcept {
     return ++runner < function->operations.size();
 }
 
-Cell NativeFunctionCall::popCallStack() {
+Cell NativeFunctionCall::pop() {
     return (
         localCallStack.size() == 0
         ? Cell::nil()
@@ -35,7 +35,7 @@ Cell NativeFunctionCall::popCallStack() {
     );
 }
 
-void NativeFunctionCall::pushCallStack(Cell cell) {
+void NativeFunctionCall::push(Cell cell) {
     localCallStack.push(
         std::move(cell)
     );
@@ -46,7 +46,7 @@ void NativeFunctionCall::getConst() {
     auto cell = function->consts[
         function->operations[runner].position
     ];
-    this->pushCallStack(
+    this->push(
         std::move(cell)
     );
 }
@@ -58,7 +58,7 @@ void NativeFunctionCall::getLocal() {
     const auto& name = this->function->names[pos];
     // copy
     auto local = this->vars.at(name);
-    this->pushCallStack(
+    this->push(
         std::move(local)
     );
 }
@@ -69,12 +69,12 @@ void NativeFunctionCall::setLocal() {
             this->runner
         ].position
     ];
-    this->vars[name] = this->popCallStack();
+    this->vars[name] = this->pop();
 }
 
 void NativeFunctionCall::stackRewind() {
     for (auto i = function->operations[runner].position; i != 0; --i) {
-        this->popCallStack();
+        this->pop();
     }
 }
 
@@ -98,7 +98,7 @@ Arguments NativeFunctionCall::createArgs() {
     auto args = Arguments{};
     while (size--) {
         args.push_back(
-            popCallStack()
+            pop()
         );
     }
     return args;
@@ -131,7 +131,7 @@ Environment::Environment(
 }
 
 bool Environment::step() {
-    auto call = this->stackTop();
+    auto call = this->topCall();
     if (call->next()) {
         switch (call->getOperation()) {
             case NativeFunctionDefinition::Nope:
@@ -148,15 +148,26 @@ bool Environment::step() {
             case NativeFunctionDefinition::RunFunction:
                 {
                     auto args = call->createArgs();
-                    auto toCall = call->popCallStack();
+                    auto toCall = call->pop();
                     if (toCall.is<FunctionPtr>()) {
                         auto fnPtr = toCall.get<FunctionPtr>();
                         if (fnPtr->isNative()) {
-                            this->stackPush(
-                                fnPtr->nativeCall(args)
-                            );
+                            auto nextCall = fnPtr->nativeCall(args);
+                            if (call->isReadyToPostpone()) {
+                                call->push(
+                                    Cell{
+                                        std::make_shared<PostponedFunction>(
+                                            std::move(nextCall)
+                                        )
+                                    }
+                                );
+                            } else {
+                                this->pushCall(
+                                    std::move(nextCall)
+                                );
+                            }
                         } else {
-                            call->pushCallStack(
+                            call->push(
                                 fnPtr->instantCall(
                                     std::move(args)
                                 )
@@ -175,7 +186,7 @@ bool Environment::step() {
                 break;
             case NativeFunctionDefinition::SkipIfNil:
                 {
-                    auto guard = call->popCallStack();
+                    auto guard = call->pop();
                     if (guard.is<Nil>()) {
                         call->skipUntilMark();
                     }
@@ -188,23 +199,28 @@ bool Environment::step() {
                 break;
         }
     } else {
-        this->ret = call->popCallStack();
+        // save return value
+        this->ret = call->pop();
+        // preserve the last local vars (for import)
         this->vars = call->releaseLocals();
-        this->stackPop();
-        if (this->isStackEmpty()) {
-            return false;
-        }
+        // drop spent call
+        this->popCall();
+        // check if return value is postponed call
         if (this->ret.is<FunctionPtr>()) {
             auto fnPtr = this->ret.get<FunctionPtr>();
             if (fnPtr->isPostponed()) {
-                call = this->stackPush(
+                call = this->pushCall(
                     fnPtr->nativeCall(Arguments{})
                 );
                 return true;
             }
         }
-        call = this->stackTop();
-        call->pushCallStack(
+        if (this->isStackEmpty()) {
+            // done, nothing to do
+            return false;
+        }
+        call = this->topCall();
+        call->push(
             std::move(this->ret)
         );
         this->ret = Cell::nil();

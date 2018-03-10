@@ -141,9 +141,9 @@ public:
 
     bool next() noexcept;
 
-    Cell popCallStack();
+    Cell pop();
 
-    void pushCallStack(Cell cell);
+    void push(Cell cell);
 
     void getConst();
 
@@ -162,6 +162,10 @@ public:
     Arguments createArgs();
 
     Namespace releaseLocals();
+
+    bool isReadyToPostpone() const {
+        return this->runner + 1 == function->operations.size();
+    }
 
 private:
     NativeFunctionDefinitionPtr function;
@@ -373,6 +377,51 @@ public:
     Namespace closures;  // default arguments
 };
 
+class PostponedFunction
+    : public IFunction
+{
+public:
+    explicit PostponedFunction(
+        NativeFunctionCall call
+    )
+        : call_(
+            std::move(call)
+        )
+    {
+    }
+
+    bool isPostponed() const override {
+        return true;
+    }
+
+    bool isNative() const override {
+        return true;
+    }
+
+    Cell instantCall(
+        Arguments args
+    ) const override {
+        throw Exception()
+            << "Method 'nativeCall' is not valid for 'PostponedFunction'";
+        return Cell::nil();
+    }
+
+    NativeFunctionCall nativeCall(
+        Arguments args
+    ) const override {
+        return std::move(call_);
+    }
+
+    std::string toString() const override {
+        std::ostringstream out;
+        out << "postponed-function\n";
+        return out.str();
+    }
+
+private:
+    NativeFunctionCall call_;
+};
+
 class LambdaFunction
     : public IFunction
 {
@@ -480,20 +529,20 @@ private:
         return this->CallStack.empty();
     }
 
-    NativeFunctionCall* stackTop() {
+    NativeFunctionCall* topCall() {
         return &this->CallStack.back();
     }
 
-    NativeFunctionCall* stackPush(
+    NativeFunctionCall* pushCall(
         NativeFunctionCall frame
     ) {
         this->CallStack.push_back(
             std::move(frame)
         );
-        return this->stackTop();
+        return this->topCall();
     }
 
-    void stackPop() {
+    void popCall() {
         this->CallStack.pop_back();
     }
 
