@@ -21,3 +21,6 @@ def build(ctx):
             "antlisp-lib-function"
         ],
     )
+    ctx.recurse([
+        "builtin",
+    ])
