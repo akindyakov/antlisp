@@ -58,7 +58,7 @@ public:
         } \
         if (!success) { \
             if (reason == nullptr) { \
-                reason = "Exception " #exception_type " was not throwned"; \
+                reason = " Exception " #exception_type " was not throwned"; \
             } \
             throw AntLisp::UnitTestException() \
                 << __FILE__ << ':' << __LINE__ \

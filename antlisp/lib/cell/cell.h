@@ -28,8 +28,12 @@ constexpr inline bool operator == (Nil, Nil) noexcept {
 
 std::ostream& operator<<(std::ostream& os, const Nil& v);
 
-class Cons;
-using ConsPtr = std::shared_ptr<Cons>;
+class IExtType {
+public:
+    virtual std::string toString() const = 0;
+};
+
+using ExtTypePtr = std::shared_ptr<IExtType>;
 
 using StringPtr = std::shared_ptr<std::string>;
 
@@ -49,7 +53,7 @@ public:
         , Float
         , Symbol
         , StringPtr
-        , ConsPtr
+        , ExtTypePtr
         , FunctionPtr
     >;
 
@@ -59,7 +63,7 @@ public:
         Float,
         Symbol,
         StringPtr,
-        Cons,
+        ExtTypePtr,
         FunctionPtr,
     };
 
@@ -144,7 +148,7 @@ public:
         )
     {
     }
-    explicit Cell(ConsPtr v)
+    explicit Cell(ExtTypePtr v)
         : value(
             std::move(v)
         )
@@ -185,21 +189,8 @@ public:
     {
     };
 
-    Float asRealNumber() const {
-        auto realV = Float{};
-        if (this->is<Float>()) {
-            realV = this->get<Float>();
-        } else if (this->is<Integer>()) {
-            realV = static_cast<Float>(
-                this->get<Integer>()
-            );
-        } else {
-            throw BadGetError()
-                << this->toString() << "is not a real number"
-            ;
-        }
-        return realV;
-    }
+    template<typename Type>
+    Cell cast() const;
 
     template<typename T>
     const T& get() const {
@@ -261,12 +252,6 @@ bool operator != (
     const Cell& first
     , const Cell& second
 );
-
-class Cons {
-public:
-    Cell car;
-    Cell cdr;
-};
 
 const auto True = Cell{Integer{1}};
 

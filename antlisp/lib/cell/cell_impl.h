@@ -63,20 +63,18 @@ public:
 };
 
 template<>
-class TypeInfo<ConsPtr>
+class TypeInfo<ExtTypePtr>
 {
 public:
     static constexpr const char* name() {
-        return "cons";
+        return "ext-type";
     }
-    static std::string toString(const ConsPtr& cons) {
-        auto out = std::ostringstream();
-        out << '('
-            << (cons ? cons->car.toString() : "?")
-            << " . "
-            << (cons ? cons->cdr.toString() : "?")
-            << ')';
-        return out.str();
+    static std::string toString(const ExtTypePtr& ext) {
+        // TODO(akindyakov): [task](doc/todo/5t7dmp19.md)
+        // should be smth like this: return ext->toString();
+        return std::string{
+            name()
+        };
     }
 };
 
