@@ -31,11 +31,9 @@ def configure(ctx):
         os.path.abspath(top),
         os.path.abspath(out),
     ]
-    print ctx.env.INCLUDES
 
 
 def build(ctx):
-    print ctx.env.INCLUDES
     ctx.recurse([
         "antlisp",
     ])
