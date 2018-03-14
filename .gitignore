@@ -7,3 +7,4 @@ doc/**.pdf
 **.swp
 build-waf
 antlisp/tools/waf/waf-**
+.waf**
