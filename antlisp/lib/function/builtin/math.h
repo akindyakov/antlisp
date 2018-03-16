@@ -16,6 +16,15 @@ public:
     ) const override;
 };
 
+class Less
+    : public ExtInstantFunction
+{
+public:
+    Cell instantCall(
+        Arguments args
+    ) const override;
+};
+
 }  // namespace Builtin
 
 }  // namespace AntLisp

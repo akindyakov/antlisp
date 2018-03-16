@@ -36,7 +36,7 @@ void sumImpl(Cell& to, const Cell& arg) {
         );
         to = Cell::string(std::move(str));
     } else {
-        throw RuntimeError() << "Unexpected argument types ( "
+        throw RuntimeError() << "Sum: unexpected argument types ( "
             << to.toString() << ", " <<  arg.toString() << " )";
     }
 }
@@ -57,8 +57,54 @@ Cell Sum::instantCall(
     return out;
 }
 
+namespace {
+
+Cell lessImpl(const Cell& left, const Cell& right) {
+    auto out = Cell::nil();
+    if (left.is<Integer>() && right.is<Integer>()) {
+        if (left.get<Integer>() < right.get<Integer>()) {
+            out = Cell::t();
+        }
+    } else if (left.is<Float>() || right.is<Float>()) {
+        if (
+            left.cast<Float>().get<Float>()
+            < right.cast<Float>().get<Float>()
+        ) {
+            out = Cell::t();
+        }
+    } else if (left.is<StringPtr>() && right.is<StringPtr>()) {
+        if (
+            *left.get<StringPtr>() < *right.get<StringPtr>()
+        ) {
+            out = Cell::t();
+        }
+    } else if (left.is<Symbol>() && right.is<Symbol>()) {
+        if (
+            left.get<Symbol>() < right.get<Symbol>()
+        ) {
+            out = Cell::t();
+        }
+    } else {
+        throw RuntimeError() << "Less: unexpected argument types ( "
+            << left.toString() << ", " <<  right.toString() << " )";
+    }
+    return out;
+}
+
+}
+
+Cell Less::instantCall(
+    Arguments args
+) const {
+    if (args.size() != 2) {
+        throw TypeError() << "Less function takes exactly 2 arguments";
+    }
+    return lessImpl(args.front(), args.back());
+}
+
 void allMathFunctions(Namespace& space) {
     space.emplace("+", std::make_shared<Sum>());
+    space.emplace("<", std::make_shared<Less>());
 }
 
 }  // namespace Builtin

@@ -69,4 +69,9 @@ class RuntimeError
 {
 };
 
+class TypeError
+    : public Exception
+{
+};
+
 }  // namespace AntLisp

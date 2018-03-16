@@ -38,7 +38,6 @@ void test_sum() {
                 AntLisp::Cell::symbol('$'),
             }
         );
-        std::cerr << out.toString() << '\n';
         UT_ASSERT_EQUAL(
             *out.get<AntLisp::StringPtr>(),
             std::string("$in the dark$")
@@ -48,6 +47,100 @@ void test_sum() {
             AntLisp::Cell::string("$in the dark$")
         );
     }
+}
+
+void test_less() {
+    auto less = AntLisp::Builtin::Less();
+    UT_ASSERT_EQUAL(
+        less.instantCall(
+            AntLisp::Arguments{
+                AntLisp::Cell::integer(86),
+                AntLisp::Cell::integer(64),
+            }
+        ),
+        AntLisp::Cell::nil()
+    );
+    UT_ASSERT_EQUAL(
+        less.instantCall(
+            AntLisp::Arguments{
+                AntLisp::Cell::integer(32),
+                AntLisp::Cell::integer(64),
+            }
+        ),
+        AntLisp::Cell::t()
+    );
+    UT_ASSERT_EQUAL(
+        less.instantCall(
+            AntLisp::Arguments{
+                AntLisp::Cell::real(192.168),
+                AntLisp::Cell::real(1.155),
+            }
+        ),
+        AntLisp::Cell::nil()
+    );
+    UT_ASSERT_EQUAL(
+        less.instantCall(
+            AntLisp::Arguments{
+                AntLisp::Cell::real(2.16),
+                AntLisp::Cell::real(10.7),
+            }
+        ),
+        AntLisp::Cell::t()
+    );
+    UT_ASSERT_EQUAL(
+        less.instantCall(
+            AntLisp::Arguments{
+                AntLisp::Cell::integer(2),
+                AntLisp::Cell::real(10.7),
+            }
+        ),
+        AntLisp::Cell::t()
+    );
+    UT_ASSERT_EQUAL(
+        less.instantCall(
+            AntLisp::Arguments{
+                AntLisp::Cell::real(-2.66),
+                AntLisp::Cell::integer(-2),
+            }
+        ),
+        AntLisp::Cell::t()
+    );
+    UT_ASSERT_EQUAL(
+        less.instantCall(
+            AntLisp::Arguments{
+                AntLisp::Cell::string("aa"),
+                AntLisp::Cell::string("aaa"),
+            }
+        ),
+        AntLisp::Cell::t()
+    );
+    UT_ASSERT_EQUAL(
+        less.instantCall(
+            AntLisp::Arguments{
+                AntLisp::Cell::string("abc"),
+                AntLisp::Cell::string("abc"),
+            }
+        ),
+        AntLisp::Cell::nil()
+    );
+    UT_ASSERT_EQUAL(
+        less.instantCall(
+            AntLisp::Arguments{
+                AntLisp::Cell::symbol('a'),
+                AntLisp::Cell::symbol('b'),
+            }
+        ),
+        AntLisp::Cell::t()
+    );
+    UT_ASSERT_EQUAL(
+        less.instantCall(
+            AntLisp::Arguments{
+                AntLisp::Cell::symbol('c'),
+                AntLisp::Cell::symbol('b'),
+            }
+        ),
+        AntLisp::Cell::nil()
+    );
 }
 
 void test_allMathBuiltinFunctions() {
@@ -63,9 +156,20 @@ void test_allMathBuiltinFunctions() {
         ),
         AntLisp::Cell::integer(17 + 16)
     );
+    const auto lessPtr = space.at("<").get<AntLisp::FunctionPtr>();
+    UT_ASSERT_EQUAL(
+        lessPtr->instantCall(
+            AntLisp::Arguments{
+                AntLisp::Cell::real(1.29),
+                AntLisp::Cell::real(1.31),
+            }
+        ),
+        AntLisp::Cell::t()
+    );
 }
 
 UT_LIST(
     RUN_TEST(test_sum);
     RUN_TEST(test_allMathBuiltinFunctions);
+    RUN_TEST(test_less);
 );
