@@ -33,7 +33,7 @@ public:
         InCodeStream& inStream
     ) {
         auto topLevel = ParenthesesParser::fromCodeStream(inStream);
-        this->expression(topLevel);
+        this->prognDef(topLevel);
         return *this;
     }
 

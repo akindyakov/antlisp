@@ -177,6 +177,24 @@ void test_parseCode_set() {
     );
 }
 
+void test_parseCode_multistate() {
+    auto global = AntLisp::Namespace{
+        {"+", AntLisp::Cell(std::make_shared<AntLisp::ExtSum>())},
+    };
+    std::istringstream in(R"antlisp-code(
+    (set x 87)
+    (set xy (+ x 250 250 242))
+    xy
+    )antlisp-code");
+    auto native = AntLisp::parseCode(in, global);
+    auto env = AntLisp::Environment(native);
+    env.run();
+    UT_ASSERT_EQUAL(
+        env.ret.get<AntLisp::Integer>(),
+        87 + 250 + 250 + 242
+    );
+}
+
 UT_LIST(
     RUN_TEST(testFullCycle);
     RUN_TEST(test_parseCode_lambda_call);
@@ -186,4 +204,5 @@ UT_LIST(
     RUN_TEST(test_parseCode_lambda_multi_call);
     RUN_TEST(test_parseCode_defun_call);
     RUN_TEST(test_parseCode_set);
+    RUN_TEST(test_parseCode_multistate);
 );
