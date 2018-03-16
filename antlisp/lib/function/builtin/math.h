@@ -5,6 +5,8 @@ namespace AntLisp {
 
 namespace Builtin {
 
+void allMathFunctions(Namespace& space);
+
 class Sum
     : public ExtInstantFunction
 {

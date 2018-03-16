@@ -2,13 +2,15 @@
 
 #include <antlisp/lib/parser/parser.h>
 #include <antlisp/lib/function/stack_machine.h>
+#include <antlisp/lib/function/builtin/math.h>
 
 #include <fstream>
 #include <iostream>
 
 
-AntLisp::Namespace interactive() {
-    auto global = AntLisp::Namespace{};
+void interactive(
+    AntLisp::Namespace& global
+) {
     auto line = std::string{};
     while (std::cin) {
         std::cout << "> " << std::flush;
@@ -22,32 +24,33 @@ AntLisp::Namespace interactive() {
         std::cout << env.ret.toString() << std::endl;
         global = std::move(env.vars);
     }
-    return global;
 }
 
-AntLisp::Namespace fromStream(
-    std::istream& in
+void fromStream(
+    AntLisp::Namespace& global
+    , std::istream& in
 ) {
-    auto global = AntLisp::Namespace{};
     auto env = AntLisp::Environment(
         AntLisp::parseCode(in, global)
     );
     env.run();
-    return std::move(env.vars);
+    global = std::move(env.vars);
 }
 
-AntLisp::Namespace fromFile(
-    const std::string& filename
+void fromFile(
+    AntLisp::Namespace& global
+    , const std::string& filename
 ) {
     std::ifstream in(filename);
-    return fromStream(in);
+    fromStream(global, in);
 }
 
-AntLisp::Namespace fromString(
-    const std::string& code
+void fromString(
+    AntLisp::Namespace& global
+    , const std::string& code
 ) {
     std::istringstream in(code);
-    return fromStream(in);
+    fromStream(global, in);
 }
 
 int main(int argn, char** argv) {
@@ -62,20 +65,23 @@ int main(int argn, char** argv) {
         return 0;
     }
 
-    auto globalVars = AntLisp::Namespace{};
+    auto global = AntLisp::Namespace{};
+    AntLisp::Builtin::allMathFunctions(global);
     if (args.count("script-file")) {
-        globalVars = fromFile(
+        fromFile(
+            global,
             args["script-file"].as<std::string>()
         );
     } else if (args.count("cmd")) {
-        globalVars = fromString(
+        fromString(
+            global,
             args["cmd"].as<std::string>()
         );
     } else {
-        globalVars = interactive();
+        interactive(global);
     }
     if (args.count("print-global")) {
-        for (const auto& nameAndCell : globalVars) {
+        for (const auto& nameAndCell : global) {
             std::cout
                 << "{"
                 << nameAndCell.first << " " << nameAndCell.second.toString()

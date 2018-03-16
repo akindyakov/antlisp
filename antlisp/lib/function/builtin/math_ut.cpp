@@ -50,6 +50,22 @@ void test_sum() {
     }
 }
 
+void test_allMathBuiltinFunctions() {
+    auto space = AntLisp::Namespace{};
+    AntLisp::Builtin::allMathFunctions(space);
+    const auto sumPtr = space.at("+").get<AntLisp::FunctionPtr>();
+    UT_ASSERT_EQUAL(
+        sumPtr->instantCall(
+            AntLisp::Arguments{
+                AntLisp::Cell::integer(17),
+                AntLisp::Cell::integer(16),
+            }
+        ),
+        AntLisp::Cell::integer(17 + 16)
+    );
+}
+
 UT_LIST(
     RUN_TEST(test_sum);
+    RUN_TEST(test_allMathBuiltinFunctions);
 );

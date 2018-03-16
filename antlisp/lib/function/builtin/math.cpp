@@ -50,13 +50,15 @@ Cell Sum::instantCall(
     auto it = args.cbegin();
     if (it != args.cend()) {
         out = it->copy();
-        std::cerr << "0 " << out.toString() << "\n";
         while (++it != args.cend()) {
-            std::cerr << "1 " << it->toString() << "\n";
             sumImpl(out, *it);
         }
     }
     return out;
+}
+
+void allMathFunctions(Namespace& space) {
+    space.emplace("+", std::make_shared<Sum>());
 }
 
 }  // namespace Builtin

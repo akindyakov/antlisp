@@ -13,6 +13,7 @@ def build(ctx):
             "antlisp-lib-function",
             "antlisp-lib-parser",
             "antlisp-lib-util",
+            "antlisp-lib-function-builtin",
         ],
     )
     ctx.recurse([
