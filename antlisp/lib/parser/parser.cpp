@@ -22,7 +22,7 @@ public:
             std::make_shared<LambdaFunction>(
                 NativeFunction(
                     std::make_shared<NativeFunctionDefinition>(),
-                    0, global
+                    0, global, "this"
                 ),
                 std::vector<TVarName>{} // global arg names - should be empty
             )
@@ -58,7 +58,7 @@ private:
             if ("defun" == token) {
                 functionDef(nextParser);
             } else if ("lambda" == token) {
-                lambdaDef(nextParser);
+                lambdaDef(nextParser, "this");
             } else if ("let" == token) {
                 letDef(nextParser);
             } else if ("set" == token) {
@@ -120,18 +120,21 @@ private:
         if (!pParser.nextToken(fname)) {
             throw SyntaxError() << pParser.getStat().toString() << " there is suppose to be function name.";
         }
-        lambdaDef(pParser);
         auto core = definitionStack.back()->core();
-        auto pos = core->names.size();
+        auto functionNamePos = core->names.size();
         core->names.push_back(fname);
+        // read and put lambda to stack
+        lambdaDef(pParser, fname);
+        // add defined lambda to local namespace
         core->addStep(
             NativeFunctionDefinition::SetLocal,
-            pos
+            functionNamePos
         );
     }
 
     void lambdaDef(
         ParenthesesParser& pParser
+        , const std::string& selfName
     ) {
         auto argNames = ArgNames{};
         auto token = std::string{};
@@ -153,7 +156,8 @@ private:
                     std::move(argNames)
                 ),
                 argnum,
-                Namespace{}
+                Namespace{},
+                selfName
             ),
             ArgNames{}
         );

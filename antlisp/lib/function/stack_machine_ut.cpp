@@ -73,7 +73,7 @@ void testFullCycle() {
     );
     auto env = AntLisp::Environment(
         AntLisp::NativeFunction(
-            std::move(fdef), 0, global
+            std::move(fdef), 0, global, "this"
         )
     );
     env.run();
@@ -139,7 +139,7 @@ void testLambdaFunction() {
         AntLisp::TVarName{"local_first"}, AntLisp::Cell::integer(81)
     );
     auto nativeCore = AntLisp::NativeFunction(
-        std::move(corefdef), 0, coreLocal
+        std::move(corefdef), 0, coreLocal, "this"
     );
     auto firstLambda = std::make_shared<AntLisp::LambdaFunction>(
         std::move(nativeCore),
@@ -194,7 +194,7 @@ void testLambdaFunction() {
     );
     auto env = AntLisp::Environment(
         AntLisp::NativeFunction{
-            std::move(gDef), 0, global
+            std::move(gDef), 0, global, "this"
         }
     );
     env.run();

@@ -9,4 +9,7 @@
     (true (+ prev_prev_sum prev_sum))
   )
 )
-(fib_rec 10 0 0 1)
+(set
+  fib10
+  (fib_rec 10 0 0 1)
+)

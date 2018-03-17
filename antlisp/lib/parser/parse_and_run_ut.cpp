@@ -40,6 +40,31 @@ void test_parseCode_lambda_call() {
     );
 }
 
+void test_parseCode_lambda_recursive_call() {
+    auto global = AntLisp::Namespace{
+        {"+", AntLisp::Cell(std::make_shared<AntLisp::ExtSum>())},
+        {"=", AntLisp::Cell(std::make_shared<AntLisp::ExtIsEqual>())},
+    };
+    std::istringstream in(R"(
+    (
+      (lambda (n)
+        (cond
+          ((= n 0) 0)
+          (true (+ 1 (this (+ -1 n))))
+        )
+      )
+      5
+    )
+    )");
+    auto native = AntLisp::parseCode(in, global);
+    auto env = AntLisp::Environment(native);
+    env.run();
+    UT_ASSERT_EQUAL(
+        env.ret.get<AntLisp::Integer>(),
+        5
+    );
+}
+
 void test_parseCode_cond() {
     auto global = AntLisp::Namespace{
         {"+", AntLisp::Cell(std::make_shared<AntLisp::ExtSum>())},
@@ -129,6 +154,31 @@ void test_parseCode_defun_call() {
     );
 }
 
+void test_parseCode_defun_recursive_call() {
+    auto global = AntLisp::Namespace{
+        {"+", AntLisp::Cell(std::make_shared<AntLisp::ExtSum>())},
+        {"=", AntLisp::Cell(std::make_shared<AntLisp::ExtIsEqual>())},
+    };
+    std::istringstream in(R"antlisp-code(
+    (progn
+      (defun ballad (n sum)
+        (cond
+          ((= n 0) sum)
+          (true (ballad (+ n -1) (+ sum 2)))
+        )
+      )
+      (ballad 5 0)
+    )
+    )antlisp-code");
+    auto native = AntLisp::parseCode(in, global);
+    auto env = AntLisp::Environment(native);
+    env.run();
+    UT_ASSERT_EQUAL(
+        env.ret.get<AntLisp::Integer>(),
+        5 * 2
+    );
+}
+
 void test_parseCode_lambda_multi_call() {
     auto global = AntLisp::Namespace{
         {"+", AntLisp::Cell(std::make_shared<AntLisp::ExtSum>())},
@@ -198,11 +248,13 @@ void test_parseCode_multistate() {
 UT_LIST(
     RUN_TEST(testFullCycle);
     RUN_TEST(test_parseCode_lambda_call);
+    RUN_TEST(test_parseCode_lambda_recursive_call);
     RUN_TEST(test_parseCode_cond);
     RUN_TEST(test_parseCode_progn);
     RUN_TEST(test_parseCode_progn_simple);
     RUN_TEST(test_parseCode_lambda_multi_call);
     RUN_TEST(test_parseCode_defun_call);
+    RUN_TEST(test_parseCode_defun_recursive_call);
     RUN_TEST(test_parseCode_set);
     RUN_TEST(test_parseCode_multistate);
 );

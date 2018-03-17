@@ -151,10 +151,6 @@ public:
 
     void setLocal();
 
-    void getGlobal(const Namespace& global);
-
-    void setGlobal(Namespace& global);
-
     void stackRewind();
 
     void skipUntilMark();
@@ -246,6 +242,7 @@ public:
 class ExtSum
     : public ExtInstantFunction
 {
+public:
     Cell instantCall(
         Arguments frame
     ) const override {
@@ -260,6 +257,7 @@ class ExtSum
 class ExtMultiplication
     : public ExtInstantFunction
 {
+public:
     Cell instantCall(
         Arguments frame
     ) const override {
@@ -271,21 +269,29 @@ class ExtMultiplication
     }
 };
 
+class ExtIsEqual
+    : public ExtInstantFunction
+{
+public:
+    Cell instantCall(
+        Arguments frame
+    ) const override {
+        if (frame.at(0) == frame.at(1)) {
+            return Cell::t();
+        }
+        return Cell::nil();
+    }
+};
+
 class NativeFunction
     : public IFunction
 {
 public:
-    explicit NativeFunction()
-        : fdef(
-            std::make_shared<NativeFunctionDefinition>()
-        )
-    {
-    }
-
     explicit NativeFunction(
         NativeFunctionDefinitionPtr fdef_
         , std::size_t argnum_
         , Namespace closures_
+        , TVarName selfName_
     )
         : argnum(argnum_)
         , fdef(
@@ -294,7 +300,14 @@ public:
         , closures(
             std::move(closures_)
         )
+        , selfName(
+            std::move(selfName_)
+        )
     {
+        // shold shared_from_this be used here?
+        closures[selfName] = Cell::function(
+            nullptr
+        );
     }
 
     NativeFunction(const NativeFunction&) = delete;
@@ -320,7 +333,15 @@ public:
         Namespace vars
     ) const {
         vars.insert(closures.begin(), closures.end());
-        return std::make_shared<NativeFunction>(fdef, argnum, std::move(vars));
+        auto copy = std::make_shared<NativeFunction>(
+            fdef, argnum, std::move(vars), selfName
+        );
+        // Add this ptr to local vars to make recursive call
+        copy->closures[selfName] = Cell::function(
+            copy
+        );
+        // Not activated native function does not have 'this' variable
+        return copy;
     }
 
     Cell instantCall(
@@ -375,6 +396,7 @@ public:
     std::size_t argnum = 0;
     NativeFunctionDefinitionPtr fdef;
     Namespace closures;  // default arguments
+    TVarName selfName;
 };
 
 class PostponedFunction
