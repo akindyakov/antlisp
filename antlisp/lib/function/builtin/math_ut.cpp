@@ -141,6 +141,44 @@ void test_less() {
         ),
         AntLisp::Cell::nil()
     );
+    UT_ASSERT_EQUAL(
+        less.instantCall(
+            AntLisp::Arguments{
+                AntLisp::Cell::symbol('a'),
+                AntLisp::Cell::symbol('b'),
+                AntLisp::Cell::symbol('c'),
+                AntLisp::Cell::symbol('d'),
+                AntLisp::Cell::symbol('e'),
+                AntLisp::Cell::symbol('y'),
+                AntLisp::Cell::symbol('z'),
+            }
+        ),
+        AntLisp::Cell::t()
+    );
+    UT_ASSERT_EQUAL(
+        less.instantCall(
+            AntLisp::Arguments{
+                AntLisp::Cell::integer(10),
+                AntLisp::Cell::integer(20),
+                AntLisp::Cell::integer(30),
+                AntLisp::Cell::integer(30),
+                AntLisp::Cell::integer(40),
+            }
+        ),
+        AntLisp::Cell::nil()
+    );
+    UT_ASSERT_EQUAL(
+        less.instantCall(
+            AntLisp::Arguments{
+                AntLisp::Cell::symbol('1'),
+                AntLisp::Cell::symbol('2'),
+                AntLisp::Cell::symbol('3'),
+                AntLisp::Cell::symbol('3'),
+                AntLisp::Cell::symbol('4'),
+            }
+        ),
+        AntLisp::Cell::nil()
+    );
 }
 
 void test_equality() {

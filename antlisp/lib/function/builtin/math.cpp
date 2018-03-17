@@ -95,30 +95,34 @@ bool lessImpl(const Cell& left, const Cell& right) {
 Cell Less::instantCall(
     Arguments args
 ) const {
-    // TODO: make it possible to use more than two args
-    if (args.size() != 2) {
-        throw TypeError() << "Less function takes exactly 2 arguments";
+    if (args.size() < 2) {
+        throw TypeError() << "Less function takes 2 or more arguments";
     }
-    auto out = lessImpl(args.front(), args.back())
-        ? Cell::t()
-        : Cell::nil();
-    return out;
+    auto right = args.cbegin();
+    auto left = right++;
+    while (right != args.cend()) {
+        if (not lessImpl(*left, *right)) {
+            return Cell::nil();
+        }
+        ++left;
+        ++right;
+    }
+    return Cell::t();
 }
 
 Cell Equality::instantCall(
     Arguments args
 ) const {
-    auto out = Cell::t();
-    auto it = args.begin();
-    auto first = it++;
-    while (it < args.end()) {
-        if (*it != *first) {
-            out = Cell::nil();
-            break;
+    auto right = args.cbegin();
+    auto left = right++;
+    while (right != args.cend()) {
+        if (*left != *right) {
+            return Cell::nil();
         }
-        ++it;
+        ++left;
+        ++right;
     }
-    return out;
+    return Cell::t();
 }
 
 void allMathFunctions(Namespace& space) {
