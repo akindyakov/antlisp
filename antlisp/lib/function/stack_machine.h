@@ -194,8 +194,8 @@ public:
     ) {
         auto vars = Namespace{};
         std::size_t nameIndex = 0;
-        auto rit = args.rbegin();
-        while (rit != args.rend() && nameIndex < argMaxNum) {
+        auto rit = args.begin();
+        while (rit != args.end() && nameIndex < argMaxNum) {
             const auto& argName = names[nameIndex];
             vars[argName] = std::move(*rit);
             ++rit;
@@ -359,6 +359,11 @@ public:
             fdef->names,
             argnum
         );
+        std::cerr << "(args ";
+        for (const auto& arg : vars) {
+            std::cerr << "{" << arg.first << " " << arg.second.toString() << "} ";
+        }
+        std::cerr << ")\n";
         vars.insert(closures.begin(), closures.end());
         return NativeFunctionCall(fdef, vars);
     }

@@ -2,6 +2,8 @@
 
 #include <antlisp/lib/util/string.h>
 
+#include <algorithm>
+
 
 namespace AntLisp {
 
@@ -102,6 +104,7 @@ Arguments NativeFunctionCall::createArgs() {
             pop()
         );
     }
+    std::reverse(args.begin(), args.end());
     return args;
 }
 
