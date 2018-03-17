@@ -22,9 +22,28 @@ def configure(ctx):
     ])
     ctx.env.append_unique(
         "CXXFLAGS", [
-            #"-O2",
+            "-O2",
             "-std=c++14",
             "-ggdb",
+            "-Wall",
+            "-Wextra",
+            "-Wformat-nonliteral",
+            "-Wcast-align",
+            "-Wpointer-arith",
+            "-Wbad-function-cast",
+            "-Wmissing-prototypes",
+            "-Wstrict-prototypes",
+            "-Wmissing-declarations",
+            "-Winline",
+            "-Wundef",
+            "-Wnested-externs",
+            "-Wcast-qual",
+            "-Wshadow",
+            "-Wwrite-strings",
+            "-Wno-unused-parameter",
+            "-Wfloat-equal",
+            "-Wpedantic",
+            "-ansi",
         ]
     )
     ctx.env.INCLUDES = [
