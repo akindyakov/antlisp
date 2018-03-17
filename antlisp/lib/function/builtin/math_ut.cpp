@@ -199,6 +199,29 @@ void test_equality() {
         ),
         AntLisp::Cell::nil()
     );
+    UT_ASSERT_EQUAL(
+        eq.instantCall(
+            AntLisp::Arguments{
+                AntLisp::Cell::symbol('t'),
+                AntLisp::Cell::symbol('t'),
+                AntLisp::Cell::symbol('t'),
+                AntLisp::Cell::symbol('t'),
+                AntLisp::Cell::symbol('t'),
+            }
+        ),
+        AntLisp::Cell::t()
+    );
+    UT_ASSERT_EQUAL(
+        eq.instantCall(
+            AntLisp::Arguments{
+                AntLisp::Cell::symbol('u'),
+                AntLisp::Cell::symbol('u'),
+                AntLisp::Cell::symbol('*'),
+                AntLisp::Cell::symbol('u'),
+            }
+        ),
+        AntLisp::Cell::nil()
+    );
 }
 
 void test_allMathBuiltinFunctions() {
