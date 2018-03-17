@@ -57,10 +57,11 @@ void NativeFunctionCall::getLocal() {
     ].position;
     const auto& name = this->function->names[pos];
     // copy
-    auto local = this->vars.at(name);
-    this->push(
-        std::move(local)
-    );
+    auto localIt = this->vars.find(name);
+    if (localIt == this->vars.end()) {
+        throw RuntimeError() << "There is no such local name " << Str::Quotes(name);
+    }
+    this->push(localIt->second);
 }
 
 void NativeFunctionCall::setLocal() {
