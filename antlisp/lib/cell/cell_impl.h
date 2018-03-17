@@ -83,11 +83,11 @@ class TypeInfo<FunctionPtr>
 {
 public:
     static constexpr const char* name() {
-        return "function-ptr";
+        return "function";
     }
     static std::string toString(FunctionPtr ptr) {
         auto out = std::ostringstream();
-        out << name() << ": " << ptr;
+        out << name() << ":" << ptr;
         return out.str();
     }
 };

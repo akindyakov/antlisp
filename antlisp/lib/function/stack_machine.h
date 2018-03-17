@@ -359,11 +359,6 @@ public:
             fdef->names,
             argnum
         );
-        std::cerr << "(args ";
-        for (const auto& arg : vars) {
-            std::cerr << "{" << arg.first << " " << arg.second.toString() << "} ";
-        }
-        std::cerr << ")\n";
         vars.insert(closures.begin(), closures.end());
         return NativeFunctionCall(fdef, vars);
     }

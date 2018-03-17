@@ -61,7 +61,6 @@ namespace {
 
 Cell lessImpl(const Cell& left, const Cell& right) {
     auto out = Cell::nil();
-    std::cerr << "( {left " << left.toString() << "} {right " << right.toString() << "} )\n";
     if (left.is<Integer>() && right.is<Integer>()) {
         if (left.get<Integer>() < right.get<Integer>()) {
             out = Cell::t();
