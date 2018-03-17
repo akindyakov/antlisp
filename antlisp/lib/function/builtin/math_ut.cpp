@@ -261,7 +261,7 @@ void test_allMathBuiltinFunctions() {
 
 UT_LIST(
     RUN_TEST(test_sum);
-    RUN_TEST(test_allMathBuiltinFunctions);
     RUN_TEST(test_equality);
     RUN_TEST(test_less);
+    RUN_TEST(test_allMathBuiltinFunctions);
 );
