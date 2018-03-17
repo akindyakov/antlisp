@@ -25,6 +25,15 @@ public:
     ) const override;
 };
 
+class Equality
+    : public ExtInstantFunction
+{
+public:
+    Cell instantCall(
+        Arguments args
+    ) const override;
+};
+
 }  // namespace Builtin
 
 }  // namespace AntLisp

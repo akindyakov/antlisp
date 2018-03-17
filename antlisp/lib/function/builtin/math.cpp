@@ -96,15 +96,33 @@ Cell lessImpl(const Cell& left, const Cell& right) {
 Cell Less::instantCall(
     Arguments args
 ) const {
+    // TODO: make it possible to use more than two args
     if (args.size() != 2) {
         throw TypeError() << "Less function takes exactly 2 arguments";
     }
     return lessImpl(args.front(), args.back());
 }
 
+Cell Equality::instantCall(
+    Arguments args
+) const {
+    auto out = Cell::t();
+    auto it = args.begin();
+    auto first = it++;
+    while (it < args.end()) {
+        if (*it != *first) {
+            out = Cell::nil();
+            break;
+        }
+        ++it;
+    }
+    return out;
+}
+
 void allMathFunctions(Namespace& space) {
     space.emplace("+", std::make_shared<Sum>());
     space.emplace("<", std::make_shared<Less>());
+    space.emplace("=", std::make_shared<Equality>());
 }
 
 }  // namespace Builtin
