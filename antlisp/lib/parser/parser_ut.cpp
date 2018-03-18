@@ -6,24 +6,10 @@
 
 #include <sstream>
 
-class ExtMultiplication
-    : public AntLisp::ExtInstantFunction
-{
-public:
-    AntLisp::Cell instantCall(
-        AntLisp::Arguments frame
-    ) const override {
-        auto m = AntLisp::Integer{1};
-        for (const auto& cell : frame) {
-            m *= cell.get<AntLisp::Integer>();
-        }
-        return AntLisp::Cell::integer(m);
-    }
-};
 
 void test_parseCode() {
     auto global = AntLisp::Namespace{
-        {"*", AntLisp::Cell(std::make_shared<ExtMultiplication>())},
+        {"*", AntLisp::Cell(std::make_shared<AntLisp::Builtin::Multiplication>())},
         {"sum", AntLisp::Cell(std::make_shared<AntLisp::Builtin::Sum>())},
     };
     std::istringstream in("  (sum 1.23 (* 2 3)) ");

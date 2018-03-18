@@ -46,13 +46,69 @@ void sumImpl(Cell& to, const Cell& arg) {
 Cell Sum::instantCall(
     Arguments args
 ) const {
+    if (args.size() < 2) {
+        throw TypeError() << "Sum function takes 2 or more arguments";
+    }
     auto out = Cell::nil();
     auto it = args.cbegin();
-    if (it != args.cend()) {
-        out = it->copy();
-        while (++it != args.cend()) {
-            sumImpl(out, *it);
+    out = it->copy();
+    while (++it != args.cend()) {
+        sumImpl(out, *it);
+    }
+    return out;
+}
+
+namespace {
+
+void multiplicationImpl(Cell& to, const Cell& right) {
+    if (to.is<Integer>() && right.is<Integer>()) {
+        to.get<Integer>() *= right.get<Integer>();
+    } else if (to.is<Float>() || right.is<Float>()) {
+        if (not to.is<Float>()) {
+            to = to.cast<Float>();
         }
+        to.get<Float>() *= right.cast<Float>().get<Float>();
+    } else if (to.is<StringPtr>() && right.is<Integer>()) {
+        auto strPtr = to.get<StringPtr>().get();
+        auto len = strPtr->size();
+        auto n = right.get<Integer>();
+        if (n < 0) {
+            throw RuntimeError() << "Multiplication: multiplication strin on negative integer is prohibited";
+        }
+        while (n-- > 1) {
+            std::copy(
+                strPtr->begin(),
+                strPtr->begin() + len,
+                std::back_inserter(*strPtr)
+            );
+        }
+    } else if (to.is<Symbol>() && right.is<Integer>()) {
+        auto n = right.get<Integer>();
+        if (n < 0) {
+            throw RuntimeError() << "Multiplication: multiplication symbol on negative integer is prohibited";
+        }
+        to = Cell::string(
+            std::string(n, to.get<Symbol>())
+        );
+    } else {
+        throw RuntimeError() << "Multiplication: unexpected argument types ( "
+            << to.toString() << ", " <<  right.toString() << " )";
+    }
+}
+
+}
+
+Cell Multiplication::instantCall(
+    Arguments args
+) const {
+    if (args.size() < 2) {
+        throw TypeError() << "Multiplication function takes 2 or more arguments";
+    }
+    auto out = Cell::nil();
+    auto it = args.cbegin();
+    out = it->copy();
+    while (++it != args.cend()) {
+        multiplicationImpl(out, *it);
     }
     return out;
 }
@@ -127,6 +183,7 @@ Cell Equality::instantCall(
 
 void allMathFunctions(Namespace& space) {
     space.emplace("+", std::make_shared<Sum>());
+    space.emplace("*", std::make_shared<Multiplication>());
     space.emplace("<", std::make_shared<Less>());
     space.emplace("=", std::make_shared<Equality>());
 }

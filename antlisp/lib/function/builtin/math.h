@@ -16,6 +16,15 @@ public:
     ) const override;
 };
 
+class Multiplication
+    : public ExtInstantFunction
+{
+public:
+    Cell instantCall(
+        Arguments args
+    ) const override;
+};
+
 class Less
     : public ExtInstantFunction
 {

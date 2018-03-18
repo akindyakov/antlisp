@@ -7,29 +7,10 @@
 
 #include <iostream>
 
-class ExtMultiplication
-    : public AntLisp::ExtInstantFunction
-{
-public:
-    AntLisp::Cell instantCall(
-        AntLisp::Arguments frame
-    ) const override {
-        auto m = AntLisp::Integer{1};
-        for (const auto& cell : frame) {
-            m *= cell.get<AntLisp::Integer>();
-        }
-        return AntLisp::Cell::integer(m);
-    }
-};
 
 void testFullCycle() {
     std::istringstream in("  (+ 21 (* 2 3)) ");
-    auto global = AntLisp::Namespace{
-        {
-            "*",
-            AntLisp::Cell(std::make_shared<ExtMultiplication>())
-        }
-    };
+    auto global = AntLisp::Namespace{};
     AntLisp::Builtin::allMathFunctions(global);
     auto native = AntLisp::parseCode(in, global);
     auto env = AntLisp::Environment(native);

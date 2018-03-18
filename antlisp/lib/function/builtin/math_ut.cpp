@@ -49,6 +49,55 @@ void test_sum() {
     }
 }
 
+void test_multiplication() {
+    auto m = AntLisp::Builtin::Multiplication();
+    UT_ASSERT_EQUAL(
+        m.instantCall(
+            AntLisp::Arguments{
+                AntLisp::Cell::integer(12),
+                AntLisp::Cell::integer(-6),
+            }
+        ),
+        AntLisp::Cell::integer(12 * -6)
+    );
+    UT_ASSERT_EQUAL(
+        m.instantCall(
+            AntLisp::Arguments{
+                AntLisp::Cell::symbol('s'),
+                AntLisp::Cell::integer(1),
+            }
+        ),
+        AntLisp::Cell::string("s")
+    );
+    UT_ASSERT_EQUAL(
+        m.instantCall(
+            AntLisp::Arguments{
+                AntLisp::Cell::symbol('s'),
+                AntLisp::Cell::integer(3),
+            }
+        ),
+        AntLisp::Cell::string("sss")
+    );
+    UT_ASSERT_EQUAL(
+        m.instantCall(
+            AntLisp::Arguments{
+                AntLisp::Cell::string("Basic"),
+                AntLisp::Cell::integer(2),
+            }
+        ),
+        AntLisp::Cell::string("BasicBasic")
+    );
+    UT_ASSERT_EQUAL(
+        m.instantCall(
+            AntLisp::Arguments{
+                AntLisp::Cell::string("welcomE"),
+                AntLisp::Cell::integer(1),
+            }
+        ),
+        AntLisp::Cell::string("welcomE")
+    );
+}
+
 void test_less() {
     auto less = AntLisp::Builtin::Less();
     UT_ASSERT_EQUAL(
@@ -295,10 +344,21 @@ void test_allMathBuiltinFunctions() {
         ),
         AntLisp::Cell::t()
     );
+    const auto mPtr = space.at("*").get<AntLisp::FunctionPtr>();
+    UT_ASSERT_EQUAL(
+        mPtr->instantCall(
+            AntLisp::Arguments{
+                AntLisp::Cell::integer(6),
+                AntLisp::Cell::integer(29),
+            }
+        ),
+        AntLisp::Cell::integer(6 * 29)
+    );
 }
 
 UT_LIST(
     RUN_TEST(test_sum);
+    RUN_TEST(test_multiplication);
     RUN_TEST(test_equality);
     RUN_TEST(test_less);
     RUN_TEST(test_allMathBuiltinFunctions);
