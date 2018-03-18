@@ -5,13 +5,43 @@
 #include <iostream>
 
 
+class ExtSum
+    : public AntLisp::ExtInstantFunction
+{
+public:
+    AntLisp::Cell instantCall(
+        AntLisp::Arguments frame
+    ) const override {
+        auto sum = AntLisp::Integer{0};
+        for (const auto& cell : frame) {
+            sum += cell.get<AntLisp::Integer>();
+        }
+        return AntLisp::Cell::integer(sum);
+    }
+};
+
+class ExtMultiplication
+    : public AntLisp::ExtInstantFunction
+{
+public:
+    AntLisp::Cell instantCall(
+        AntLisp::Arguments frame
+    ) const override {
+        auto m = AntLisp::Integer{1};
+        for (const auto& cell : frame) {
+            m *= cell.get<AntLisp::Integer>();
+        }
+        return AntLisp::Cell::integer(m);
+    }
+};
+
 void testFullCycle() {
     auto global = AntLisp::Namespace{
         {
-            "+", AntLisp::Cell(std::make_shared<AntLisp::ExtSum>())
+            "+", AntLisp::Cell(std::make_shared<ExtSum>())
         },
         {
-            "*", AntLisp::Cell(std::make_shared<AntLisp::ExtMultiplication>())
+            "*", AntLisp::Cell(std::make_shared<ExtMultiplication>())
         },
         {
             "first", AntLisp::Cell::integer(12)
@@ -86,7 +116,7 @@ void testFullCycle() {
 void testLambdaFunction() {
     auto global = AntLisp::Namespace{
         {
-            "+", AntLisp::Cell(std::make_shared<AntLisp::ExtSum>())
+            "+", AntLisp::Cell(std::make_shared<ExtSum>())
         },
         {
             "global_first", AntLisp::Cell::integer(2209)

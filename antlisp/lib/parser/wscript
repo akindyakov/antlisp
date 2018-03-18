@@ -22,6 +22,7 @@ def build(ctx):
         source="code_stream_ut.cpp",
         use=[
             "antlisp-lib-parser",
+            "antlisp-lib-function-builtin",
         ],
     )
     ctx.program(
@@ -30,6 +31,7 @@ def build(ctx):
         source="parentheses_parser_ut.cpp",
         use=[
             "antlisp-lib-parser",
+            "antlisp-lib-function-builtin",
         ],
     )
     ctx.program(
@@ -38,6 +40,7 @@ def build(ctx):
         source="parser_ut.cpp",
         use=[
             "antlisp-lib-parser",
+            "antlisp-lib-function-builtin",
         ],
     )
     ctx.program(
@@ -46,6 +49,7 @@ def build(ctx):
         source="parse_and_run_ut.cpp",
         use=[
             "antlisp-lib-parser",
+            "antlisp-lib-function-builtin",
         ],
     )
     ctx.program(
@@ -54,5 +58,6 @@ def build(ctx):
         source="cell_in_string_ut.cpp",
         use=[
             "antlisp-lib-parser",
+            "antlisp-lib-function-builtin",
         ],
     )

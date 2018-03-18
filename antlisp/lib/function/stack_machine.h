@@ -239,50 +239,6 @@ public:
     }
 };
 
-class ExtSum
-    : public ExtInstantFunction
-{
-public:
-    Cell instantCall(
-        Arguments frame
-    ) const override {
-        auto sum = Integer{0};
-        for (const auto& cell : frame) {
-            sum += cell.get<Integer>();
-        }
-        return Cell::integer(sum);
-    }
-};
-
-class ExtMultiplication
-    : public ExtInstantFunction
-{
-public:
-    Cell instantCall(
-        Arguments frame
-    ) const override {
-        auto m = Integer{1};
-        for (const auto& cell : frame) {
-            m *= cell.get<Integer>();
-        }
-        return Cell::integer(m);
-    }
-};
-
-class ExtIsEqual
-    : public ExtInstantFunction
-{
-public:
-    Cell instantCall(
-        Arguments frame
-    ) const override {
-        if (frame.at(0) == frame.at(1)) {
-            return Cell::t();
-        }
-        return Cell::nil();
-    }
-};
-
 class NativeFunction
     : public IFunction
 {

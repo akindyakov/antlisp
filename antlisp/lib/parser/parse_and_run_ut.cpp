@@ -1,22 +1,36 @@
 #include "parser.h"
 
 #include <antlisp/lib/function/stack_machine.h>
+#include <antlisp/lib/function/builtin/math.h>
 
 #include <antlisp/lib/test/ut.h>
 
 #include <iostream>
 
+class ExtMultiplication
+    : public AntLisp::ExtInstantFunction
+{
+public:
+    AntLisp::Cell instantCall(
+        AntLisp::Arguments frame
+    ) const override {
+        auto m = AntLisp::Integer{1};
+        for (const auto& cell : frame) {
+            m *= cell.get<AntLisp::Integer>();
+        }
+        return AntLisp::Cell::integer(m);
+    }
+};
 
 void testFullCycle() {
     std::istringstream in("  (+ 21 (* 2 3)) ");
     auto global = AntLisp::Namespace{
         {
-            "+", AntLisp::Cell(std::make_shared<AntLisp::ExtSum>())
-        },
-        {
-            "*", AntLisp::Cell(std::make_shared<AntLisp::ExtMultiplication>())
+            "*",
+            AntLisp::Cell(std::make_shared<ExtMultiplication>())
         }
     };
+    AntLisp::Builtin::allMathFunctions(global);
     auto native = AntLisp::parseCode(in, global);
     auto env = AntLisp::Environment(native);
     env.run();
@@ -27,9 +41,8 @@ void testFullCycle() {
 }
 
 void test_parseCode_lambda_call() {
-    auto global = AntLisp::Namespace{
-        {"+", AntLisp::Cell(std::make_shared<AntLisp::ExtSum>())},
-    };
+    auto global = AntLisp::Namespace{};
+    AntLisp::Builtin::allMathFunctions(global);
     std::istringstream in("((lambda (x y) (+ x y 1)) 4 2)");
     auto native = AntLisp::parseCode(in, global);
     auto env = AntLisp::Environment(native);
@@ -41,10 +54,8 @@ void test_parseCode_lambda_call() {
 }
 
 void test_parseCode_lambda_recursive_call() {
-    auto global = AntLisp::Namespace{
-        {"+", AntLisp::Cell(std::make_shared<AntLisp::ExtSum>())},
-        {"=", AntLisp::Cell(std::make_shared<AntLisp::ExtIsEqual>())},
-    };
+    auto global = AntLisp::Namespace{};
+    AntLisp::Builtin::allMathFunctions(global);
     std::istringstream in(R"(
     (
       (lambda (n)
@@ -66,9 +77,8 @@ void test_parseCode_lambda_recursive_call() {
 }
 
 void test_parseCode_cond() {
-    auto global = AntLisp::Namespace{
-        {"+", AntLisp::Cell(std::make_shared<AntLisp::ExtSum>())},
-    };
+    auto global = AntLisp::Namespace{};
+    AntLisp::Builtin::allMathFunctions(global);
     std::istringstream in(R"antlisp-code(
     (cond
         (nil  (+ 1 2))
@@ -89,9 +99,8 @@ void test_parseCode_cond() {
 }
 
 void test_parseCode_progn_simple() {
-    auto global = AntLisp::Namespace{
-        {"+", AntLisp::Cell(std::make_shared<AntLisp::ExtSum>())},
-    };
+    auto global = AntLisp::Namespace{};
+    AntLisp::Builtin::allMathFunctions(global);
     std::istringstream in(R"antlisp-code(
     (progn
       true
@@ -109,9 +118,8 @@ void test_parseCode_progn_simple() {
 }
 
 void test_parseCode_progn() {
-    auto global = AntLisp::Namespace{
-        {"+", AntLisp::Cell(std::make_shared<AntLisp::ExtSum>())},
-    };
+    auto global = AntLisp::Namespace{};
+    AntLisp::Builtin::allMathFunctions(global);
     std::istringstream in(R"antlisp-code(
     (
       (lambda (x y)
@@ -134,9 +142,8 @@ void test_parseCode_progn() {
 }
 
 void test_parseCode_defun_call() {
-    auto global = AntLisp::Namespace{
-        {"+", AntLisp::Cell(std::make_shared<AntLisp::ExtSum>())},
-    };
+    auto global = AntLisp::Namespace{};
+    AntLisp::Builtin::allMathFunctions(global);
     std::istringstream in(R"antlisp-code(
     (progn
         (defun ballad (of bull)
@@ -155,10 +162,8 @@ void test_parseCode_defun_call() {
 }
 
 void test_parseCode_defun_recursive_call() {
-    auto global = AntLisp::Namespace{
-        {"+", AntLisp::Cell(std::make_shared<AntLisp::ExtSum>())},
-        {"=", AntLisp::Cell(std::make_shared<AntLisp::ExtIsEqual>())},
-    };
+    auto global = AntLisp::Namespace{};
+    AntLisp::Builtin::allMathFunctions(global);
     std::istringstream in(R"antlisp-code(
     (progn
       (defun ballad (n sum)
@@ -180,9 +185,8 @@ void test_parseCode_defun_recursive_call() {
 }
 
 void test_parseCode_lambda_multi_call() {
-    auto global = AntLisp::Namespace{
-        {"+", AntLisp::Cell(std::make_shared<AntLisp::ExtSum>())},
-    };
+    auto global = AntLisp::Namespace{};
+    AntLisp::Builtin::allMathFunctions(global);
     std::istringstream in(R"code(
 (
   (
@@ -208,9 +212,8 @@ void test_parseCode_lambda_multi_call() {
 
 
 void test_parseCode_set() {
-    auto global = AntLisp::Namespace{
-        {"+", AntLisp::Cell(std::make_shared<AntLisp::ExtSum>())},
-    };
+    auto global = AntLisp::Namespace{};
+    AntLisp::Builtin::allMathFunctions(global);
     std::istringstream in(R"antlisp-code(
     (progn
       (set xx 181)
@@ -228,9 +231,8 @@ void test_parseCode_set() {
 }
 
 void test_parseCode_multistate() {
-    auto global = AntLisp::Namespace{
-        {"+", AntLisp::Cell(std::make_shared<AntLisp::ExtSum>())},
-    };
+    auto global = AntLisp::Namespace{};
+    AntLisp::Builtin::allMathFunctions(global);
     std::istringstream in(R"antlisp-code(
     (set x 87)
     (set xy (+ x 250 250 242))

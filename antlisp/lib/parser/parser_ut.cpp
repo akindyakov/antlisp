@@ -1,14 +1,30 @@
 #include "parser.h"
 
+#include <antlisp/lib/function/builtin/math.h>
+
 #include <antlisp/lib/test/ut.h>
 
 #include <sstream>
 
+class ExtMultiplication
+    : public AntLisp::ExtInstantFunction
+{
+public:
+    AntLisp::Cell instantCall(
+        AntLisp::Arguments frame
+    ) const override {
+        auto m = AntLisp::Integer{1};
+        for (const auto& cell : frame) {
+            m *= cell.get<AntLisp::Integer>();
+        }
+        return AntLisp::Cell::integer(m);
+    }
+};
 
 void test_parseCode() {
     auto global = AntLisp::Namespace{
-        {"*", AntLisp::Cell(std::make_shared<AntLisp::ExtMultiplication>())},
-        {"sum", AntLisp::Cell(std::make_shared<AntLisp::ExtSum>())},
+        {"*", AntLisp::Cell(std::make_shared<ExtMultiplication>())},
+        {"sum", AntLisp::Cell(std::make_shared<AntLisp::Builtin::Sum>())},
     };
     std::istringstream in("  (sum 1.23 (* 2 3)) ");
     auto native = AntLisp::parseCode(in, global);
@@ -18,7 +34,7 @@ void test_parseCode() {
 
 void test_parseCode_lambda() {
     auto global = AntLisp::Namespace{
-        {"+", AntLisp::Cell(std::make_shared<AntLisp::ExtSum>())},
+        {"+", AntLisp::Cell(std::make_shared<AntLisp::Builtin::Sum>())},
     };
     std::istringstream in("(lambda (x) (+ x 1))");
     auto native = AntLisp::parseCode(in, global);
@@ -28,7 +44,7 @@ void test_parseCode_lambda() {
 
 void test_parseCode_wrong_labda__body_is_absent() {
     auto global = AntLisp::Namespace{
-        {"+", AntLisp::Cell(std::make_shared<AntLisp::ExtSum>())},
+        {"+", AntLisp::Cell(std::make_shared<AntLisp::Builtin::Sum>())},
     };
     std::istringstream in("(lambda (x))");
     UT_ASSERT_EXCEPTION_TYPE(
@@ -39,7 +55,7 @@ void test_parseCode_wrong_labda__body_is_absent() {
 
 void test_parseCode_wrong_labda__args_and_body_is_absent() {
     auto global = AntLisp::Namespace{
-        {"+", AntLisp::Cell(std::make_shared<AntLisp::ExtSum>())},
+        {"+", AntLisp::Cell(std::make_shared<AntLisp::Builtin::Sum>())},
     };
     std::istringstream in("(lambda)");
     UT_ASSERT_EXCEPTION_TYPE(
@@ -50,7 +66,7 @@ void test_parseCode_wrong_labda__args_and_body_is_absent() {
 
 void test_parseCode_cond() {
     auto global = AntLisp::Namespace{
-        {"+", AntLisp::Cell(std::make_shared<AntLisp::ExtSum>())},
+        {"+", AntLisp::Cell(std::make_shared<AntLisp::Builtin::Sum>())},
     };
     std::istringstream in(R"antlisp-code(
     (cond
@@ -67,7 +83,7 @@ void test_parseCode_cond() {
 
 void test_parseCode_let() {
     auto global = AntLisp::Namespace{
-        {"+", AntLisp::Cell(std::make_shared<AntLisp::ExtSum>())},
+        {"+", AntLisp::Cell(std::make_shared<AntLisp::Builtin::Sum>())},
     };
     std::istringstream in(R"antlisp-code(
     (let
@@ -87,7 +103,7 @@ void test_parseCode_let() {
 
 void test_parseCode_progn() {
     auto global = AntLisp::Namespace{
-        {"+", AntLisp::Cell(std::make_shared<AntLisp::ExtSum>())},
+        {"+", AntLisp::Cell(std::make_shared<AntLisp::Builtin::Sum>())},
     };
     std::istringstream in(R"antlisp-code(
     (progn
@@ -103,7 +119,7 @@ void test_parseCode_progn() {
 
 void test_parseCode_defun() {
     auto global = AntLisp::Namespace{
-        {"+", AntLisp::Cell(std::make_shared<AntLisp::ExtSum>())},
+        {"+", AntLisp::Cell(std::make_shared<AntLisp::Builtin::Sum>())},
     };
     std::istringstream in(R"antlisp-code(
     (defun first (x) (
@@ -117,7 +133,7 @@ void test_parseCode_defun() {
 
 void test_parseCode_set() {
     auto global = AntLisp::Namespace{
-        {"+", AntLisp::Cell(std::make_shared<AntLisp::ExtSum>())},
+        {"+", AntLisp::Cell(std::make_shared<AntLisp::Builtin::Sum>())},
     };
     std::istringstream in(R"antlisp-code(
     (progn
