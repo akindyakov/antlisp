@@ -1,4 +1,4 @@
-#include "stack_machine.h"
+#include "tape_machine.h"
 
 #include <antlisp/lib/test/ut.h>
 

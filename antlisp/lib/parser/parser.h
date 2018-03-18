@@ -2,7 +2,7 @@
 
 #include <antlisp/lib/util/exception.h>
 
-#include <antlisp/lib/function/stack_machine.h>
+#include <antlisp/lib/function/tape_machine.h>
 
 #include "error.h"
 

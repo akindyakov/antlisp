@@ -1,4 +1,4 @@
-#include <antlisp/lib/function/stack_machine.h>
+#include <antlisp/lib/function/tape_machine.h>
 
 
 namespace AntLisp {

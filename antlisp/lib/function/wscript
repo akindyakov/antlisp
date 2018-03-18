@@ -6,7 +6,7 @@ def build(ctx):
     ctx.stlib(
         target="antlisp-lib-function",
         source = [
-            "stack_machine.cpp",
+            "tape_machine.cpp",
             "interface.cpp",
         ],
         use=[
@@ -14,9 +14,9 @@ def build(ctx):
         ],
     )
     ctx.program(
-        target="stack_machine_ut",
+        target="tape_machine_ut",
         features="test",
-        source="stack_machine_ut.cpp",
+        source="tape_machine_ut.cpp",
         use=[
             "antlisp-lib-function"
         ],
