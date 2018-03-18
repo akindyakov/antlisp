@@ -21,3 +21,27 @@ def build(ctx):
             "antlisp-lib-function-builtin",
         ],
     )
+    ctx.program(
+        target="builtin_math_sum_ut",
+        features="test",
+        source="math_sum_ut.cpp",
+        use=[
+            "antlisp-lib-function-builtin",
+        ],
+    )
+    ctx.program(
+        target="builtin_math_multiplication_ut",
+        features="test",
+        source="math_multiplication_ut.cpp",
+        use=[
+            "antlisp-lib-function-builtin",
+        ],
+    )
+    ctx.program(
+        target="builtin_math_less_ut",
+        features="test",
+        source="math_less_ut.cpp",
+        use=[
+            "antlisp-lib-function-builtin",
+        ],
+    )
