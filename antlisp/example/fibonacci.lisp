@@ -12,7 +12,6 @@
 (defun fib (n)
   (fib_rec n 0 0 1)
 )
-(set
-  fib10
-  (fib 10)
+(print
+  "fib_10->" (fib 10)
 )

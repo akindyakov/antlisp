@@ -6,6 +6,7 @@ def build(ctx):
     ctx.stlib(
         target="antlisp-lib-function-builtin",
         source = [
+            "io.cpp",
             "math.cpp",
         ],
         use=[

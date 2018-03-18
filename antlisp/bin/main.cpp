@@ -3,6 +3,7 @@
 #include <antlisp/lib/parser/parser.h>
 #include <antlisp/lib/function/tape_machine.h>
 #include <antlisp/lib/function/builtin/math.h>
+#include <antlisp/lib/function/builtin/io.h>
 
 #include <fstream>
 #include <iostream>
@@ -67,6 +68,7 @@ int main(int argn, char** argv) {
 
     auto global = AntLisp::Namespace{};
     AntLisp::Builtin::allMathFunctions(global);
+    AntLisp::Builtin::IO::all(global);
     if (args.count("script-file")) {
         fromFile(
             global,
