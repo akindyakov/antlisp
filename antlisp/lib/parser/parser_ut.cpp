@@ -108,7 +108,7 @@ void test_parseCode_defun() {
         {"+", AntLisp::Cell(std::make_shared<AntLisp::Builtin::Sum>())},
     };
     std::istringstream in(R"antlisp-code(
-    (defun first (x) (
+    (defun first (x)
         ( + x 2  )
     )
     )antlisp-code");

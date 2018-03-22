@@ -178,6 +178,11 @@ bool Environment::step() {
                             );
                         }
                     } else {
+                        std::cerr << "args[" << args.size() << "] : ( ";
+                        for (const auto& arg : args) {
+                            std::cerr << " " << arg.toString();
+                        }
+                        std::cerr << " )\n";
                         throw Error()
                             << __FILE__ << ":" << __LINE__
                             << " Type error: cell (" << toCall.toString()

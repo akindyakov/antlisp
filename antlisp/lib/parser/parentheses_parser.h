@@ -1,6 +1,7 @@
 #pragma once
 
 #include <antlisp/lib/util/exception.h>
+#include <antlisp/lib/util/optional.h>
 
 #include "code_stream.h"
 
@@ -11,11 +12,18 @@ class ParenthesesParser
 {
 public:
     ParenthesesParser() = delete;
-    ParenthesesParser(const ParenthesesParser&) = delete;
-    ParenthesesParser(ParenthesesParser&&) = default;
+    ~ParenthesesParser();
 
+    ParenthesesParser(ParenthesesParser&& other)
+        : codeStream(other.codeStream)
+        , level(other.level)
+    {
+        other.level = -1;
+    }
+
+    ParenthesesParser(const ParenthesesParser&) = delete;
     ParenthesesParser& operator=(const ParenthesesParser&) = delete;
-    ParenthesesParser& operator=(ParenthesesParser&&) = default;
+    ParenthesesParser& operator=(ParenthesesParser&&) = delete;
 
     class Error
         : public Exception
@@ -38,15 +46,13 @@ public:
 
     std::string nextToken();
 
-    bool check();
-
-    void close();
-
-    ParenthesesParser nextParser();
+    Optional<ParenthesesParser> nextParser();
 
     const CodeStat& getStat() const {
         return codeStream.getStat();
     }
+
+    void close();
 
 private:
     explicit ParenthesesParser(

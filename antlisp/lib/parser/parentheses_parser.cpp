@@ -7,6 +7,15 @@
 
 namespace AntLisp {
 
+ParenthesesParser::~ParenthesesParser() {
+    if (this->level >= 0) {
+        std::cerr
+            << this->getStat().toString()
+            << " Warning: deleting unclosed ParenthesesParser"
+            << " on depth " << this->level << '\n';
+    }
+}
+
 ParenthesesParser ParenthesesParser::fromCodeStream(
     InCodeStream& codeStream
 ) {
@@ -22,7 +31,8 @@ bool ParenthesesParser::isLocked() const {
 
 bool ParenthesesParser::isEnd() const {
     return (
-        this->getStat().parentheses < this->level
+        this->level < 0
+        || this->getStat().parentheses < this->level
         || not codeStream.good()
     );
 }
@@ -54,40 +64,25 @@ std::string ParenthesesParser::nextToken() {
     return token;
 }
 
-bool ParenthesesParser::check() {
-    if (this->good()) {
-        auto token = std::string{};
-        if (this->nextToken(token)) {
-            throw Error() << this->getStat().toString()
-                << " wtf, there is token " << Str::Quotes(token)
-                << " noting is expected";
-        }
-        return not this->isEnd();
-    }
-    return false;
-}
-
 void ParenthesesParser::close() {
-    if (this->good()) {
-        codeStream.skipSpaces();
-        auto ch = codeStream.peek();
-        if (InCodeStream::getParenthesesNumber(ch) < 0) {
-            // skip last closing ')'
-            codeStream.ignore();
-        } else {
-            throw Error() << this->getStat().toString() << " closing parenthes is expected here, got " << ch << "\n";
+    if (this->level > 0) {
+        if (not codeStream.tryClose()) {
+            throw Error()
+                << this->getStat().toString()
+                << " Wrong attempt to close unfinished expression";
         }
     }
+    this->level = -1;
 }
 
-ParenthesesParser ParenthesesParser::nextParser() {
-    if (not this->isLocked()) {
-        throw Error() << this->getStat().toString() << " parser should be locked to go deeper";
+Optional<ParenthesesParser> ParenthesesParser::nextParser() {
+    if (codeStream.tryOpen()) {
+        return ParenthesesParser(
+            codeStream,
+            codeStream.getStat().parentheses
+        );
     }
-    return ParenthesesParser(
-        codeStream,
-        this->getStat().parentheses
-    );
+    return Optional<ParenthesesParser>{};
 }
 
 ParenthesesParser::ParenthesesParser(

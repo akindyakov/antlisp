@@ -18,34 +18,30 @@ bool InCodeStream::good() const {
     );
 }
 
-Char InCodeStream::peek() const {
-    return static_cast<Char>(
-        istream.peek()
-    );
-}
-
-bool InCodeStream::peek(Char& ch) const {
-    ch = istream.peek();
-    return this->good();
-}
-
-void InCodeStream::updateStat(Char ch) {
-    ++stat.characters;
-    stat.parentheses += getParenthesesNumber(ch);
-    stat.lines += (ch == '\n') ? 1 : 0;
-}
-
 bool InCodeStream::next(Char& ch) {
     if (this->good() && istream.get(ch).good()) {
-        updateStat(ch);
+        ++stat.characters;
+        stat.lines += (ch == '\n') ? 1 : 0;
         return true;
     }
     return false;
 }
 
-bool InCodeStream::ignore() {
-    auto ch = Char{};
-    return this->next(ch);
+void InCodeStream::unget() {
+    istream.unget();
+    --stat.characters;
+}
+
+bool InCodeStream::next(Symbol& symbol) {
+    if (this->next(symbol.ch)) {
+        symbol.escaped = (symbol.ch == '\\');
+        if (symbol.escaped) {
+            return this->next(symbol.ch);
+        }
+    } else {
+        return false;
+    }
+    return true;
 }
 
 bool InCodeStream::nextToken(
@@ -56,20 +52,34 @@ bool InCodeStream::nextToken(
         throw Error() << "TODO: " << __FILE__ << __LINE__;
     }
     this->skipSpaces();
-    auto ch = Char{};
-    while (
-        this->peek(ch)
-        && std::isspace(ch) == false
-        && getParenthesesNumber(ch) == 0
-    ) {
-        token.push_back(ch);
-        this->ignore();
+    auto symbol = Symbol{};
+    if (not this->next(symbol)) {
+        return false;
     }
-    this->skipSpaces();
-    this->peek(ch);
-    if (0 != InCodeStream::getParenthesesNumber(ch)) {
-        this->ignore();
-        this->skipSpaces();
+    if (0 != getParenthesesNumber(symbol.ch) and not symbol.escaped) {
+        this->unget();
+    } else if (symbol.ch == '"' and not symbol.escaped) {
+        token.push_back(symbol.ch);
+        while (this->next(symbol)) {
+            token.push_back(symbol.ch);
+            if (symbol.ch == '"' and not symbol.escaped) {
+                break;
+            }
+        }
+    } else {
+        token.push_back(symbol.ch);
+        while (this->next(symbol)) {
+            if (not symbol.escaped) {
+                if (std::isspace(symbol.ch)) {
+                    break;
+                }
+                if (0 != getParenthesesNumber(symbol.ch)) {
+                    this->unget();
+                    break;
+                }
+            }
+            token.push_back(symbol.ch);
+        }
     }
     return !token.empty();
 }
@@ -83,18 +93,43 @@ std::string InCodeStream::nextToken() {
 }
 
 void InCodeStream::skipSpaces() {
+    auto ch = Char{};
     while (
         this->good()
         && std::isspace(
-            istream.peek()
+            this->istream.peek()
         )
     ) {
-        this->ignore();
+        this->next(ch);
     }
 }
 
 const CodeStat& InCodeStream::getStat() const {
     return stat;
+}
+
+bool InCodeStream::tryOpen() {
+    this->skipSpaces();
+    Char ch = istream.peek();
+    if (getParenthesesNumber(ch) > 0) {
+        ++stat.parentheses;
+        this->next(ch);
+    } else {
+        return false;
+    }
+    return true;
+}
+
+bool InCodeStream::tryClose() {
+    this->skipSpaces();
+    Char ch = istream.peek();
+    if (getParenthesesNumber(ch) < 0) {
+        --stat.parentheses;
+        this->next(ch);
+    } else {
+        return false;
+    }
+    return true;
 }
 
 int InCodeStream::getParenthesesNumber(Char ch) {

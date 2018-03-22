@@ -34,6 +34,7 @@ public:
     ) {
         auto topLevel = ParenthesesParser::fromCodeStream(inStream);
         this->prognDef(topLevel);
+        topLevel.close();
         return *this;
     }
 
@@ -53,34 +54,38 @@ private:
         ParenthesesParser& pParser
     ) {
         auto nextParser = pParser.nextParser();
+        if (not nextParser) {
+            return false;
+        }
         auto token = std::string{};
-        if (nextParser.nextToken(token)) {
+        if (nextParser->nextToken(token)) {
             if ("defun" == token) {
-                functionDef(nextParser);
+                functionDef(nextParser.get());
             } else if ("lambda" == token) {
-                lambdaDef(nextParser, "this");
-            } else if ("let" == token) {
-                letDef(nextParser);
+                lambdaDef(nextParser.get(), "this");
+            // TODO(akindyakov): implement 'let' construction
+            //} else if ("let" == token) {
+            //    letDef(nextParser.get());
             } else if ("set" == token) {
-                setDef(nextParser);
+                setDef(nextParser.get());
             } else if ("cond" == token) {
-                condDef(nextParser);
+                condDef(nextParser.get());
             } else if ("progn" == token) {
-                prognDef(nextParser);
+                prognDef(nextParser.get());
             } else {
                 tokenDef(token);
-                callDef(nextParser);
+                callDef(nextParser.get());
             }
         } else {
-            if (nextParser.isEnd()) {
+            if (nextParser->isEnd()) {
                 return false;
             }
-            if (not parenthesesExpression(nextParser)) {
+            if (not parenthesesExpression(nextParser.get())) {
                 return false;
             }
-            callDef(nextParser);
+            callDef(nextParser.get());
         }
-        nextParser.close();
+        nextParser->close();
         return true;
     }
 
@@ -91,10 +96,6 @@ private:
         if (pParser.nextToken(token)) {
             tokenDef(token);
         } else {
-            // TODO: may be useless
-            if (pParser.isEnd()) {
-                return false;
-            }
             return parenthesesExpression(pParser);
         }
         return true;
@@ -118,7 +119,7 @@ private:
     ) {
         auto fname = std::string{};
         if (!pParser.nextToken(fname)) {
-            throw SyntaxError() << pParser.getStat().toString() << " there is suppose to be function name.";
+            throw SyntaxError() << pParser.getStat().toString() << " there is supposed to be function name.";
         }
         auto core = definitionStack.back()->core();
         auto functionNamePos = core->names.size();
@@ -138,15 +139,17 @@ private:
     ) {
         auto argNames = ArgNames{};
         auto token = std::string{};
-        pParser.check();
         {
             auto argParser = pParser.nextParser();
-            while (argParser.nextToken(token)) {
+            if (not argParser) {
+                throw SyntaxError()
+                    << pParser.getStat().toString()
+                    << " here is supposed to be argument list";
+            }
+            while (argParser->nextToken(token)) {
                 argNames.push_back(token);
             }
-            if (not argParser.isEnd()) {
-                throw SyntaxError() << argParser.getStat().toString() << ", code stream of lambda arguments is suppose to be exhausted";
-            }
+            argParser->close();
         }
         auto core = definitionStack.back()->core();
         auto argnum = argNames.size();
@@ -174,7 +177,7 @@ private:
         if (not expression(pParser)) {
             throw SyntaxError() << pParser.getStat().toString() << ", there is suppose to be lambda body";
         }
-        pParser.check();
+        pParser.close();
         definitionStack.pop_back();
         argnum = newLambda->names.size();
         core->addStep(
@@ -212,18 +215,16 @@ private:
     ) {
         auto core = definitionStack.back()->core();
         auto endMark = getMarkUid();
-        condParser.check();
-        while (condParser.isLocked() && not condParser.isEnd()) {
-            auto branchParser = condParser.nextParser();
+        while (auto branchParser = condParser.nextParser()) {
             auto token = std::string{};
-            expression(branchParser);
+            expression(branchParser.value());
             auto branchEndMark = getMarkUid();
             core->addStep(
                 NativeFunctionDefinition::SkipIfNil,
                 branchEndMark
             );
 
-            expression(branchParser);
+            expression(branchParser.value());
             core->addStep(
                 NativeFunctionDefinition::Skip,
                 endMark
@@ -232,8 +233,7 @@ private:
                 NativeFunctionDefinition::GuardMark,
                 branchEndMark
             );
-            branchParser.close();
-            condParser.check();
+            branchParser->close();
         }
         core->addStep(
             NativeFunctionDefinition::GuardMark,

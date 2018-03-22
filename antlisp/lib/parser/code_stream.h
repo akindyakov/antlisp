@@ -8,6 +8,7 @@ namespace AntLisp {
 using Char = char;
 
 struct CodeStat {
+    // change name to level or depth
     int parentheses = 0;
     std::size_t lines = 1;
     std::size_t characters = 0;
@@ -26,6 +27,12 @@ public:
         std::istream& in
     );
 
+    InCodeStream(const InCodeStream&) = delete;
+    InCodeStream& operator=(const InCodeStream&) = delete;
+
+    InCodeStream(InCodeStream&&) = default;
+    InCodeStream& operator=(InCodeStream&&) = default;
+
     class Error
         : public Exception
     {
@@ -33,18 +40,17 @@ public:
 
     bool good() const;
 
-    Char peek() const;
-    bool peek(Char& ch) const;
-
-    bool next(Char& ch);
-
-    bool ignore();
-
     bool nextToken(
         std::string& token
     );
     std::string nextToken();
 
+    bool tryOpen();
+    bool tryClose();
+
+    const CodeStat& getStat() const;
+
+private:
     void skipSpaces();
 
     enum Parentheses
@@ -54,12 +60,16 @@ public:
         CHAR_CLOSE = ')',
     };
 
-    const CodeStat& getStat() const;
+    bool next(Char& ch);
+    void unget();
+
+    struct Symbol {
+        Char ch;
+        bool escaped = false;
+    };
+    bool next(Symbol& sym);
 
     static int getParenthesesNumber(Char ch);
-
-private:
-    void updateStat(Char ch);
 
 private:
     std::istream& istream;
