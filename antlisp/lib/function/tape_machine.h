@@ -20,7 +20,7 @@ using Namespace = std::unordered_map<TVarName, Cell>;
 using Arguments = std::vector<Cell>;
 using ArgNames = std::vector<TVarName>;
 
-class StackMachineError
+class TapeMachineError
     : public Exception
 {
 };
@@ -28,29 +28,11 @@ class StackMachineError
 class LocalStack
 {
 public:
-    void push(Cell value) {
-        stackImpl.push_back(
-            std::move(value)
-        );
-    }
+    void push(Cell value);
 
-    Cell pop() {
-        auto value = std::move(
-            stackImpl.back()
-        );
-        stackImpl.pop_back();
-        return value;
-    }
+    Cell pop();
 
-    std::size_t size() const noexcept {
-        return stackImpl.size();
-    }
-
-    void print(std::ostream& out) {
-        for (const auto& c : stackImpl) {
-            out << "( " << c.toString() << " )\n";
-        }
-    }
+    std::size_t size() const noexcept;
 
 private:
     std::vector<Cell> stackImpl;
@@ -113,7 +95,7 @@ struct NativeFunctionDefinition {
     }
 
     class Error
-        : public StackMachineError
+        : public TapeMachineError
     {
     };
 
@@ -206,7 +188,7 @@ class ExtInstantFunction
 {
 public:
     class Error
-        : public StackMachineError
+        : public TapeMachineError
     {
     };
 
@@ -240,23 +222,7 @@ public:
         , std::size_t argnum_
         , Namespace closures_
         , TVarName selfName_
-    )
-        : argnum(argnum_)
-        , fdef(
-            std::move(fdef_)
-        )
-        , closures(
-            std::move(closures_)
-        )
-        , selfName(
-            std::move(selfName_)
-        )
-    {
-        // shold shared_from_this be used here?
-        closures[selfName] = Cell::function(
-            nullptr
-        );
-    }
+    );
 
     NativeFunction(const NativeFunction&) = delete;
     NativeFunction(NativeFunction&&) = default;
@@ -265,76 +231,29 @@ public:
     NativeFunction& operator=(NativeFunction&&) = default;
 
     class Error
-        : public StackMachineError
+        : public TapeMachineError
     {
     };
 
-    bool isNative() const override final {
-        return true;
-    }
+    bool isNative() const override final;
 
     FunctionPtr activate(
         Namespace vars
-    ) const {
-        vars.insert(closures.begin(), closures.end());
-        auto copy = std::make_shared<NativeFunction>(
-            fdef, argnum, std::move(vars), selfName
-        );
-        // Add this ptr to local vars to make recursive call
-        copy->closures[selfName] = Cell::function(
-            copy
-        );
-        // Not activated native function does not have 'this' variable
-        return copy;
-    }
+    ) const;
 
     Cell instantCall(
         Arguments args
-    ) const override {
-        throw Error() << "Method 'nativeCall' is not valid for 'NativeFunction'";
-        return Cell::nil();
-    }
+    ) const override;
 
     NativeFunctionCall nativeCall(
         Arguments args
-    ) const override {
-        auto vars = IFunction::parseArguments(
-            args,
-            fdef->names,
-            argnum
-        );
-        vars.insert(closures.begin(), closures.end());
-        return NativeFunctionCall(fdef, vars);
-    }
+    ) const override;
 
     bool hasName(
         const TVarName& name
-    ) const {
-        auto last = fdef->names.cend();
-        return (
-            closures.count(name) != 0
-            || last != std::find(fdef->names.cbegin(), last, name)
-        );
-    }
+    ) const;
 
-    std::string toString() const override {
-        std::ostringstream out;
-        {
-            out << "( ";
-            auto last = fdef->names.cbegin() + argnum;
-            for (auto it = fdef->names.cbegin(); it != last; ++it) {
-                out << *it << " ";
-            }
-            out << ")\n";
-        }
-        for (const auto& closure : closures) {
-            out << "{ " << closure.first << " " << closure.second.toString() << " }\n";
-        }
-        for (const auto& op : fdef->operations) {
-            out << int(op.operation) << " : " << int(op.position) << "\n";
-        }
-        return out.str();
-    }
+    std::string toString() const override;
 
 public:
     std::size_t argnum = 0;
@@ -350,67 +269,30 @@ public:
     explicit LambdaFunction(
         NativeFunction native_
         , ArgNames names_
-    )
-        : nativeFn(std::move(native_))
-        , names(std::move(names_))
-    {
-    }
+    );
 
     class Error
-        : public StackMachineError
+        : public TapeMachineError
     {
     };
 
-    bool isNative() const override {
-        return false;
-    }
+    bool isNative() const override;
 
     Cell instantCall(
         Arguments args
-    ) const override {
-        auto nextClosures = IFunction::parseArguments(
-            args,
-            names,
-            names.size()
-        );
-        return Cell::function(
-            nativeFn.activate(nextClosures)
-        );
-    }
+    ) const override;
 
     NativeFunctionCall nativeCall(
         Arguments
-    ) const override final {
-        throw Error() << "Method 'nativeCall' is not valid for 'LambdaFunction'";
-        return NativeFunctionCall{
-            nullptr,
-            Namespace{}
-        };
-    }
+    ) const override final;
 
-    NativeFunctionDefinition* core() {
-        return nativeFn.fdef.get();
-    }
+    NativeFunctionDefinition* core();
 
     bool hasName(
         const TVarName& name
-    ) const {
-        return (
-            nativeFn.hasName(name)
-            || names.end() != std::find(names.begin(), names.end(), name)
-        );
-    }
+    ) const;
 
-    std::string toString() const override {
-        std::ostringstream out;
-        out << "lambda: ( ";
-        for (const auto& name : names) {
-            out << name << " ";
-        }
-        out << ")\n";
-        out << nativeFn.toString();
-        return out.str();
-    }
+    std::string toString() const override;
 
 public:
     // members visible only for parsers
@@ -437,32 +319,17 @@ public:
     }
 
     class Error
-        : public StackMachineError
+        : public TapeMachineError
     {
     };
 
 private:
-    bool isStackEmpty() {
-        return this->CallStack.empty();
-    }
-
-    NativeFunctionCall* topCall() {
-        return &this->CallStack.back();
-    }
-
+    bool isStackEmpty() const;
+    NativeFunctionCall* topCall();
     NativeFunctionCall* pushCall(
         NativeFunctionCall frame
-    ) {
-        this->CallStack.push_back(
-            std::move(frame)
-        );
-        return this->topCall();
-    }
-
-    void popCall() {
-        this->CallStack.pop_back();
-    }
-
+    );
+    void popCall();
     void runFunctionImpl(NativeFunctionCall* call);
     void runTailRecOptimizedFunctionImpl(
         NativeFunctionCall* call

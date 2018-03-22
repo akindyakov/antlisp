@@ -7,6 +7,24 @@
 
 namespace AntLisp {
 
+void LocalStack::push(Cell value) {
+    stackImpl.push_back(
+        std::move(value)
+    );
+}
+
+Cell LocalStack::pop() {
+    auto value = std::move(
+        stackImpl.back()
+    );
+    stackImpl.pop_back();
+    return value;
+}
+
+std::size_t LocalStack::size() const noexcept {
+    return stackImpl.size();
+}
+
 void NativeFunctionDefinition::ApplyTailRecursionOptimization() {
     if (operations.empty()) {
         return;
@@ -31,6 +49,155 @@ void NativeFunctionDefinition::ApplyTailRecursionOptimization() {
             }
         }
     }
+}
+
+NativeFunction::NativeFunction(
+    NativeFunctionDefinitionPtr fdef_
+    , std::size_t argnum_
+    , Namespace closures_
+    , TVarName selfName_
+)
+    : argnum(argnum_)
+    , fdef(
+        std::move(fdef_)
+    )
+    , closures(
+        std::move(closures_)
+    )
+    , selfName(
+        std::move(selfName_)
+    )
+{
+    closures[selfName] = Cell::function(
+        nullptr
+    );
+}
+
+bool NativeFunction::isNative() const {
+    return true;
+}
+
+FunctionPtr NativeFunction::activate(
+    Namespace vars
+) const {
+    vars.insert(closures.begin(), closures.end());
+    auto copy = std::make_shared<NativeFunction>(
+        fdef, argnum, std::move(vars), selfName
+    );
+    // Add this ptr to local vars to make recursive call
+    copy->closures[selfName] = Cell::function(
+        copy
+    );
+    // Not activated native function does not have 'this' variable
+    return copy;
+}
+
+Cell NativeFunction::instantCall(
+    Arguments args
+) const {
+    throw Error() << "Method 'nativeCall' is not valid for 'NativeFunction'";
+    return Cell::nil();
+}
+
+NativeFunctionCall NativeFunction::nativeCall(
+    Arguments args
+) const {
+    auto vars = IFunction::parseArguments(
+        args,
+        fdef->names,
+        argnum
+    );
+    vars.insert(closures.begin(), closures.end());
+    return NativeFunctionCall(fdef, vars);
+}
+
+bool NativeFunction::hasName(
+    const TVarName& name
+) const {
+    auto last = fdef->names.cend();
+    return (
+        closures.count(name) != 0
+        || last != std::find(fdef->names.cbegin(), last, name)
+    );
+}
+
+std::string NativeFunction::toString() const {
+    std::ostringstream out;
+    {
+        out << "( ";
+        auto last = fdef->names.cbegin() + argnum;
+        for (auto it = fdef->names.cbegin(); it != last; ++it) {
+            out << *it << " ";
+        }
+        out << ")\n";
+    }
+    for (const auto& closure : closures) {
+        out << "{ " << closure.first << " " << closure.second.toString() << " }\n";
+    }
+    for (const auto& op : fdef->operations) {
+        out << int(op.operation) << " : " << int(op.position) << "\n";
+    }
+    return out.str();
+}
+
+LambdaFunction::LambdaFunction(
+    NativeFunction native_
+    , ArgNames names_
+)
+    : nativeFn(std::move(native_))
+    , names(std::move(names_))
+{
+}
+
+bool LambdaFunction::isNative() const {
+    return false;
+}
+
+Cell LambdaFunction::instantCall(
+    Arguments args
+) const {
+    auto nextClosures = IFunction::parseArguments(
+        args,
+        names,
+        names.size()
+    );
+    return Cell::function(
+        nativeFn.activate(nextClosures)
+    );
+}
+
+NativeFunctionCall LambdaFunction::nativeCall(
+    Arguments
+) const {
+    throw Error() << "Method 'nativeCall' is not valid for 'LambdaFunction'";
+    return NativeFunctionCall{
+        nullptr,
+        Namespace{}
+    };
+}
+
+NativeFunctionDefinition* LambdaFunction::core() {
+    return nativeFn.fdef.get();
+}
+
+bool LambdaFunction::hasName(
+    const TVarName& name
+) const {
+    return (
+        nativeFn.hasName(name)
+        || names.end() != std::find(names.begin(), names.end(), name)
+    );
+}
+
+std::string LambdaFunction::toString() const {
+    std::ostringstream out;
+    out << "lambda: ( ";
+    for (const auto& name : names) {
+        out << name << " ";
+    }
+    out << ")\n";
+    out << nativeFn.toString();
+    return out.str();
 }
 
 NativeFunctionCall::NativeFunctionCall(
@@ -124,11 +291,9 @@ void NativeFunctionCall::skipUntilMark() {
 
 Arguments NativeFunctionCall::createArgs() {
     auto size = function->operations[runner].position;
-    auto args = Arguments{};
-    while (size--) {
-        args.push_back(
-            pop()
-        );
+    auto args = Arguments(size);
+    for (auto& arg : args) {
+        arg = pop();
     }
     std::reverse(args.begin(), args.end());
     return args;
@@ -201,6 +366,27 @@ void Environment::runCellWithArguments(
             << " Type error: cell (" << cellToRun.toString()
             << ") is not callable";
     }
+}
+
+bool Environment::isStackEmpty() const {
+    return this->CallStack.empty();
+}
+
+NativeFunctionCall* Environment::topCall() {
+    return &this->CallStack.back();
+}
+
+NativeFunctionCall* Environment::pushCall(
+    NativeFunctionCall frame
+) {
+    this->CallStack.push_back(
+        std::move(frame)
+    );
+    return this->topCall();
+}
+
+void Environment::popCall() {
+    this->CallStack.pop_back();
 }
 
 bool Environment::step() {

@@ -13,5 +13,5 @@
   (fib_rec n 0 0 1)
 )
 (print
-  "fib(10) -> " (fib 10)
+  "fib(10) -> " (fib 120)
 )
