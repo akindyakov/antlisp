@@ -8,6 +8,34 @@
 namespace AntLisp {
 
 void NativeFunctionDefinition::ApplyTailRecursionOptimization() {
+    if (operations.empty()) {
+        std::cerr << "operation list is empty\n";
+        return;
+    }
+    for (const auto& op : operations) {
+        std::cerr << int(op.operation) << " " << op.position << '\n';
+    }
+    std::cerr << "last operation: " << int(operations.back().operation) << "\n";
+    if (operations.back().operation == RunFunction) {
+        operations.back().operation = RunTailRecOptimizedFunction;
+    } else if (operations.back().operation == GuardMark) {
+        auto guard = operations.back().position;
+        for (
+            auto rit = operations.rbegin();
+            rit != operations.rend();
+            ++rit
+        ) {
+            if (
+                (rit->operation == Skip or rit->operation == SkipIfNil)
+                and rit->position == guard
+            ) {
+                auto nextOpIt = std::next(rit);
+                if (nextOpIt->operation == RunFunction) {
+                    nextOpIt->operation = RunTailRecOptimizedFunction;
+                }
+            }
+        }
+    }
 }
 
 NativeFunctionCall::NativeFunctionCall(
@@ -149,7 +177,7 @@ void Environment::runTailRecOptimizedFunctionImpl(
     auto args = call->createArgs();
     auto cellToRun = call->pop();
     this->popCall();
-    this->runCellWithArguments(call, cellToRun, std::move(args));
+    this->runCellWithArguments(this->topCall(), cellToRun, std::move(args));
 }
 
 void Environment::runCellWithArguments(
@@ -218,6 +246,7 @@ bool Environment::step() {
                 if (this->CallStack.size() < 2) {
                     this->runFunctionImpl(call);
                 } else {
+                    std::cerr << "Optimisation!\n";
                     this->runTailRecOptimizedFunctionImpl(call);
                 }
                 break;
