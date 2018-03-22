@@ -10,7 +10,7 @@ namespace AntLisp {
 ParenthesesParser::~ParenthesesParser() {
     if (this->level >= 0) {
         std::cerr
-            << this->getStat().toString()
+            << "[debug] " << this->getStat().toString()
             << " Warning: deleting unclosed ParenthesesParser"
             << " on depth " << this->level << '\n';
     }

@@ -160,10 +160,6 @@ public:
 
     Namespace releaseLocals();
 
-    bool isReadyToPostpone() const {
-        return this->runner + 1 == function->operations.size();
-    }
-
 private:
     NativeFunctionDefinitionPtr function;
     LocalStack localCallStack;
@@ -175,7 +171,6 @@ class IFunction {
 public:
     ~IFunction() = default;
 
-    //virtual bool isPostponed() const = 0;
     virtual bool isNative() const = 0;
 
     virtual Cell instantCall(
@@ -214,10 +209,6 @@ public:
         : public StackMachineError
     {
     };
-
-    //bool isPostponed() const final {
-    //    return false;
-    //}
 
     bool isNative() const override final {
         return false;
@@ -277,10 +268,6 @@ public:
         : public StackMachineError
     {
     };
-
-    //bool isPostponed() const override {
-    //    return false;
-    //}
 
     bool isNative() const override final {
         return true;
@@ -356,51 +343,6 @@ public:
     TVarName selfName;
 };
 
-class PostponedFunction
-    : public IFunction
-{
-public:
-    explicit PostponedFunction(
-        NativeFunctionCall call
-    )
-        : call_(
-            std::move(call)
-        )
-    {
-    }
-
-    //bool isPostponed() const override {
-    //    return true;
-    //}
-
-    bool isNative() const override {
-        return true;
-    }
-
-    Cell instantCall(
-        Arguments args
-    ) const override {
-        throw Exception()
-            << "Method 'nativeCall' is not valid for 'PostponedFunction'";
-        return Cell::nil();
-    }
-
-    NativeFunctionCall nativeCall(
-        Arguments args
-    ) const override {
-        return std::move(call_);
-    }
-
-    std::string toString() const override {
-        std::ostringstream out;
-        out << "postponed-function\n";
-        return out.str();
-    }
-
-private:
-    NativeFunctionCall call_;
-};
-
 class LambdaFunction
     : public IFunction
 {
@@ -418,10 +360,6 @@ public:
         : public StackMachineError
     {
     };
-
-    //bool isPostponed() const override {
-    //    return false;
-    //}
 
     bool isNative() const override {
         return false;

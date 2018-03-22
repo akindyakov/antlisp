@@ -121,7 +121,6 @@ private:
         if (!pParser.nextToken(fname)) {
             throw SyntaxError() << pParser.getStat().toString() << " there is supposed to be function name.";
         }
-        std::cerr << "Fun name: " << fname << '\n';
         auto core = definitionStack.back()->core();
         auto functionNamePos = core->names.size();
         core->names.push_back(fname);
