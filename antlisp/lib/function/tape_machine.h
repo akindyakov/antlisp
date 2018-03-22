@@ -524,6 +524,8 @@ private:
         this->CallStack.pop_back();
     }
 
+    void runFunctionImpl(NativeFunctionCall* call);
+
 public:
     Namespace vars;
     Cell ret;

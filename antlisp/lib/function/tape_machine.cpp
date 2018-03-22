@@ -134,6 +134,46 @@ Environment::Environment(
 {
 }
 
+void Environment::runFunctionImpl(NativeFunctionCall* call) {
+    auto args = call->createArgs();
+    auto toCall = call->pop();
+    if (toCall.is<FunctionPtr>()) {
+        auto fnPtr = toCall.get<FunctionPtr>();
+        if (fnPtr->isNative()) {
+            auto nextCall = fnPtr->nativeCall(args);
+            if (call->isReadyToPostpone()) {
+                call->push(
+                    Cell{
+                        std::make_shared<PostponedFunction>(
+                            std::move(nextCall)
+                        )
+                    }
+                );
+            } else {
+                this->pushCall(
+                    std::move(nextCall)
+                );
+            }
+        } else {
+            call->push(
+                fnPtr->instantCall(
+                    std::move(args)
+                )
+            );
+        }
+    } else {
+        std::cerr << "args[" << args.size() << "] : ( ";
+        for (const auto& arg : args) {
+            std::cerr << " " << arg.toString();
+        }
+        std::cerr << " )\n";
+        throw Error()
+            << __FILE__ << ":" << __LINE__
+            << " Type error: cell (" << toCall.toString()
+            << ") is not callable";
+    }
+}
+
 bool Environment::step() {
     auto call = this->topCall();
     if (call->next()) {
@@ -150,45 +190,7 @@ bool Environment::step() {
                 call->setLocal();
                 break;
             case NativeFunctionDefinition::RunFunction:
-                {
-                    auto args = call->createArgs();
-                    auto toCall = call->pop();
-                    if (toCall.is<FunctionPtr>()) {
-                        auto fnPtr = toCall.get<FunctionPtr>();
-                        if (fnPtr->isNative()) {
-                            auto nextCall = fnPtr->nativeCall(args);
-                            if (call->isReadyToPostpone()) {
-                                call->push(
-                                    Cell{
-                                        std::make_shared<PostponedFunction>(
-                                            std::move(nextCall)
-                                        )
-                                    }
-                                );
-                            } else {
-                                this->pushCall(
-                                    std::move(nextCall)
-                                );
-                            }
-                        } else {
-                            call->push(
-                                fnPtr->instantCall(
-                                    std::move(args)
-                                )
-                            );
-                        }
-                    } else {
-                        std::cerr << "args[" << args.size() << "] : ( ";
-                        for (const auto& arg : args) {
-                            std::cerr << " " << arg.toString();
-                        }
-                        std::cerr << " )\n";
-                        throw Error()
-                            << __FILE__ << ":" << __LINE__
-                            << " Type error: cell (" << toCall.toString()
-                            << ") is not callable";
-                    }
-                }
+                this->runFunctionImpl(call);
                 break;
             case NativeFunctionDefinition::Skip:
                 call->skipUntilMark();
