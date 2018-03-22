@@ -7,6 +7,9 @@
 
 namespace AntLisp {
 
+void NativeFunctionDefinition::ApplyTailRecursionOptimization() {
+}
+
 NativeFunctionCall::NativeFunctionCall(
     NativeFunctionDefinitionPtr fdef
     , Namespace predefinedVars
@@ -136,24 +139,32 @@ Environment::Environment(
 
 void Environment::runFunctionImpl(NativeFunctionCall* call) {
     auto args = call->createArgs();
-    auto toCall = call->pop();
-    if (toCall.is<FunctionPtr>()) {
-        auto fnPtr = toCall.get<FunctionPtr>();
+    auto cellToRun = call->pop();
+    this->runCellWithArguments(call, cellToRun, std::move(args));
+}
+
+void Environment::runTailRecOptimizedFunctionImpl(
+    NativeFunctionCall* call
+) {
+    auto args = call->createArgs();
+    auto cellToRun = call->pop();
+    this->popCall();
+    this->runCellWithArguments(call, cellToRun, std::move(args));
+}
+
+void Environment::runCellWithArguments(
+    NativeFunctionCall* call
+    , Cell& cellToRun
+    , Arguments args
+) {
+    if (cellToRun.is<FunctionPtr>()) {
+        auto fnPtr = cellToRun.get<FunctionPtr>();
         if (fnPtr->isNative()) {
-            auto nextCall = fnPtr->nativeCall(args);
-            if (call->isReadyToPostpone()) {
-                call->push(
-                    Cell{
-                        std::make_shared<PostponedFunction>(
-                            std::move(nextCall)
-                        )
-                    }
-                );
-            } else {
-                this->pushCall(
-                    std::move(nextCall)
-                );
-            }
+            this->pushCall(
+                fnPtr->nativeCall(
+                    std::move(args)
+                )
+            );
         } else {
             call->push(
                 fnPtr->instantCall(
@@ -162,14 +173,9 @@ void Environment::runFunctionImpl(NativeFunctionCall* call) {
             );
         }
     } else {
-        std::cerr << "args[" << args.size() << "] : ( ";
-        for (const auto& arg : args) {
-            std::cerr << " " << arg.toString();
-        }
-        std::cerr << " )\n";
         throw Error()
             << __FILE__ << ":" << __LINE__
-            << " Type error: cell (" << toCall.toString()
+            << " Type error: cell (" << cellToRun.toString()
             << ") is not callable";
     }
 }
@@ -208,6 +214,13 @@ bool Environment::step() {
             case NativeFunctionDefinition::LocalStackRewind:
                 call->stackRewind();
                 break;
+            case NativeFunctionDefinition::RunTailRecOptimizedFunction:
+                if (this->CallStack.size() < 2) {
+                    this->runFunctionImpl(call);
+                } else {
+                    this->runTailRecOptimizedFunctionImpl(call);
+                }
+                break;
         }
     } else {
         // save return value
@@ -216,20 +229,12 @@ bool Environment::step() {
         this->vars = call->releaseLocals();
         // drop spent call
         this->popCall();
-        // check if return value is postponed call
-        if (this->ret.is<FunctionPtr>()) {
-            auto fnPtr = this->ret.get<FunctionPtr>();
-            if (fnPtr->isPostponed()) {
-                call = this->pushCall(
-                    fnPtr->nativeCall(Arguments{})
-                );
-                return true;
-            }
-        }
+        // should we resume something from the stack?
         if (this->isStackEmpty()) {
             // done, nothing to do
             return false;
         }
+        // resume it
         call = this->topCall();
         call->push(
             std::move(this->ret)

@@ -16,6 +16,7 @@ Cell CoutPrint::instantCall(
         std::cout << arg.toString();
     }
     std::cout << std::endl;
+    return Cell::nil();
 }
 
 void all(Namespace& space) {

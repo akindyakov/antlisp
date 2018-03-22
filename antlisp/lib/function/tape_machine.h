@@ -88,6 +88,7 @@ struct NativeFunctionDefinition {
         SkipIfNil,      // 6
         GuardMark,      // 7
         LocalStackRewind,  // 8
+        RunTailRecOptimizedFunction  // 9
     };
 
     struct Step {
@@ -116,7 +117,7 @@ struct NativeFunctionDefinition {
     {
     };
 
-    static bool step(Environment& env);
+    void ApplyTailRecursionOptimization();
 
     std::vector<Step> operations;
     std::vector<TVarName> names;
@@ -174,7 +175,7 @@ class IFunction {
 public:
     ~IFunction() = default;
 
-    virtual bool isPostponed() const = 0;
+    //virtual bool isPostponed() const = 0;
     virtual bool isNative() const = 0;
 
     virtual Cell instantCall(
@@ -214,9 +215,9 @@ public:
     {
     };
 
-    bool isPostponed() const final {
-        return false;
-    }
+    //bool isPostponed() const final {
+    //    return false;
+    //}
 
     bool isNative() const override final {
         return false;
@@ -277,9 +278,9 @@ public:
     {
     };
 
-    bool isPostponed() const override {
-        return false;
-    }
+    //bool isPostponed() const override {
+    //    return false;
+    //}
 
     bool isNative() const override final {
         return true;
@@ -368,9 +369,9 @@ public:
     {
     }
 
-    bool isPostponed() const override {
-        return true;
-    }
+    //bool isPostponed() const override {
+    //    return true;
+    //}
 
     bool isNative() const override {
         return true;
@@ -418,9 +419,9 @@ public:
     {
     };
 
-    bool isPostponed() const override {
-        return false;
-    }
+    //bool isPostponed() const override {
+    //    return false;
+    //}
 
     bool isNative() const override {
         return false;
@@ -525,6 +526,14 @@ private:
     }
 
     void runFunctionImpl(NativeFunctionCall* call);
+    void runTailRecOptimizedFunctionImpl(
+        NativeFunctionCall* call
+    );
+    void runCellWithArguments(
+        NativeFunctionCall* call
+        , Cell& cellToRun
+        , Arguments args
+    );
 
 public:
     Namespace vars;

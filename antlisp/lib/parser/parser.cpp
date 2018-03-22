@@ -178,6 +178,8 @@ private:
             throw SyntaxError() << pParser.getStat().toString() << ", there is suppose to be lambda body";
         }
         pParser.close();
+        core->ApplyTailRecursionOptimization();
+
         definitionStack.pop_back();
         argnum = newLambda->names.size();
         core->addStep(
