@@ -169,18 +169,7 @@ public:
         Arguments& args
         , const std::vector<TVarName>& names
         , const std::size_t argMaxNum
-    ) {
-        auto vars = Namespace{};
-        std::size_t nameIndex = 0;
-        auto rit = args.begin();
-        while (rit != args.end() && nameIndex < argMaxNum) {
-            const auto& argName = names[nameIndex];
-            vars[argName] = std::move(*rit);
-            ++rit;
-            ++nameIndex;
-        }
-        return vars;
-    }
+    );
 };
 
 class ExtInstantFunction
