@@ -51,30 +51,14 @@ public:
 };
 
 template<>
-class TypeInfo<StringPtr>
-{
-public:
-    static constexpr const char* name() {
-        return "simple-base-string";
-    }
-    static std::string toString(const StringPtr& str) {
-        return *str.get();
-    }
-};
-
-template<>
 class TypeInfo<ExtTypePtr>
 {
 public:
     static constexpr const char* name() {
         return "ext-type";
     }
-    static std::string toString(const ExtTypePtr& /*ext*/) {
-        // TODO(akindyakov): [task](doc/todo/5t7dmp19.md)
-        // should be smth like this: return ext->toString();
-        return std::string{
-            name()
-        };
+    static std::string toString(const ExtTypePtr& ext) {
+        return ext->toString();
     }
 };
 

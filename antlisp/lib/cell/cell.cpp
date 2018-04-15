@@ -3,6 +3,26 @@
 
 namespace AntLisp {
 
+std::string MockExtType::toString() const override {
+    return "ext-type";
+}
+
+ExtTypePtr MockExtType::copy() const override {
+    throw NotImplementedError() << "\"copy\" method does not implemented";
+}
+void MockExtType::summarize(const Cell&) override {
+    throw NotImplementedError() << "\"summarize\" method does not implemented";
+}
+void MockExtType::multiply(const Cell&) override {
+    throw NotImplementedError() << "\"multiply\" method does not implemented";
+}
+void MockExtType::subtract(const Cell&) override {
+    throw NotImplementedError() << "\"subtract\" method does not implemented";
+}
+void MockExtType::divide(const Cell&) override {
+    throw NotImplementedError() << "\"divide\" method does not implemented";
+}
+
 template<>
 Cell Cell::cast<Nil>() const {
     if (not this->is<Nil>()) {

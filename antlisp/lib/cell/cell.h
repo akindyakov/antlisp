@@ -31,14 +31,8 @@ std::ostream& operator<<(std::ostream& os, const Nil& v);
 class IExtType;
 using ExtTypePtr = std::shared_ptr<IExtType>;
 
-class IExtType {
-public:
-    virtual std::string toString() const = 0;
-    virtual ExtTypePtr copy() const = 0;
-};
-
-
-using StringPtr = std::shared_ptr<std::string>;
+class StringType;
+using StringPtr = std::shared_ptr<StringType>;
 
 using Integer = long;
 using Float = double;
@@ -105,18 +99,18 @@ public:
         return Cell{ch};
     }
 
-    template<
-        typename SomeStringType
-    >
-    static Cell string(SomeStringType&& v) {
-        return Cell{
-            std::make_shared<std::string>(
-                std::string{
-                    std::forward<SomeStringType>(v)
-                }
-            )
-        };
-    }
+    //template<
+    //    typename SomeStringType
+    //>
+    //static Cell string(SomeStringType&& v) {
+    //    return Cell{
+    //        std::make_shared<std::string>(
+    //            std::string{
+    //                std::forward<SomeStringType>(v)
+    //            }
+    //        )
+    //    };
+    //}
 
     template<
         typename SomeNumberType
@@ -250,6 +244,30 @@ public:
 
 public:
     Value value;
+};
+
+class IExtType {
+public:
+    virtual std::string toString() const = 0;
+    virtual ExtTypePtr copy() const = 0;
+
+    virtual void summarize(const Cell&) = 0;
+    virtual void multiply(const Cell&) = 0;
+    virtual void subtract(const Cell&) = 0;
+    virtual void divide(const Cell&) = 0;
+};
+
+class MockExtType
+    : public IExtType
+{
+public:
+    std::string toString() const override;
+    ExtTypePtr copy() const override;
+
+    void summarize(const Cell&) override;
+    void multiply(const Cell&) override;
+    void subtract(const Cell&) override;
+    void divide(const Cell&) override;
 };
 
 bool operator == (

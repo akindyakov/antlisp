@@ -14,6 +14,7 @@ def build(ctx):
             "antlisp-lib-parser",
             "antlisp-lib-util",
             "antlisp-lib-function-builtin",
+            "antlisp-lib-exttypes",
         ],
     )
     ctx.recurse([
@@ -22,4 +23,5 @@ def build(ctx):
         "parser",
         "test",
         "util",
+        "ext_types",
     ])

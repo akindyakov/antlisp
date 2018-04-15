@@ -117,12 +117,14 @@ Cell CellParser<StringPtr>::parse(const std::string& str) {
         str.begin() + 1,
         str.end() - 1
     );
-    return Cell::string(
-        std::string(
-            str.begin() + 1,
-            str.end() - 1
+    return Cell{
+        std::make_shared<StringType>(
+            std::string(
+                str.begin() + 1,
+                str.end() - 1
+            )
         )
-    );
+    };
 }
 
 }  // namespace AntLisp

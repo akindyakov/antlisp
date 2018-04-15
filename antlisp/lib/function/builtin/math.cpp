@@ -15,26 +15,20 @@ void sumImpl(Cell& to, const Cell& arg) {
     } else if (to.is<Float>() || arg.is<Float>()) {
         to = to.cast<Float>();
         to.get<Float>() += arg.cast<Float>().get<Float>();
-    } else if (to.is<StringPtr>() && arg.is<StringPtr>()) {
-        to.get<StringPtr>()->append(
-            *arg.get<StringPtr>()
-        );
-    } else if (to.is<StringPtr>() && arg.is<Symbol>()) {
-        to.get<StringPtr>()->push_back(
-            arg.get<Symbol>()
-        );
-    } else if (to.is<Symbol>() && arg.is<Symbol>()) {
-        auto str = std::string(2, to.get<Symbol>());
-        str[1] = arg.get<Symbol>();
-        to = Cell::string(
-            std::move(str)
-        );
-    } else if (to.is<Symbol>() && arg.is<StringPtr>()) {
-        auto str = std::string(1, to.get<Symbol>());
-        str.append(
-            *arg.get<StringPtr>()
-        );
-        to = Cell::string(std::move(str));
+    //} else if (to.is<Symbol>() && arg.is<Symbol>()) {
+    //    auto str = std::string(2, to.get<Symbol>());
+    //    str[1] = arg.get<Symbol>();
+    //    to = Cell::string(
+    //        std::move(str)
+    //    );
+    //} else if (to.is<Symbol>() && arg.is<StringPtr>()) {
+    //    auto str = std::string(1, to.get<Symbol>());
+    //    str.append(
+    //        *arg.get<StringPtr>()
+    //    );
+    //    to = Cell::string(std::move(str));
+    } else if (to.is<ExtTypePtr>()) {
+        to.get<ExtTypePtr>()->summarize(arg);
     } else {
         throw RuntimeError() << "Sum: unexpected argument types ( "
             << to.toString() << ", " <<  arg.toString() << " )";
@@ -68,28 +62,16 @@ void multiplicationImpl(Cell& to, const Cell& right) {
             to = to.cast<Float>();
         }
         to.get<Float>() *= right.cast<Float>().get<Float>();
-    } else if (to.is<StringPtr>() && right.is<Integer>()) {
-        auto strPtr = to.get<StringPtr>().get();
-        auto len = strPtr->size();
-        auto n = right.get<Integer>();
-        if (n < 0) {
-            throw RuntimeError() << "Multiplication: multiplication strin on negative integer is prohibited";
-        }
-        while (n-- > 1) {
-            std::copy(
-                strPtr->begin(),
-                strPtr->begin() + len,
-                std::back_inserter(*strPtr)
-            );
-        }
-    } else if (to.is<Symbol>() && right.is<Integer>()) {
-        auto n = right.get<Integer>();
-        if (n < 0) {
-            throw RuntimeError() << "Multiplication: multiplication symbol on negative integer is prohibited";
-        }
-        to = Cell::string(
-            std::string(n, to.get<Symbol>())
-        );
+    //} else if (to.is<Symbol>() && right.is<Integer>()) {
+    //    auto n = right.get<Integer>();
+    //    if (n < 0) {
+    //        throw RuntimeError() << "Multiplication: multiplication symbol on negative integer is prohibited";
+    //    }
+    //    to = Cell::string(
+    //        std::string(n, to.get<Symbol>())
+    //    );
+    } else if (to.is<ExtTypePtr>()) {
+        to.get<ExtTypePtr>()->multiplication(arg);
     } else {
         throw RuntimeError() << "Multiplication: unexpected argument types ( "
             << to.toString() << ", " <<  right.toString() << " )";

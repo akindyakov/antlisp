@@ -74,4 +74,9 @@ class TypeError
 {
 };
 
+class NotImplementedError
+    : public Exception
+{
+};
+
 }  // namespace AntLisp
