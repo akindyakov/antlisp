@@ -38,7 +38,7 @@ private:
     std::vector<Cell> stackImpl;
 };
 
-struct Environment;
+class Environment;
 
 struct NativeFunctionDefinition {
     explicit NativeFunctionDefinition() = default;
@@ -187,10 +187,10 @@ public:
 
     virtual Cell instantCall(
         Arguments args
-    ) const = 0;
+    ) const override = 0;
 
     NativeFunctionCall nativeCall(
-        Arguments args
+        Arguments /*args*/
     ) const override final {
         throw Error() << "Method 'nativeCall' is not valid for 'ExtInstantFunction'";
         return NativeFunctionCall(nullptr, Namespace{});

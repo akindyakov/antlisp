@@ -9,7 +9,7 @@ public:
     static constexpr const char* name() {
         return "nil";
     }
-    static std::string toString(Nil = Nil{}) {
+    static std::string toString(Nil) {
         return name();
     }
 };
@@ -69,7 +69,7 @@ public:
     static constexpr const char* name() {
         return "ext-type";
     }
-    static std::string toString(const ExtTypePtr& ext) {
+    static std::string toString(const ExtTypePtr& /*ext*/) {
         // TODO(akindyakov): [task](doc/todo/5t7dmp19.md)
         // should be smth like this: return ext->toString();
         return std::string{

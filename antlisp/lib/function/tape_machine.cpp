@@ -110,7 +110,7 @@ FunctionPtr NativeFunction::activate(
 }
 
 Cell NativeFunction::instantCall(
-    Arguments args
+    Arguments /*args*/
 ) const {
     throw Error() << "Method 'nativeCall' is not valid for 'NativeFunction'";
     return Cell::nil();
