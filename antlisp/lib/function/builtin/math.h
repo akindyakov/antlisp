@@ -25,6 +25,15 @@ public:
     ) const override;
 };
 
+class Division
+    : public ExtInstantFunction
+{
+public:
+    Cell instantCall(
+        Arguments args
+    ) const override;
+};
+
 class Less
     : public ExtInstantFunction
 {

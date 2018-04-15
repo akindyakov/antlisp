@@ -48,6 +48,16 @@ void test_allMathBuiltinFunctions() {
         ),
         AntLisp::Cell::integer(6 * 29)
     );
+    const auto dPtr = space.at("/").get<AntLisp::FunctionPtr>();
+    UT_ASSERT_EQUAL(
+        dPtr->instantCall(
+            AntLisp::Arguments{
+                AntLisp::Cell::integer(143),
+                AntLisp::Cell::integer(11),
+            }
+        ),
+        AntLisp::Cell::integer(13)
+    );
 }
 
 UT_LIST(

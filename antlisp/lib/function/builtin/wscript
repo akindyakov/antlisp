@@ -53,3 +53,11 @@ def build(ctx):
             "antlisp-lib-function-builtin",
         ],
     )
+    ctx.program(
+        target="builtin_math_div_ut",
+        features="test",
+        source="math_div_ut.cpp",
+        use=[
+            "antlisp-lib-function-builtin",
+        ],
+    )

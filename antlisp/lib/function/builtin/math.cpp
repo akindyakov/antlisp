@@ -115,6 +115,44 @@ Cell Multiplication::instantCall(
 
 namespace {
 
+void divisionImpl(
+    Cell& what
+    , const Cell& right
+) {
+    if (what.is<Integer>() && right.is<Integer>()) {
+        what.get<Integer>() /= right.get<Integer>();
+    } else if (what.is<Float>() || right.is<Float>()) {
+        if (not what.is<Float>()) {
+            what = what.cast<Float>();
+        }
+        what.get<Float>() /= right.cast<Float>().get<Float>();
+    } else {
+        throw RuntimeError()
+            << "Division: unexpected argument types ( "
+            << what.toString() << ", " <<  right.toString() << " )"
+        ;
+    }
+}
+
+}
+
+Cell Division::instantCall(
+    Arguments args
+) const {
+    if (args.size() < 2) {
+        throw TypeError() << "Division function takes 2 or more arguments";
+    }
+    auto out = Cell::nil();
+    auto it = args.cbegin();
+    out = it->copy();
+    while (++it != args.cend()) {
+        divisionImpl(out, *it);
+    }
+    return out;
+}
+
+namespace {
+
 bool lessImpl(const Cell& left, const Cell& right) {
     if (left.is<Integer>() && right.is<Integer>()) {
         if (left.get<Integer>() < right.get<Integer>()) {
@@ -186,6 +224,7 @@ void allMathFunctions(Namespace& space) {
     space.emplace("*", std::make_shared<Multiplication>());
     space.emplace("<", std::make_shared<Less>());
     space.emplace("=", std::make_shared<Equality>());
+    space.emplace("/", std::make_shared<Division>());
 }
 
 }  // namespace Builtin
