@@ -1,5 +1,7 @@
 #include "math.h"
 
+#include <antlisp/lib/cell/string/string.h>
+
 #include <antlisp/lib/test/ut.h>
 
 #include <iostream>
@@ -36,20 +38,17 @@ void test_sum_symbol_and_string() {
     auto sum = AntLisp::Builtin::Sum();
     auto out = sum.instantCall(
         AntLisp::Arguments{
+            AntLisp::Cell::ext<AntLisp::StringType>(""),
             AntLisp::Cell::symbol('$'),
-            AntLisp::Cell::string("in the"),
+            AntLisp::Cell::ext<AntLisp::StringType>("in the"),
             AntLisp::Cell::symbol(' '),
-            AntLisp::Cell::string("dark"),
+            AntLisp::Cell::ext<AntLisp::StringType>("dark"),
             AntLisp::Cell::symbol('$'),
         }
     );
     UT_ASSERT_EQUAL(
-        *out.get<AntLisp::StringPtr>(),
-        std::string("$in the dark$")
-    );
-    UT_ASSERT_EQUAL(
         out,
-        AntLisp::Cell::string("$in the dark$")
+        AntLisp::Cell::ext<AntLisp::StringType>("$in the dark$")
     );
 }
 

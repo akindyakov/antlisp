@@ -31,9 +31,6 @@ std::ostream& operator<<(std::ostream& os, const Nil& v);
 class IExtType;
 using ExtTypePtr = std::shared_ptr<IExtType>;
 
-class StringType;
-using StringPtr = std::shared_ptr<StringType>;
-
 using Integer = long;
 using Float = double;
 using Symbol = std::string::value_type;
@@ -49,7 +46,6 @@ public:
         , Integer
         , Float
         , Symbol
-        , StringPtr
         , ExtTypePtr
         , FunctionPtr
     >;
@@ -59,7 +55,6 @@ public:
         Integer,
         Float,
         Symbol,
-        StringPtr,
         ExtTypePtr,
         FunctionPtr,
     };
@@ -99,18 +94,17 @@ public:
         return Cell{ch};
     }
 
-    //template<
-    //    typename SomeStringType
-    //>
-    //static Cell string(SomeStringType&& v) {
-    //    return Cell{
-    //        std::make_shared<std::string>(
-    //            std::string{
-    //                std::forward<SomeStringType>(v)
-    //            }
-    //        )
-    //    };
-    //}
+    template<
+        typename ExtType
+        , typename... Args
+    >
+    static Cell ext(Args&&... args) {
+        return Cell{
+            std::make_shared<ExtType>(
+              std::forward<Args>(args)...
+            )
+        };
+    }
 
     template<
         typename SomeNumberType
@@ -141,12 +135,6 @@ public:
     }
     explicit Cell(Symbol v)
         : value(v)
-    {
-    }
-    explicit Cell(StringPtr v)
-        : value(
-            std::move(v)
-        )
     {
     }
     explicit Cell(ExtTypePtr v)
@@ -255,6 +243,9 @@ public:
     virtual void multiply(const Cell&) = 0;
     virtual void subtract(const Cell&) = 0;
     virtual void divide(const Cell&) = 0;
+
+    virtual bool equal(const Cell&) const = 0;
+    virtual bool less(const Cell&) const = 0;
 };
 
 class MockExtType
@@ -268,6 +259,9 @@ public:
     void multiply(const Cell&) override;
     void subtract(const Cell&) override;
     void divide(const Cell&) override;
+
+    bool equal(const Cell&) const override;
+    bool less(const Cell&) const override;
 };
 
 bool operator == (

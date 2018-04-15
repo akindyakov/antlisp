@@ -11,7 +11,8 @@ def build(ctx):
         ],
         use=[
             "antlisp-lib-function",
-            "antlisp-lib-exttypes",
+            "antlisp-lib-cell",
+            "antlisp-lib-cell-string",
         ],
     )
     ctx.program(

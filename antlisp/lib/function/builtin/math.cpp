@@ -15,18 +15,6 @@ void sumImpl(Cell& to, const Cell& arg) {
     } else if (to.is<Float>() || arg.is<Float>()) {
         to = to.cast<Float>();
         to.get<Float>() += arg.cast<Float>().get<Float>();
-    //} else if (to.is<Symbol>() && arg.is<Symbol>()) {
-    //    auto str = std::string(2, to.get<Symbol>());
-    //    str[1] = arg.get<Symbol>();
-    //    to = Cell::string(
-    //        std::move(str)
-    //    );
-    //} else if (to.is<Symbol>() && arg.is<StringPtr>()) {
-    //    auto str = std::string(1, to.get<Symbol>());
-    //    str.append(
-    //        *arg.get<StringPtr>()
-    //    );
-    //    to = Cell::string(std::move(str));
     } else if (to.is<ExtTypePtr>()) {
         to.get<ExtTypePtr>()->summarize(arg);
     } else {
@@ -62,16 +50,8 @@ void multiplicationImpl(Cell& to, const Cell& right) {
             to = to.cast<Float>();
         }
         to.get<Float>() *= right.cast<Float>().get<Float>();
-    //} else if (to.is<Symbol>() && right.is<Integer>()) {
-    //    auto n = right.get<Integer>();
-    //    if (n < 0) {
-    //        throw RuntimeError() << "Multiplication: multiplication symbol on negative integer is prohibited";
-    //    }
-    //    to = Cell::string(
-    //        std::string(n, to.get<Symbol>())
-    //    );
     } else if (to.is<ExtTypePtr>()) {
-        to.get<ExtTypePtr>()->multiplication(arg);
+        to.get<ExtTypePtr>()->multiply(right);
     } else {
         throw RuntimeError() << "Multiplication: unexpected argument types ( "
             << to.toString() << ", " <<  right.toString() << " )";
@@ -147,18 +127,14 @@ bool lessImpl(const Cell& left, const Cell& right) {
         ) {
             return true;
         }
-    } else if (left.is<StringPtr>() && right.is<StringPtr>()) {
-        if (
-            *left.get<StringPtr>() < *right.get<StringPtr>()
-        ) {
-            return true;
-        }
     } else if (left.is<Symbol>() && right.is<Symbol>()) {
         if (
             left.get<Symbol>() < right.get<Symbol>()
         ) {
             return true;
         }
+    } else if (left.is<ExtTypePtr>()) {
+        return left.get<ExtTypePtr>()->less(right);
     } else {
         throw RuntimeError() << "Less: unexpected argument types ( "
             << left.toString() << ", " <<  right.toString() << " )";

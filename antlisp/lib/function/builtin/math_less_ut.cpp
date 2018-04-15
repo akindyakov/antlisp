@@ -1,5 +1,7 @@
 #include "math.h"
 
+#include <antlisp/lib/cell/string/string.h>
+
 #include <antlisp/lib/test/ut.h>
 
 #include <iostream>
@@ -88,8 +90,8 @@ void test_less_str_true() {
     UT_ASSERT_EQUAL(
         less.instantCall(
             AntLisp::Arguments{
-                AntLisp::Cell::string("aa"),
-                AntLisp::Cell::string("aaa"),
+                AntLisp::Cell::ext<AntLisp::StringType>("aa"),
+                AntLisp::Cell::ext<AntLisp::StringType>("aaa"),
             }
         ),
         AntLisp::Cell::t()
@@ -101,8 +103,8 @@ void test_less_str_nil() {
     UT_ASSERT_EQUAL(
         less.instantCall(
             AntLisp::Arguments{
-                AntLisp::Cell::string("abc"),
-                AntLisp::Cell::string("abc"),
+                AntLisp::Cell::ext<AntLisp::StringType>("abc"),
+                AntLisp::Cell::ext<AntLisp::StringType>("abc"),
             }
         ),
         AntLisp::Cell::nil()

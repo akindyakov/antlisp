@@ -1,4 +1,5 @@
 #include "cell_in_string.h"
+#include <antlisp/lib/cell/string/string.h>
 
 #include "error.h"
 
@@ -18,8 +19,8 @@ boost::optional<Cell> tryCellFromString(
     } else if (CellParser<Float>::check(str)) {
         out = CellParser<Float>::parse(str);
 
-    } else if (CellParser<StringPtr>::check(str)) {
-        out = CellParser<StringPtr>::parse(str);
+    } else if (CellParser<StringType>::check(str)) {
+        out = CellParser<StringType>::parse(str);
 
     } else if (CellParser<Symbol>::check(str)) {
         out = CellParser<Symbol>::parse(str);
@@ -108,23 +109,21 @@ Cell CellParser<Symbol>::parse(
     return Cell(ch);
 }
 
-bool CellParser<StringPtr>::check(const std::string& str) {
+bool CellParser<StringType>::check(const std::string& str) {
     return str.front() == quote;
 }
 
-Cell CellParser<StringPtr>::parse(const std::string& str) {
+Cell CellParser<StringType>::parse(const std::string& str) {
     auto value = std::string(
         str.begin() + 1,
         str.end() - 1
     );
-    return Cell{
-        std::make_shared<StringType>(
-            std::string(
-                str.begin() + 1,
-                str.end() - 1
-            )
+    return AntLisp::Cell::ext<AntLisp::StringType>(
+        std::string(
+            str.begin() + 1,
+            str.end() - 1
         )
-    };
+    );
 }
 
 }  // namespace AntLisp

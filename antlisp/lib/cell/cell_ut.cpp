@@ -30,7 +30,6 @@ void cellCheckTypeTag() {
     checkTagTempl<AntLisp::Integer>();
     checkTagTempl<AntLisp::Float>();
     checkTagTempl<AntLisp::Symbol>();
-    checkTagTempl<AntLisp::StringPtr>();
     checkTagTempl<AntLisp::ExtTypePtr>();
     checkTagTempl<AntLisp::FunctionPtr>();
 }
@@ -57,10 +56,6 @@ void testCell_cast_nil() {
     );
     UT_ASSERT_EXCEPTION_TYPE(
         AntLisp::Cell::nil().cast<AntLisp::Symbol>(),
-        AntLisp::Cell::BadGetError
-    );
-    UT_ASSERT_EXCEPTION_TYPE(
-        AntLisp::Cell::nil().cast<AntLisp::StringPtr>(),
         AntLisp::Cell::BadGetError
     );
     UT_ASSERT_EXCEPTION_TYPE(
@@ -91,10 +86,6 @@ void testCell_cast_integer() {
         AntLisp::Cell{'@'}
     );
     UT_ASSERT_EXCEPTION_TYPE(
-        AntLisp::Cell::integer(2).cast<AntLisp::StringPtr>(),
-        AntLisp::Cell::BadGetError
-    );
-    UT_ASSERT_EXCEPTION_TYPE(
         AntLisp::Cell::integer(3).cast<AntLisp::ExtTypePtr>(),
         AntLisp::Cell::BadGetError
     );
@@ -119,10 +110,6 @@ void testCell_cast_real() {
     );
     UT_ASSERT_EXCEPTION_TYPE(
         AntLisp::Cell::real(1.0).cast<AntLisp::Symbol>(),
-        AntLisp::Cell::BadGetError
-    );
-    UT_ASSERT_EXCEPTION_TYPE(
-        AntLisp::Cell::real(2.0).cast<AntLisp::StringPtr>(),
         AntLisp::Cell::BadGetError
     );
     UT_ASSERT_EXCEPTION_TYPE(
@@ -153,47 +140,11 @@ void testCell_cast_symbol() {
         AntLisp::Cell{'W'}
     );
     UT_ASSERT_EXCEPTION_TYPE(
-        AntLisp::Cell{'c'}.cast<AntLisp::StringPtr>(),
-        AntLisp::Cell::BadGetError
-    );
-    UT_ASSERT_EXCEPTION_TYPE(
         AntLisp::Cell{'d'}.cast<AntLisp::ExtTypePtr>(),
         AntLisp::Cell::BadGetError
     );
     UT_ASSERT_EXCEPTION_TYPE(
         AntLisp::Cell{'e'}.cast<AntLisp::FunctionPtr>(),
-        AntLisp::Cell::BadGetError
-    );
-}
-
-void testCell_cast_string() {
-    auto strPtrCell = AntLisp::Cell::string("never ending flame");
-    UT_ASSERT_EXCEPTION_TYPE(
-        strPtrCell.cast<AntLisp::Nil>(),
-        AntLisp::Cell::BadGetError
-    );
-    UT_ASSERT_EXCEPTION_TYPE(
-        strPtrCell.cast<AntLisp::Integer>(),
-        AntLisp::Cell::BadGetError
-    );
-    UT_ASSERT_EXCEPTION_TYPE(
-        strPtrCell.cast<AntLisp::Float>(),
-        AntLisp::Cell::BadGetError
-    );
-    UT_ASSERT_EXCEPTION_TYPE(
-        strPtrCell.cast<AntLisp::Symbol>(),
-        AntLisp::Cell::BadGetError
-    );
-    UT_ASSERT_EQUAL(
-        strPtrCell.cast<AntLisp::StringPtr>(),
-        strPtrCell
-    );
-    UT_ASSERT_EXCEPTION_TYPE(
-        strPtrCell.cast<AntLisp::ExtTypePtr>(),
-        AntLisp::Cell::BadGetError
-    );
-    UT_ASSERT_EXCEPTION_TYPE(
-        strPtrCell.cast<AntLisp::FunctionPtr>(),
         AntLisp::Cell::BadGetError
     );
 }
@@ -216,10 +167,6 @@ void testCell_cast_ext() {
     );
     UT_ASSERT_EXCEPTION_TYPE(
         extPtrCell.cast<AntLisp::Symbol>(),
-        AntLisp::Cell::BadGetError
-    );
-    UT_ASSERT_EXCEPTION_TYPE(
-        extPtrCell.cast<AntLisp::StringPtr>(),
         AntLisp::Cell::BadGetError
     );
     UT_ASSERT_EXCEPTION_TYPE(
@@ -249,10 +196,6 @@ void testCell_cast_function() {
         AntLisp::Cell::BadGetError
     );
     UT_ASSERT_EXCEPTION_TYPE(
-        fnPtrCell.cast<AntLisp::StringPtr>(),
-        AntLisp::Cell::BadGetError
-    );
-    UT_ASSERT_EXCEPTION_TYPE(
         fnPtrCell.cast<AntLisp::ExtTypePtr>(),
         AntLisp::Cell::BadGetError
     );
@@ -272,30 +215,6 @@ void testCell_cast_copy_integer() {
     );
 }
 
-void testCell_cast_copy_string() {
-    auto value = AntLisp::Cell::string("act");
-    auto cValue = value.copy();
-    cValue.get<AntLisp::StringPtr>()->append(" local");
-    value.get<AntLisp::StringPtr>()->append("!");
-    UT_ASSERT_EQUAL(
-        *value.get<AntLisp::StringPtr>(),
-        "act!"
-    );
-    UT_ASSERT_EQUAL(
-        *cValue.get<AntLisp::StringPtr>(),
-        "act local"
-    );
-}
-
-void testCell_string_eq() {
-    auto first = AntLisp::Cell::string("act");
-    auto second = AntLisp::Cell::string("act");
-    UT_ASSERT_EQUAL(
-        first,
-        second
-    );
-}
-
 UT_LIST(
     RUN_TEST(nilEqualTest);
     RUN_TEST(cellCheckTypeTag);
@@ -304,10 +223,7 @@ UT_LIST(
     RUN_TEST(testCell_cast_integer);
     RUN_TEST(testCell_cast_real);
     RUN_TEST(testCell_cast_symbol);
-    RUN_TEST(testCell_cast_string);
     RUN_TEST(testCell_cast_ext);
     RUN_TEST(testCell_cast_function);
     RUN_TEST(testCell_cast_copy_integer);
-    RUN_TEST(testCell_cast_copy_string);
-    RUN_TEST(testCell_string_eq);
 );

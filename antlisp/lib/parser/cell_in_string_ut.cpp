@@ -75,9 +75,10 @@ void test_tryFromString_number() {
 void test_tryFromString_string() {
     auto dst = AntLisp::tryCellFromString("\" abc \"");
     UT_ASSERT(dst);
+    std::cerr << dst->toString() << '\n';
     UT_ASSERT_EQUAL(
-        *dst->get<AntLisp::StringPtr>().get(),
-        " abc "
+        *dst,
+        AntLisp::Cell::ext<AntLisp::StringType>(" abc ")
     );
 }
 

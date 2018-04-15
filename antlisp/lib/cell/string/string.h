@@ -1,6 +1,7 @@
 #pragma once
 
 #include <antlisp/lib/cell/cell.h>
+
 #include <antlisp/lib/util/exception.h>
 
 #include <boost/variant.hpp>
@@ -33,7 +34,26 @@ public:
     ExtTypePtr copy() const override;
 
     void summarize(const Cell&) override;
-    void multiplication(const Cell&) override;
+    void multiply(const Cell&) override;
+
+    bool equal(const Cell&) const override;
+    bool less(const Cell&) const override;
+
+    static const StringType* castFromCell(const Cell& value) {
+      return value.is<ExtTypePtr>()
+          ? dynamic_cast<const StringType*>(
+             value.get<ExtTypePtr>().get()
+          )
+          : nullptr;
+    }
+
+    static StringType* castFromCell(Cell& value) {
+      return value.is<ExtTypePtr>()
+          ? dynamic_cast<StringType*>(
+              value.get<ExtTypePtr>().get()
+          )
+          : nullptr;
+    }
 
 private:
     std::string value;

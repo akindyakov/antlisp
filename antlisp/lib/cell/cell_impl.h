@@ -58,6 +58,9 @@ public:
         return "ext-type";
     }
     static std::string toString(const ExtTypePtr& ext) {
+        if (not ext) {
+          return "(ext-type nullptr)";
+        }
         return ext->toString();
     }
 };

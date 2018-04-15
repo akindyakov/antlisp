@@ -1,6 +1,7 @@
 #pragma once
 
 #include <antlisp/lib/cell/cell.h>
+#include <antlisp/lib/cell/string/string.h>
 
 
 namespace AntLisp {
@@ -52,7 +53,7 @@ public:
 };
 
 template<>
-class CellParser<StringPtr>
+class CellParser<StringType>
 {
 public:
     static constexpr char quote = '"';

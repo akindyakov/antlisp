@@ -1,5 +1,7 @@
 #include "math.h"
 
+#include <antlisp/lib/cell/string/string.h>
+
 #include <antlisp/lib/test/ut.h>
 
 #include <iostream>
@@ -62,8 +64,8 @@ void test_equality_string() {
     UT_ASSERT_EQUAL(
         eq.instantCall(
             AntLisp::Arguments{
-                AntLisp::Cell::string("keymaster"),
-                AntLisp::Cell::string("keymaster"),
+                AntLisp::Cell::ext<AntLisp::StringType>("keymaster"),
+                AntLisp::Cell::ext<AntLisp::StringType>("keymaster"),
             }
         ),
         AntLisp::Cell::t()
@@ -75,8 +77,8 @@ void test_equality_string_nil() {
     UT_ASSERT_EQUAL(
         eq.instantCall(
             AntLisp::Arguments{
-                AntLisp::Cell::string("key master"),
-                AntLisp::Cell::string("keymaster"),
+                AntLisp::Cell::ext<AntLisp::StringType>("key master"),
+                AntLisp::Cell::ext<AntLisp::StringType>("keymaster"),
             }
         ),
         AntLisp::Cell::nil()

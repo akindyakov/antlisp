@@ -3,24 +3,32 @@
 
 namespace AntLisp {
 
-std::string MockExtType::toString() const override {
-    return "ext-type";
+std::string MockExtType::toString() const {
+    std::cerr << "mock MockExtType::toString()\n";
+    throw NotImplementedError() << "\"toString\" method does not implemented";
 }
 
-ExtTypePtr MockExtType::copy() const override {
+ExtTypePtr MockExtType::copy() const {
     throw NotImplementedError() << "\"copy\" method does not implemented";
 }
-void MockExtType::summarize(const Cell&) override {
+void MockExtType::summarize(const Cell&) {
     throw NotImplementedError() << "\"summarize\" method does not implemented";
 }
-void MockExtType::multiply(const Cell&) override {
+void MockExtType::multiply(const Cell&) {
     throw NotImplementedError() << "\"multiply\" method does not implemented";
 }
-void MockExtType::subtract(const Cell&) override {
+void MockExtType::subtract(const Cell&) {
     throw NotImplementedError() << "\"subtract\" method does not implemented";
 }
-void MockExtType::divide(const Cell&) override {
+void MockExtType::divide(const Cell&) {
     throw NotImplementedError() << "\"divide\" method does not implemented";
+}
+
+bool MockExtType::equal(const Cell&) const {
+    throw NotImplementedError() << "\"equal\" method does not implemented";
+}
+bool MockExtType::less(const Cell&) const {
+    throw NotImplementedError() << "\"less\" method does not implemented";
 }
 
 template<>
@@ -37,6 +45,7 @@ Cell Cell::cast<Nil>() const {
 template<>
 Cell Cell::cast<Integer>() const {
     auto out = Integer{};
+    std::cerr << "cast enter point\n";
     if (this->is<Integer>()) {
         out = this->get<Integer>();
     } else if (this->is<Float>()) {
@@ -48,6 +57,7 @@ Cell Cell::cast<Integer>() const {
             this->get<Symbol>()
         );
     } else {
+        std::cerr << "throw\n";
         throw BadGetError()
             << "Wrong cast to Integer: "
             << this->toString()
@@ -93,23 +103,9 @@ Cell Cell::cast<Symbol>() const {
 }
 
 template<>
-Cell Cell::cast<StringPtr>() const {
-    // shell we use the simlest one ?
-    // return Cell::string(
-    //     this->toString()
-    // );
-    if (not this->is<StringPtr>()) {
-        throw BadGetError()
-            << "Wrong cast to StringPtr: "
-            << this->toString()
-        ;
-    }
-    return *this;
-}
-
-template<>
 Cell Cell::cast<ExtTypePtr>() const {
     // TODO(akindyakov): [task](doc/todo/5t7dmp19.md)
+    std::cerr << "cast enter point\n";
     if (not this->is<ExtTypePtr>()) {
         throw BadGetError()
             << "Wrong cast to ExtTypePtr: "
@@ -131,11 +127,7 @@ Cell Cell::cast<FunctionPtr>() const {
 }
 
 Cell Cell::copy() const {
-    if (this->is<StringPtr>()) {
-        return Cell::string(
-            *this->get<StringPtr>()
-        );
-    } else if (this->is<ExtTypePtr>()) {
+    if (this->is<ExtTypePtr>()) {
         return Cell{
             this->get<ExtTypePtr>()->copy()
         };
@@ -191,11 +183,8 @@ public:
         );
     }
 
-    bool operator()(const StringPtr& value) const {
-        return (
-            Cell::tagOf<StringPtr>() == first.tag()
-            && *value == *first.get<StringPtr>()
-        );
+    bool operator()(const ExtTypePtr& value) const {
+        return value->equal(first);
     }
 };
 
@@ -205,8 +194,8 @@ bool operator == (
     const Cell& first
     , const Cell& second
 ) {
-    return first.visit(
-        CellEqualityVisitor(second)
+    return second.visit(
+        CellEqualityVisitor(first)
     );
 }
 
