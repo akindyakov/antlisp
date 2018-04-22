@@ -62,3 +62,23 @@
     {threads 16}
 )'
 ```
+
+## Tables
+```
+(table:table 4 nil
+  (table:content
+    (table:row
+      (table:cell 1 "")
+      (table:cell 1 "")
+      (table:cell 1 "")
+      (table:cell 1 "")
+    )
+    (table:row
+      (table:cell 1 "")
+      (table:cell 1 "")
+      (table:cell 1 "")
+      (table:cell 1 "")
+    )
+  )
+)
+```
