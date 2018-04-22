@@ -11,6 +11,7 @@ def build(ctx):
         ],
         use=[
             "antlisp-lib-cell",
+            "antlisp-lib-name",
         ],
     )
     ctx.program(

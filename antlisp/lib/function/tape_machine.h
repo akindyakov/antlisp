@@ -2,6 +2,8 @@
 
 #include <antlisp/lib/cell/cell.h>
 
+#include <antlisp/lib/name/name.hpp>
+
 #include <algorithm>
 #include <exception>
 #include <iostream>
@@ -12,10 +14,6 @@
 
 
 namespace AntLisp {
-
-using TVarName = std::string;
-
-using Namespace = std::unordered_map<TVarName, Cell>;
 
 using Arguments = std::vector<Cell>;
 using ArgNames = std::vector<TVarName>;

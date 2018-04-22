@@ -20,6 +20,7 @@ def build(ctx):
     ctx.recurse([
         "cell",
         "function",
+        "name",
         "parser",
         "test",
         "util",
