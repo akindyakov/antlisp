@@ -4,25 +4,22 @@
 
 def build(ctx):
     ctx.stlib(
-        target="antlisp-lib-cell-ext",
+        target="antlisp-lib-cell-array",
         source = [
-            "mock.cpp",
+            "array.cpp",
         ],
         use=[
+            "antlisp-lib-cell-ext",
+            "antlisp-lib-name",
             "antlisp-lib-util",
         ],
     )
 
     ctx.program(
-        target="mock_ut",
+        target="array_ut",
         features="test",
-        source="mock_ut.cpp",
+        source="array_ut.cpp",
         use=[
-            "antlisp-lib-cell-ext"
+            "antlisp-lib-cell-array",
         ],
     )
-
-    ctx.recurse([
-        "array",
-        "string",
-    ])
