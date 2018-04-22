@@ -58,11 +58,11 @@ Namespace IFunction::parseArguments(
 ) {
     auto vars = Namespace{};
     std::size_t nameIndex = 0;
-    auto rit = args.begin();
-    while (rit != args.end() && nameIndex < argMaxNum) {
+    auto argIt = args.begin();
+    while (argIt != args.end() && nameIndex < argMaxNum) {
         const auto& argName = names[nameIndex];
-        vars[argName] = std::move(*rit);
-        ++rit;
+        vars[argName] = std::move(*argIt);
+        ++argIt;
         ++nameIndex;
     }
     return vars;
