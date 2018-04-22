@@ -10,7 +10,6 @@ def build(ctx):
         ],
         use=[
             "antlisp-lib-util",
-            "antlisp-lib-cell-ext-string",
         ],
     )
 

@@ -1,6 +1,6 @@
 #pragma once
 
-#include <antlisp/lib/cell/cell.h>
+#include <antlisp/lib/cell/ext/mock.hpp>
 
 #include <antlisp/lib/util/exception.h>
 
