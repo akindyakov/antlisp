@@ -1,5 +1,5 @@
 #include "cell_in_string.h"
-#include <antlisp/lib/cell/string/string.h>
+#include <antlisp/lib/cell/ext/string/string.h>
 
 #include "error.h"
 

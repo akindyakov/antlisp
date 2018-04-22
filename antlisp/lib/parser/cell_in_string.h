@@ -1,7 +1,7 @@
 #pragma once
 
 #include <antlisp/lib/cell/cell.h>
-#include <antlisp/lib/cell/string/string.h>
+#include <antlisp/lib/cell/ext/string/string.h>
 
 
 namespace AntLisp {
