@@ -53,7 +53,7 @@ public:
 };
 
 template<>
-class CellParser<StringType>
+class CellParser<StringCell>
 {
 public:
     static constexpr char quote = '"';

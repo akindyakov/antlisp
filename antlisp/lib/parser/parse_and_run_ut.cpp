@@ -12,11 +12,11 @@ void testFullCycle() {
     std::istringstream in("  (+ 21 (* 2 3)) ");
     auto global = AntLisp::Namespace{};
     AntLisp::Builtin::allMathFunctions(global);
-    auto native = AntLisp::parseCode(in, global);
+    auto native = AntLisp::parseCode(in, std::move(global));
     auto env = AntLisp::Environment(native);
     env.run();
     UT_ASSERT_EQUAL(
-        env.ret.get<AntLisp::Integer>(),
+        env.ret.as<AntLisp::Integer>(),
         21 + (2 * 3)
     );
 }
@@ -25,11 +25,11 @@ void test_parseCode_lambda_call() {
     auto global = AntLisp::Namespace{};
     AntLisp::Builtin::allMathFunctions(global);
     std::istringstream in("((lambda (x y) (+ x y 1)) 4 2)");
-    auto native = AntLisp::parseCode(in, global);
+    auto native = AntLisp::parseCode(in, std::move(global));
     auto env = AntLisp::Environment(native);
     env.run();
     UT_ASSERT_EQUAL(
-        env.ret.get<AntLisp::Integer>(),
+        env.ret.as<AntLisp::Integer>(),
         4 + 2 + 1
     );
 }
@@ -48,11 +48,11 @@ void test_parseCode_lambda_recursive_call() {
       5
     )
     )");
-    auto native = AntLisp::parseCode(in, global);
+    auto native = AntLisp::parseCode(in, std::move(global));
     auto env = AntLisp::Environment(native);
     env.run();
     UT_ASSERT_EQUAL(
-        env.ret.get<AntLisp::Integer>(),
+        env.ret.as<AntLisp::Integer>(),
         5
     );
 }
@@ -67,14 +67,14 @@ void test_parseCode_cond() {
         ((+ 1 0) (+ 3 4))
     )
     )antlisp-code");
-    auto native = AntLisp::parseCode(in, global);
+    auto native = AntLisp::parseCode(in, std::move(global));
     UT_ASSERT_EQUAL(native.fdef->consts.size(), 10);
     // FIXME: names is [+ + + +], uniq it for the sake of God
     UT_ASSERT_EQUAL(native.fdef->names.size(), 4);
     auto env = AntLisp::Environment(native);
     env.run();
     UT_ASSERT_EQUAL(
-        env.ret.get<AntLisp::Integer>(),
+        env.ret.as<AntLisp::Integer>(),
         2 + 3
     );
 }
@@ -89,11 +89,11 @@ void test_parseCode_progn_simple() {
       (+ 4 44)
     )
     )antlisp-code");
-    auto native = AntLisp::parseCode(in, global);
+    auto native = AntLisp::parseCode(in, std::move(global));
     auto env = AntLisp::Environment(native);
     env.run();
     UT_ASSERT_EQUAL(
-        env.ret.get<AntLisp::Integer>(),
+        env.ret.as<AntLisp::Integer>(),
         4 + 44
     );
 }
@@ -113,11 +113,11 @@ void test_parseCode_progn() {
       12 13
     )
     )antlisp-code");
-    auto native = AntLisp::parseCode(in, global);
+    auto native = AntLisp::parseCode(in, std::move(global));
     auto env = AntLisp::Environment(native);
     env.run();
     UT_ASSERT_EQUAL(
-        env.ret.get<AntLisp::Integer>(),
+        env.ret.as<AntLisp::Integer>(),
         12 + 13
     );
 }
@@ -133,11 +133,11 @@ void test_parseCode_defun_call() {
         (ballad 192 168)
     )
     )antlisp-code");
-    auto native = AntLisp::parseCode(in, global);
+    auto native = AntLisp::parseCode(in, std::move(global));
     auto env = AntLisp::Environment(native);
     env.run();
     UT_ASSERT_EQUAL(
-        env.ret.get<AntLisp::Integer>(),
+        env.ret.as<AntLisp::Integer>(),
         192 + 168 + 35
     );
 }
@@ -156,11 +156,11 @@ void test_parseCode_defun_recursive_call() {
       (ballad 5 0)
     )
     )antlisp-code");
-    auto native = AntLisp::parseCode(in, global);
+    auto native = AntLisp::parseCode(in, std::move(global));
     auto env = AntLisp::Environment(native);
     env.run();
     UT_ASSERT_EQUAL(
-        env.ret.get<AntLisp::Integer>(),
+        env.ret.as<AntLisp::Integer>(),
         5 * 2
     );
 }
@@ -182,11 +182,11 @@ void test_parseCode_lambda_multi_call() {
   4 2
 )
 )code");
-    auto native = AntLisp::parseCode(in, global);
+    auto native = AntLisp::parseCode(in, std::move(global));
     auto env = AntLisp::Environment(native);
     env.run();
     UT_ASSERT_EQUAL(
-        env.ret.get<AntLisp::Integer>(),
+        env.ret.as<AntLisp::Integer>(),
         4 + 2 + 1
     );
 }
@@ -202,11 +202,11 @@ void test_parseCode_set() {
       xy
     )
     )antlisp-code");
-    auto native = AntLisp::parseCode(in, global);
+    auto native = AntLisp::parseCode(in, std::move(global));
     auto env = AntLisp::Environment(native);
     env.run();
     UT_ASSERT_EQUAL(
-        env.ret.get<AntLisp::Integer>(),
+        env.ret.as<AntLisp::Integer>(),
         181 + 39
     );
 }
@@ -219,11 +219,11 @@ void test_parseCode_multistate() {
     (set xy (+ x 250 250 242))
     xy
     )antlisp-code");
-    auto native = AntLisp::parseCode(in, global);
+    auto native = AntLisp::parseCode(in, std::move(global));
     auto env = AntLisp::Environment(native);
     env.run();
     UT_ASSERT_EQUAL(
-        env.ret.get<AntLisp::Integer>(),
+        env.ret.as<AntLisp::Integer>(),
         87 + 250 + 250 + 242
     );
 }

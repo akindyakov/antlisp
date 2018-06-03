@@ -2,6 +2,8 @@
 
 #include <antlisp/lib/util/exception.h>
 
+#include <antlisp/lib/cell/string/string.h>
+
 
 namespace AntLisp {
 
@@ -11,12 +13,10 @@ namespace {
 
 void sumImpl(Cell& to, const Cell& arg) {
     if (to.is<Integer>() && arg.is<Integer>()) {
-        to.get<Integer>() += arg.get<Integer>();
+        to.as<Integer>() += arg.as<Integer>();
     } else if (to.is<Float>() || arg.is<Float>()) {
         to = to.cast<Float>();
-        to.get<Float>() += arg.cast<Float>().get<Float>();
-    } else if (to.is<ExtTypePtr>()) {
-        to.get<ExtTypePtr>()->summarize(arg);
+        to.as<Float>() += arg.cast<Float>().as<Float>();
     } else {
         throw RuntimeError() << "Sum: unexpected argument types ( "
             << to.toString() << ", " <<  arg.toString() << " )";
@@ -44,14 +44,12 @@ namespace {
 
 void multiplicationImpl(Cell& to, const Cell& right) {
     if (to.is<Integer>() && right.is<Integer>()) {
-        to.get<Integer>() *= right.get<Integer>();
+        to.as<Integer>() *= right.as<Integer>();
     } else if (to.is<Float>() || right.is<Float>()) {
         if (not to.is<Float>()) {
             to = to.cast<Float>();
         }
-        to.get<Float>() *= right.cast<Float>().get<Float>();
-    } else if (to.is<ExtTypePtr>()) {
-        to.get<ExtTypePtr>()->multiply(right);
+        to.as<Float>() *= right.cast<Float>().as<Float>();
     } else {
         throw RuntimeError() << "Multiplication: unexpected argument types ( "
             << to.toString() << ", " <<  right.toString() << " )";
@@ -82,12 +80,12 @@ void divisionImpl(
     , const Cell& right
 ) {
     if (what.is<Integer>() && right.is<Integer>()) {
-        what.get<Integer>() /= right.get<Integer>();
+        what.as<Integer>() /= right.as<Integer>();
     } else if (what.is<Float>() || right.is<Float>()) {
         if (not what.is<Float>()) {
             what = what.cast<Float>();
         }
-        what.get<Float>() /= right.cast<Float>().get<Float>();
+        what.as<Float>() /= right.cast<Float>().as<Float>();
     } else {
         throw RuntimeError()
             << "Division: unexpected argument types ( "
@@ -117,24 +115,22 @@ namespace {
 
 bool lessImpl(const Cell& left, const Cell& right) {
     if (left.is<Integer>() && right.is<Integer>()) {
-        if (left.get<Integer>() < right.get<Integer>()) {
+        if (left.as<Integer>() < right.as<Integer>()) {
             return true;
         }
     } else if (left.is<Float>() || right.is<Float>()) {
         if (
-            left.cast<Float>().get<Float>()
-            < right.cast<Float>().get<Float>()
+            left.cast<Float>().as<Float>()
+            < right.cast<Float>().as<Float>()
         ) {
             return true;
         }
     } else if (left.is<Symbol>() && right.is<Symbol>()) {
         if (
-            left.get<Symbol>() < right.get<Symbol>()
+            left.as<Symbol>() < right.as<Symbol>()
         ) {
             return true;
         }
-    } else if (left.is<ExtTypePtr>()) {
-        return left.get<ExtTypePtr>()->less(right);
     } else {
         throw RuntimeError() << "Less: unexpected argument types ( "
             << left.toString() << ", " <<  right.toString() << " )";
@@ -161,6 +157,28 @@ Cell Less::instantCall(
     }
     return Cell::t();
 }
+namespace {
+
+bool eqImpl(const Cell& left, const Cell& right) {
+    const auto id = left.typeId();
+    if (id != right.typeId()) {
+        return false;
+    }
+    if (id == Cell::typeIdOf<Nil>()) {
+        return true;
+    } else if (id == Cell::typeIdOf<Integer>()) {
+        return left.as<Integer>() == right.as<Integer>();
+    } else if (id == Cell::typeIdOf<Float>()) {
+        return left.as<Float>() == right.as<Float>();
+    } else if (id == Cell::typeIdOf<Symbol>()) {
+        return left.as<Symbol>() == right.as<Symbol>();
+    } else if (id == Cell::typeIdOf<StringType>()) {
+        return left.as<StringType>() == right.as<StringType>();
+    }
+    return false;
+}
+
+}
 
 Cell Equality::instantCall(
     Arguments args
@@ -168,7 +186,7 @@ Cell Equality::instantCall(
     auto right = args.cbegin();
     auto left = right++;
     while (right != args.cend()) {
-        if (*left != *right) {
+        if (not eqImpl(*left, *right)) {
             return Cell::nil();
         }
         ++left;
@@ -178,11 +196,11 @@ Cell Equality::instantCall(
 }
 
 void allMathFunctions(Namespace& space) {
-    space.emplace("+", std::make_shared<Sum>());
-    space.emplace("*", std::make_shared<Multiplication>());
-    space.emplace("<", std::make_shared<Less>());
-    space.emplace("=", std::make_shared<Equality>());
-    space.emplace("/", std::make_shared<Division>());
+    space.emplace("+", Cell::function(std::make_shared<Sum>()));
+    space.emplace("*", Cell::function(std::make_shared<Multiplication>()));
+    space.emplace("<", Cell::function(std::make_shared<Less>()));
+    space.emplace("=", Cell::function(std::make_shared<Equality>()));
+    space.emplace("/", Cell::function(std::make_shared<Division>()));
 }
 
 }  // namespace Builtin

@@ -1,62 +1,17 @@
 #pragma once
 
-#include <antlisp/lib/cell/cell.h>
-
-#include <antlisp/lib/util/exception.h>
-
-#include <boost/variant.hpp>
-#include <boost/variant/get.hpp>
-#include <boost/optional.hpp>
-
-#include <string>
-#include <unordered_map>
-
+#include <antlisp/lib/cell/cell_type.h>
+#include <antlisp/lib/util/string.h>
 
 namespace AntLisp {
 
-class StringType
-    : public MockExtType
-{
-public:
-    explicit StringType() = default;
+using StringType = std::string;
+using StringCell = CellType<StringType>;
 
-    template<
-        typename SomeOtherStringType
-    >
-    explicit StringType(SomeOtherStringType&& v)
-        : value(
-            std::forward<SomeOtherStringType>(v)
-        )
-    {
-    }
+template<>
+std::string CellType<StringType>::toString() const;
 
-    std::string toString() const override;
-    ExtTypePtr copy() const override;
-
-    void summarize(const Cell&) override;
-    void multiply(const Cell&) override;
-
-    bool equal(const Cell&) const override;
-    bool less(const Cell&) const override;
-
-    static const StringType* castFromCell(const Cell& value) {
-      return value.is<ExtTypePtr>()
-          ? dynamic_cast<const StringType*>(
-             value.get<ExtTypePtr>().get()
-          )
-          : nullptr;
-    }
-
-    static StringType* castFromCell(Cell& value) {
-      return value.is<ExtTypePtr>()
-          ? dynamic_cast<StringType*>(
-              value.get<ExtTypePtr>().get()
-          )
-          : nullptr;
-    }
-
-private:
-    std::string value;
-};
+template<>
+ICellType::Ptr CellType<StringType>::copy() const;
 
 }  // namespace AntLisp

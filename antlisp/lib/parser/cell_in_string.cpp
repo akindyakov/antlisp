@@ -19,8 +19,8 @@ boost::optional<Cell> tryCellFromString(
     } else if (CellParser<Float>::check(str)) {
         out = CellParser<Float>::parse(str);
 
-    } else if (CellParser<StringType>::check(str)) {
-        out = CellParser<StringType>::parse(str);
+    } else if (CellParser<StringCell>::check(str)) {
+        out = CellParser<StringCell>::parse(str);
 
     } else if (CellParser<Symbol>::check(str)) {
         out = CellParser<Symbol>::parse(str);
@@ -106,19 +106,19 @@ Cell CellParser<Symbol>::parse(
     } else {
         throw ParseError() << "Simple character input should have prefix '#\\'";
     }
-    return Cell(ch);
+    return Cell::symbol(ch);
 }
 
-bool CellParser<StringType>::check(const std::string& str) {
+bool CellParser<StringCell>::check(const std::string& str) {
     return str.front() == quote;
 }
 
-Cell CellParser<StringType>::parse(const std::string& str) {
+Cell CellParser<StringCell>::parse(const std::string& str) {
     auto value = std::string(
         str.begin() + 1,
         str.end() - 1
     );
-    return AntLisp::Cell::ext<AntLisp::StringType>(
+    return AntLisp::Cell::ext<std::string>(
         std::string(
             str.begin() + 1,
             str.end() - 1

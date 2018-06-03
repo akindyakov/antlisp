@@ -9,110 +9,104 @@
 
 void test_equality_int() {
     auto eq = AntLisp::Builtin::Equality();
-    UT_ASSERT_EQUAL(
+    auto args = AntLisp::Arguments{};
+    args.push_back(AntLisp::Cell::integer(48));
+    args.push_back(AntLisp::Cell::integer(48));
+    UT_ASSERT(
         eq.instantCall(
-            AntLisp::Arguments{
-                AntLisp::Cell::integer(48),
-                AntLisp::Cell::integer(48),
-            }
-        ),
-        AntLisp::Cell::t()
+            std::move(args)
+        ).is<AntLisp::Integer>()
     );
 }
 
 void test_equality_int_neg() {
     auto eq = AntLisp::Builtin::Equality();
-    UT_ASSERT_EQUAL(
-        eq.instantCall(
-            AntLisp::Arguments{
-                AntLisp::Cell::integer(155),
-                AntLisp::Cell::integer(-155),
-            }
-        ),
-        AntLisp::Cell::nil()
+    auto args = AntLisp::Arguments{};
+    args.push_back(AntLisp::Cell::integer(155));
+    args.push_back(AntLisp::Cell::integer(-155));
+    auto ans = eq.instantCall(
+        std::move(args)
+    );
+    std::cerr << ans.toString() << '\n';
+    UT_ASSERT(
+        ans.is<AntLisp::Nil>()
     );
 }
 
 void test_equality_symbol() {
     auto eq = AntLisp::Builtin::Equality();
-    UT_ASSERT_EQUAL(
+    auto args = AntLisp::Arguments{};
+    args.push_back(AntLisp::Cell::symbol('t'));
+    args.push_back(AntLisp::Cell::symbol('t'));
+    UT_ASSERT(
         eq.instantCall(
-            AntLisp::Arguments{
-                AntLisp::Cell::symbol('t'),
-                AntLisp::Cell::symbol('t'),
-            }
-        ),
-        AntLisp::Cell::t()
+            std::move(args)
+        ).is<AntLisp::Integer>()
     );
 }
 
 void test_equality_symbol_nil() {
     auto eq = AntLisp::Builtin::Equality();
-    UT_ASSERT_EQUAL(
+    auto args = AntLisp::Arguments{};
+    args.push_back(AntLisp::Cell::symbol('a'));
+    args.push_back(AntLisp::Cell::symbol('A'));
+    UT_ASSERT(
         eq.instantCall(
-            AntLisp::Arguments{
-                AntLisp::Cell::symbol('a'),
-                AntLisp::Cell::symbol('A'),
-            }
-        ),
-        AntLisp::Cell::nil()
+            std::move(args)
+        ).is<AntLisp::Nil>()
     );
 }
 
 void test_equality_string() {
     auto eq = AntLisp::Builtin::Equality();
-    UT_ASSERT_EQUAL(
+    auto args = AntLisp::Arguments{};
+    args.push_back(AntLisp::Cell::ext<AntLisp::StringType>("keymaster"));
+    args.push_back(AntLisp::Cell::ext<AntLisp::StringType>("keymaster"));
+    UT_ASSERT(
         eq.instantCall(
-            AntLisp::Arguments{
-                AntLisp::Cell::ext<AntLisp::StringType>("keymaster"),
-                AntLisp::Cell::ext<AntLisp::StringType>("keymaster"),
-            }
-        ),
-        AntLisp::Cell::t()
+            std::move(args)
+        ).is<AntLisp::Integer>()
     );
 }
 
 void test_equality_string_nil() {
     auto eq = AntLisp::Builtin::Equality();
-    UT_ASSERT_EQUAL(
+    auto args = AntLisp::Arguments{};
+    args.push_back(AntLisp::Cell::ext<AntLisp::StringType>("key master"));
+    args.push_back(AntLisp::Cell::ext<AntLisp::StringType>("keymaster"));
+    UT_ASSERT(
         eq.instantCall(
-            AntLisp::Arguments{
-                AntLisp::Cell::ext<AntLisp::StringType>("key master"),
-                AntLisp::Cell::ext<AntLisp::StringType>("keymaster"),
-            }
-        ),
-        AntLisp::Cell::nil()
+            std::move(args)
+        ).is<AntLisp::Nil>()
     );
 }
 
 void test_equality_multi_symbol() {
     auto eq = AntLisp::Builtin::Equality();
-    UT_ASSERT_EQUAL(
+    auto args = AntLisp::Arguments{};
+    args.push_back(AntLisp::Cell::symbol('t'));
+    args.push_back(AntLisp::Cell::symbol('t'));
+    args.push_back(AntLisp::Cell::symbol('t'));
+    args.push_back(AntLisp::Cell::symbol('t'));
+    args.push_back(AntLisp::Cell::symbol('t'));
+    UT_ASSERT(
         eq.instantCall(
-            AntLisp::Arguments{
-                AntLisp::Cell::symbol('t'),
-                AntLisp::Cell::symbol('t'),
-                AntLisp::Cell::symbol('t'),
-                AntLisp::Cell::symbol('t'),
-                AntLisp::Cell::symbol('t'),
-            }
-        ),
-        AntLisp::Cell::t()
+            std::move(args)
+        ).is<AntLisp::Integer>()
     );
 }
 
 void test_equality_multi_symbol_nil() {
     auto eq = AntLisp::Builtin::Equality();
-    UT_ASSERT_EQUAL(
+    auto args = AntLisp::Arguments{};
+    args.push_back(AntLisp::Cell::symbol('u'));
+    args.push_back(AntLisp::Cell::symbol('u'));
+    args.push_back(AntLisp::Cell::symbol('*'));
+    args.push_back(AntLisp::Cell::symbol('u'));
+    UT_ASSERT(
         eq.instantCall(
-            AntLisp::Arguments{
-                AntLisp::Cell::symbol('u'),
-                AntLisp::Cell::symbol('u'),
-                AntLisp::Cell::symbol('*'),
-                AntLisp::Cell::symbol('u'),
-            }
-        ),
-        AntLisp::Cell::nil()
+            std::move(args)
+        ).is<AntLisp::Nil>()
     );
 }
 

@@ -1,31 +1,31 @@
 #include "string.h"
 
+#include <antlisp/lib/cell/cell.h>
+
 #include <antlisp/lib/test/ut.h>
 
 #include <iostream>
 
 
 void testCell_cast_copy_string() {
-    auto value = AntLisp::StringType{"act"};
+    auto value = AntLisp::Cell::ext<AntLisp::StringType>(
+      "act"
+    );
     auto copyValuePtr = value.copy();
-    value.summarize(
-        AntLisp::Cell::ext<AntLisp::StringType>(
-            " local!"
-        )
+    value.as<AntLisp::StringType>() += " local!";
+    UT_ASSERT_EQUAL(
+        value.as<AntLisp::StringType>(),
+        AntLisp::StringType{"act local!"}
     );
     UT_ASSERT_EQUAL(
-        value.toString(),
-        "\"act local!\""
-    );
-    UT_ASSERT_EQUAL(
-        copyValuePtr->toString(),
-        "\"act\""
+        copyValuePtr.as<AntLisp::StringType>(),
+        AntLisp::StringType{"act"}
     );
 }
 
 void testCell_string_eq() {
-    auto first = AntLisp::Cell::ext<AntLisp::StringType>("act");
-    auto second = AntLisp::Cell::ext<AntLisp::StringType>("act");
+    auto first = AntLisp::StringCell("act");
+    auto second = AntLisp::StringCell("act");
     UT_ASSERT_EQUAL(
         first,
         second

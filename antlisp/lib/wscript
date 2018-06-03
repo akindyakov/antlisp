@@ -15,6 +15,7 @@ def build(ctx):
             "antlisp-lib-util",
             "antlisp-lib-function-builtin",
             "antlisp-lib-exttypes",
+            "antlisp-lib-cell-string",
         ],
     )
     ctx.recurse([

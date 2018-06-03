@@ -15,14 +15,14 @@ namespace {
 class ConstructionParser {
 public:
     explicit ConstructionParser (
-        const Namespace& global
+        Namespace global
     )
     {
         definitionStack.push_back(
             std::make_shared<LambdaFunction>(
                 NativeFunction(
                     std::make_shared<NativeFunctionDefinition>(),
-                    0, global, "this"
+                    0, std::move(global), "this"
                 ),
                 std::vector<TVarName>{} // global arg names - should be empty
             )
@@ -63,7 +63,7 @@ private:
                 functionDef(nextParser.get());
             } else if ("lambda" == token) {
                 lambdaDef(nextParser.get(), "this");
-            // TODO(akindyakov): implement 'let' construction
+            // TODO: implement 'let' construction
             //} else if ("let" == token) {
             //    letDef(nextParser.get());
             } else if ("set" == token) {
@@ -327,10 +327,10 @@ private:
 
 NativeFunction parseCode(
     std::istream& in
-    , const Namespace& global
+    , Namespace global
 ) {
     auto codeStream = InCodeStream(in);
-    return ConstructionParser(global).fromCodeStream(
+    return ConstructionParser(std::move(global)).fromCodeStream(
         codeStream
     ).finish();
 }
