@@ -158,7 +158,14 @@ std::string NativeFunction::toString() const {
         out << ")\n";
     }
     for (const auto& closure : closures) {
-        out << "{ " << closure.first << " " << closure.second.toString() << " }\n";
+        if (closure.second.is<FunctionPtr>()) {
+            out << "( " << closure.first << " <lambda> )\n";
+        } else {
+            out << "( " << closure.first
+                << ' ' << closure.second.toString()
+                << '\n'
+            ;
+        }
     }
     for (const auto& op : fdef->operations) {
         out << int(op.operation) << " : " << int(op.position) << "\n";

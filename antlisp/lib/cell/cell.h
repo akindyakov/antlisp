@@ -18,7 +18,6 @@ namespace AntLisp {
 class IFunction;
 
 using FunctionPtr = std::shared_ptr<IFunction>;
-using FunctionCell = CellType<FunctionPtr>;
 
 using Integer = long;
 using Float = double;
@@ -97,8 +96,8 @@ public:
 
     static Cell function(FunctionPtr ptr) {
         return Cell{
-            std::make_unique<FunctionCell>(
-                ptr
+            std::make_unique<CellType<FunctionPtr>>(
+                std::move(ptr)
             )
         };
     }
