@@ -7,6 +7,7 @@ def build(ctx):
         target="antlisp-lib-cell",
         source = [
             "cell.cpp",
+            "cell_type.cpp",
         ],
         use=[
             "antlisp-lib-util",

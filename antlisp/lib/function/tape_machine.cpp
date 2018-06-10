@@ -7,6 +7,11 @@
 
 namespace AntLisp {
 
+template<>
+std::string CellType<FunctionPtr>::toString() const {
+    return value_->toString();
+}
+
 void LocalStack::push(Cell value) {
     stackImpl.push_back(
         std::move(value)
@@ -97,7 +102,9 @@ bool NativeFunction::isNative() const {
 FunctionPtr NativeFunction::activate(
     Namespace vars
 ) const {
-    vars.insert(closures.begin(), closures.end());
+    for (const auto& var : closures) {
+        vars.emplace(var.first, var.second.copy());
+    }
     auto copy = std::make_shared<NativeFunction>(
         fdef, argnum, std::move(vars), selfName
     );
@@ -124,8 +131,10 @@ NativeFunctionCall NativeFunction::nativeCall(
         fdef->names,
         argnum
     );
-    vars.insert(closures.begin(), closures.end());
-    return NativeFunctionCall(fdef, vars);
+    for (const auto& var : closures) {
+        vars.emplace(var.first, var.second.copy());
+    }
+    return NativeFunctionCall(fdef, std::move(vars));
 }
 
 bool NativeFunction::hasName(
@@ -179,7 +188,7 @@ Cell LambdaFunction::instantCall(
         names.size()
     );
     return Cell::function(
-        nativeFn.activate(nextClosures)
+        nativeFn.activate(std::move(nextClosures))
     );
 }
 
@@ -254,10 +263,9 @@ void NativeFunctionCall::push(Cell cell) {
 }
 
 void NativeFunctionCall::getConst() {
-    // copy
     auto cell = function->consts[
         function->operations[runner].position
-    ];
+    ].copy();
     this->push(
         std::move(cell)
     );
@@ -268,12 +276,11 @@ void NativeFunctionCall::getLocal() {
         this->runner
     ].position;
     const auto& name = this->function->names[pos];
-    // copy
     auto localIt = this->vars.find(name);
     if (localIt == this->vars.end()) {
         throw RuntimeError() << "There is no such local name " << Str::Quotes(name);
     }
-    this->push(localIt->second);
+    this->push(localIt->second.copy());
 }
 
 void NativeFunctionCall::setLocal() {
@@ -363,7 +370,7 @@ void Environment::runCellWithArguments(
     , Arguments args
 ) {
     if (cellToRun.is<FunctionPtr>()) {
-        auto fnPtr = cellToRun.get<FunctionPtr>();
+        auto fnPtr = cellToRun.as<FunctionPtr>();
         if (fnPtr->isNative()) {
             this->pushCall(
                 fnPtr->nativeCall(

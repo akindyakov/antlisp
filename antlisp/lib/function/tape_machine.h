@@ -18,6 +18,7 @@ using TVarName = std::string;
 using Namespace = std::unordered_map<TVarName, Cell>;
 
 using Arguments = std::vector<Cell>;
+
 using ArgNames = std::vector<TVarName>;
 
 class TapeMachineError
@@ -151,7 +152,7 @@ private:
 
 class IFunction {
 public:
-    ~IFunction() = default;
+    virtual ~IFunction() = default;
 
     virtual bool isNative() const = 0;
 
@@ -172,10 +173,15 @@ public:
     );
 };
 
+template<>
+std::string CellType<FunctionPtr>::toString() const;
+
 class ExtInstantFunction
     : public IFunction
 {
 public:
+    virtual ~ExtInstantFunction() = default;
+
     class Error
         : public TapeMachineError
     {
@@ -218,6 +224,7 @@ public:
 
     NativeFunction& operator=(const NativeFunction&) = delete;
     NativeFunction& operator=(NativeFunction&&) = default;
+    virtual ~NativeFunction() = default;
 
     class Error
         : public TapeMachineError
@@ -259,6 +266,8 @@ public:
         NativeFunction native_
         , ArgNames names_
     );
+
+    virtual ~LambdaFunction() = default;
 
     class Error
         : public TapeMachineError

@@ -3,26 +3,25 @@
 #include <antlisp/lib/test/ut.h>
 
 #include <iostream>
+#include <string>
+#include <vector>
 
 void nilEqualTest() {
     UT_ASSERT_EQUAL(
-        AntLisp::Cell::nil(), AntLisp::Cell::nil()
-    );
-    UT_ASSERT_EQUAL(
-        AntLisp::Cell{AntLisp::Nil{}}, AntLisp::Cell::nil()
-    );
-    UT_ASSERT_EQUAL(
         AntLisp::Nil{}, AntLisp::Nil{}
     );
+    const auto cValue1 = AntLisp::Nil{};
+    const auto cValue2 = AntLisp::Nil{};
+    UT_ASSERT_EQUAL(cValue1, cValue1);
+    UT_ASSERT_EQUAL(cValue1, cValue2);
 }
 
 template<typename T>
 void checkTagTempl() {
-    auto v = AntLisp::Cell(T{});
-    UT_ASSERT_EQUAL(
-        static_cast<int>(v.tag()),
-        static_cast<int>(AntLisp::Cell::tagOf<T>())
-    );
+    auto v = AntLisp::Cell::ext<T>(T{});
+    auto first = v.typeId();
+    auto second = AntLisp::Cell::typeIdOf<T>();
+    UT_ASSERT_EQUAL(first, second);
 }
 
 void cellCheckTypeTag() {
@@ -30,21 +29,49 @@ void cellCheckTypeTag() {
     checkTagTempl<AntLisp::Integer>();
     checkTagTempl<AntLisp::Float>();
     checkTagTempl<AntLisp::Symbol>();
-    checkTagTempl<AntLisp::ExtTypePtr>();
     checkTagTempl<AntLisp::FunctionPtr>();
+
+    checkTagTempl<short>();
+    checkTagTempl<short int>();
+    checkTagTempl<signed short>();
+    checkTagTempl<signed short int>();
+    checkTagTempl<unsigned short>();
+    checkTagTempl<unsigned short int>();
+    checkTagTempl<unsigned short int>();
+    checkTagTempl<int>();
+    checkTagTempl<signed>();
+    checkTagTempl<signed int>();
+    checkTagTempl<unsigned>();
+    checkTagTempl<unsigned int>();
+    checkTagTempl<unsigned int>();
+    checkTagTempl<long>();
+    checkTagTempl<long int>();
+    checkTagTempl<signed long>();
+    checkTagTempl<signed long int>();
+    checkTagTempl<unsigned long>();
+    checkTagTempl<unsigned long int>();
+    checkTagTempl<unsigned long int>();
+    checkTagTempl<long long>();
+    checkTagTempl<long long int>();
+    checkTagTempl<signed long long>();
+    checkTagTempl<signed long long int>();
+    checkTagTempl<unsigned long long>();
+    checkTagTempl<unsigned long long int>();
+
+    checkTagTempl<std::string>();
+    checkTagTempl<std::vector<std::string>>();
 }
 
 void cellGetError() {
     UT_ASSERT_EXCEPTION_TYPE(
-        AntLisp::Cell::nil().get<AntLisp::Integer>(),
+        AntLisp::Cell::nil().as<AntLisp::Integer>(),
         AntLisp::Cell::BadGetError
     );
 }
 
 void testCell_cast_nil() {
-    UT_ASSERT_EQUAL(
-        AntLisp::Cell::nil().cast<AntLisp::Nil>(),
-        AntLisp::Cell::nil()
+    UT_ASSERT(
+        AntLisp::Cell::nil().cast<AntLisp::Nil>().is<AntLisp::Nil>()
     );
     UT_ASSERT_EXCEPTION_TYPE(
         AntLisp::Cell::nil().cast<AntLisp::Integer>(),
@@ -59,10 +86,6 @@ void testCell_cast_nil() {
         AntLisp::Cell::BadGetError
     );
     UT_ASSERT_EXCEPTION_TYPE(
-        AntLisp::Cell::nil().cast<AntLisp::ExtTypePtr>(),
-        AntLisp::Cell::BadGetError
-    );
-    UT_ASSERT_EXCEPTION_TYPE(
         AntLisp::Cell::nil().cast<AntLisp::FunctionPtr>(),
         AntLisp::Cell::BadGetError
     );
@@ -74,20 +97,22 @@ void testCell_cast_integer() {
         AntLisp::Cell::BadGetError
     );
     UT_ASSERT_EQUAL(
-        AntLisp::Cell::integer(1334).cast<AntLisp::Integer>(),
         AntLisp::Cell::integer(1334)
+            .cast<AntLisp::Integer>()
+            .as<AntLisp::Integer>(),
+        AntLisp::Integer{1334}
     );
     UT_ASSERT_EQUAL(
-        AntLisp::Cell::integer(1334).cast<AntLisp::Float>(),
-        AntLisp::Cell::real(1334)
+        AntLisp::Cell::integer(1334)
+            .cast<AntLisp::Float>()
+            .as<AntLisp::Float>(),
+        AntLisp::Float{1334}
     );
     UT_ASSERT_EQUAL(
-        AntLisp::Cell::integer(64).cast<AntLisp::Symbol>(),
-        AntLisp::Cell{'@'}
-    );
-    UT_ASSERT_EXCEPTION_TYPE(
-        AntLisp::Cell::integer(3).cast<AntLisp::ExtTypePtr>(),
-        AntLisp::Cell::BadGetError
+        AntLisp::Cell::integer(64)
+            .cast<AntLisp::Symbol>()
+            .as<AntLisp::Symbol>(),
+        AntLisp::Symbol{'@'}
     );
     UT_ASSERT_EXCEPTION_TYPE(
         AntLisp::Cell::integer(4).cast<AntLisp::FunctionPtr>(),
@@ -101,19 +126,19 @@ void testCell_cast_real() {
         AntLisp::Cell::BadGetError
     );
     UT_ASSERT_EQUAL(
-        AntLisp::Cell::real(1339.2).cast<AntLisp::Integer>(),
-        AntLisp::Cell::integer(1339)
+        AntLisp::Cell::real(1339.2)
+            .cast<AntLisp::Integer>()
+            .as<AntLisp::Integer>(),
+        AntLisp::Integer{1339}
     );
     UT_ASSERT_EQUAL(
-        AntLisp::Cell::real(1338.1).cast<AntLisp::Float>(),
         AntLisp::Cell::real(1338.1)
+            .cast<AntLisp::Float>()
+            .as<AntLisp::Float>(),
+        AntLisp::Float{1338.1}
     );
     UT_ASSERT_EXCEPTION_TYPE(
         AntLisp::Cell::real(1.0).cast<AntLisp::Symbol>(),
-        AntLisp::Cell::BadGetError
-    );
-    UT_ASSERT_EXCEPTION_TYPE(
-        AntLisp::Cell::real(3.0).cast<AntLisp::ExtTypePtr>(),
         AntLisp::Cell::BadGetError
     );
     UT_ASSERT_EXCEPTION_TYPE(
@@ -124,61 +149,35 @@ void testCell_cast_real() {
 
 void testCell_cast_symbol() {
     UT_ASSERT_EXCEPTION_TYPE(
-        AntLisp::Cell{'a'}.cast<AntLisp::Nil>(),
+        AntLisp::Cell::symbol('a').cast<AntLisp::Nil>(),
         AntLisp::Cell::BadGetError
     );
     UT_ASSERT_EQUAL(
-        AntLisp::Cell{'Y'}.cast<AntLisp::Integer>(),
-        AntLisp::Cell::integer(89)
+        AntLisp::Cell::symbol('Y')
+            .cast<AntLisp::Integer>()
+            .as<AntLisp::Integer>(),
+        AntLisp::Integer{89}
     );
     UT_ASSERT_EXCEPTION_TYPE(
-        AntLisp::Cell{'b'}.cast<AntLisp::Float>(),
+        AntLisp::Cell::symbol('b').cast<AntLisp::Float>(),
         AntLisp::Cell::BadGetError
     );
     UT_ASSERT_EQUAL(
-        AntLisp::Cell{'W'}.cast<AntLisp::Symbol>(),
-        AntLisp::Cell{'W'}
+        AntLisp::Cell::symbol('W')
+            .cast<AntLisp::Symbol>()
+            .as<AntLisp::Symbol>(),
+        AntLisp::Symbol{'W'}
     );
     UT_ASSERT_EXCEPTION_TYPE(
-        AntLisp::Cell{'d'}.cast<AntLisp::ExtTypePtr>(),
-        AntLisp::Cell::BadGetError
-    );
-    UT_ASSERT_EXCEPTION_TYPE(
-        AntLisp::Cell{'e'}.cast<AntLisp::FunctionPtr>(),
-        AntLisp::Cell::BadGetError
-    );
-}
-
-void testCell_cast_ext() {
-    auto extPtrCell = AntLisp::Cell{
-        AntLisp::ExtTypePtr{nullptr}
-    };
-    UT_ASSERT_EXCEPTION_TYPE(
-        extPtrCell.cast<AntLisp::Nil>(),
-        AntLisp::Cell::BadGetError
-    );
-    UT_ASSERT_EXCEPTION_TYPE(
-        extPtrCell.cast<AntLisp::Integer>(),
-        AntLisp::Cell::BadGetError
-    );
-    UT_ASSERT_EXCEPTION_TYPE(
-        extPtrCell.cast<AntLisp::Float>(),
-        AntLisp::Cell::BadGetError
-    );
-    UT_ASSERT_EXCEPTION_TYPE(
-        extPtrCell.cast<AntLisp::Symbol>(),
-        AntLisp::Cell::BadGetError
-    );
-    UT_ASSERT_EXCEPTION_TYPE(
-        extPtrCell.cast<AntLisp::FunctionPtr>(),
+        AntLisp::Cell::symbol('e').cast<AntLisp::FunctionPtr>(),
         AntLisp::Cell::BadGetError
     );
 }
 
 void testCell_cast_function() {
-    auto fnPtrCell = AntLisp::Cell{
+    auto fnPtrCell = AntLisp::Cell::function(
         AntLisp::FunctionPtr{nullptr}
-    };
+    );
     UT_ASSERT_EXCEPTION_TYPE(
         fnPtrCell.cast<AntLisp::Nil>(),
         AntLisp::Cell::BadGetError
@@ -195,22 +194,18 @@ void testCell_cast_function() {
         fnPtrCell.cast<AntLisp::Symbol>(),
         AntLisp::Cell::BadGetError
     );
-    UT_ASSERT_EXCEPTION_TYPE(
-        fnPtrCell.cast<AntLisp::ExtTypePtr>(),
-        AntLisp::Cell::BadGetError
-    );
 }
 
 void testCell_cast_copy_integer() {
     auto value = AntLisp::Cell::integer(167);
     auto cValue = value.copy();
-    cValue.get<AntLisp::Integer>() += 12;
+    cValue.as<AntLisp::Integer>() += 12;
     UT_ASSERT_EQUAL(
-        value.get<AntLisp::Integer>(),
+        value.as<AntLisp::Integer>(),
         167
     );
     UT_ASSERT_EQUAL(
-        cValue.get<AntLisp::Integer>(),
+        cValue.as<AntLisp::Integer>(),
         12 + 167
     );
 }
@@ -223,7 +218,6 @@ UT_LIST(
     RUN_TEST(testCell_cast_integer);
     RUN_TEST(testCell_cast_real);
     RUN_TEST(testCell_cast_symbol);
-    RUN_TEST(testCell_cast_ext);
     RUN_TEST(testCell_cast_function);
     RUN_TEST(testCell_cast_copy_integer);
 );

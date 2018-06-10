@@ -5,61 +5,85 @@
 #include <iostream>
 
 
-void test_allMathBuiltinFunctions() {
+void test_allMathBuiltinFunctionsPlus() {
     auto space = AntLisp::Namespace{};
     AntLisp::Builtin::allMathFunctions(space);
-    const auto sumPtr = space.at("+").get<AntLisp::FunctionPtr>();
+    const auto sumPtr = space.at("+").as<AntLisp::FunctionPtr>();
+    auto args = AntLisp::Arguments{};
+    args.push_back(AntLisp::Cell::integer(17));
+    args.push_back(AntLisp::Cell::integer(16));
     UT_ASSERT_EQUAL(
         sumPtr->instantCall(
-            AntLisp::Arguments{
-                AntLisp::Cell::integer(17),
-                AntLisp::Cell::integer(16),
-            }
-        ),
-        AntLisp::Cell::integer(17 + 16)
+            std::move(args)
+        ).as<AntLisp::Integer>(),
+        17 + 16
     );
-    const auto lessPtr = space.at("<").get<AntLisp::FunctionPtr>();
+}
+
+void test_allMathBuiltinFunctionsLess() {
+    auto space = AntLisp::Namespace{};
+    AntLisp::Builtin::allMathFunctions(space);
+    const auto lessPtr = space.at("<").as<AntLisp::FunctionPtr>();
+    auto args2 = AntLisp::Arguments{};
+    args2.push_back(AntLisp::Cell::real(1.29));
+    args2.push_back(AntLisp::Cell::real(1.31));
     UT_ASSERT_EQUAL(
         lessPtr->instantCall(
-            AntLisp::Arguments{
-                AntLisp::Cell::real(1.29),
-                AntLisp::Cell::real(1.31),
-            }
-        ),
-        AntLisp::Cell::t()
+            std::move(args2)
+        ).as<AntLisp::Integer>(),
+        AntLisp::Cell::t().as<AntLisp::Integer>()
     );
-    const auto eqPtr = space.at("=").get<AntLisp::FunctionPtr>();
-    UT_ASSERT_EQUAL(
-        eqPtr->instantCall(
-            AntLisp::Arguments{
-                AntLisp::Cell::real(1.29),
-                AntLisp::Cell::real(1.29),
-            }
-        ),
-        AntLisp::Cell::t()
+}
+
+void test_allMathBuiltinFunctionsEqual() {
+    auto space = AntLisp::Namespace{};
+    AntLisp::Builtin::allMathFunctions(space);
+    const auto eqPtr = space.at("=").as<AntLisp::FunctionPtr>();
+    auto args = AntLisp::Arguments{};
+    args.push_back(AntLisp::Cell::integer(129));
+    args.push_back(AntLisp::Cell::integer(129));
+    auto ans = eqPtr->instantCall(
+        std::move(args)
     );
-    const auto mPtr = space.at("*").get<AntLisp::FunctionPtr>();
+    UT_ASSERT(
+        ans.is<AntLisp::Integer>()
+    );
+}
+
+void test_allMathBuiltinFunctionsMultiplication() {
+    auto space = AntLisp::Namespace{};
+    AntLisp::Builtin::allMathFunctions(space);
+    const auto mPtr = space.at("*").as<AntLisp::FunctionPtr>();
+    auto args = AntLisp::Arguments{};
+    args.push_back(AntLisp::Cell::integer(6));
+    args.push_back(AntLisp::Cell::integer(29));
     UT_ASSERT_EQUAL(
         mPtr->instantCall(
-            AntLisp::Arguments{
-                AntLisp::Cell::integer(6),
-                AntLisp::Cell::integer(29),
-            }
-        ),
-        AntLisp::Cell::integer(6 * 29)
+            std::move(args)
+        ).as<AntLisp::Integer>(),
+        AntLisp::Integer{6 * 29}
     );
-    const auto dPtr = space.at("/").get<AntLisp::FunctionPtr>();
+}
+
+void test_allMathBuiltinFunctionsDivision() {
+    auto space = AntLisp::Namespace{};
+    AntLisp::Builtin::allMathFunctions(space);
+    const auto dPtr = space.at("/").as<AntLisp::FunctionPtr>();
+    auto args = AntLisp::Arguments{};
+    args.push_back(AntLisp::Cell::integer(143));
+    args.push_back(AntLisp::Cell::integer(11));
     UT_ASSERT_EQUAL(
         dPtr->instantCall(
-            AntLisp::Arguments{
-                AntLisp::Cell::integer(143),
-                AntLisp::Cell::integer(11),
-            }
-        ),
-        AntLisp::Cell::integer(13)
+            std::move(args)
+        ).as<AntLisp::Integer>(),
+        AntLisp::Integer{13}
     );
 }
 
 UT_LIST(
-    RUN_TEST(test_allMathBuiltinFunctions);
+    RUN_TEST(test_allMathBuiltinFunctionsPlus);
+    RUN_TEST(test_allMathBuiltinFunctionsDivision);
+    RUN_TEST(test_allMathBuiltinFunctionsMultiplication);
+    RUN_TEST(test_allMathBuiltinFunctionsLess);
+    RUN_TEST(test_allMathBuiltinFunctionsEqual);
 );

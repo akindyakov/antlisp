@@ -3,34 +3,6 @@
 
 namespace AntLisp {
 
-std::string MockExtType::toString() const {
-    std::cerr << "mock MockExtType::toString()\n";
-    throw NotImplementedError() << "\"toString\" method does not implemented";
-}
-
-ExtTypePtr MockExtType::copy() const {
-    throw NotImplementedError() << "\"copy\" method does not implemented";
-}
-void MockExtType::summarize(const Cell&) {
-    throw NotImplementedError() << "\"summarize\" method does not implemented";
-}
-void MockExtType::multiply(const Cell&) {
-    throw NotImplementedError() << "\"multiply\" method does not implemented";
-}
-void MockExtType::subtract(const Cell&) {
-    throw NotImplementedError() << "\"subtract\" method does not implemented";
-}
-void MockExtType::divide(const Cell&) {
-    throw NotImplementedError() << "\"divide\" method does not implemented";
-}
-
-bool MockExtType::equal(const Cell&) const {
-    throw NotImplementedError() << "\"equal\" method does not implemented";
-}
-bool MockExtType::less(const Cell&) const {
-    throw NotImplementedError() << "\"less\" method does not implemented";
-}
-
 template<>
 Cell Cell::cast<Nil>() const {
     if (not this->is<Nil>()) {
@@ -39,7 +11,7 @@ Cell Cell::cast<Nil>() const {
             << this->toString()
         ;
     }
-    return *this;
+    return Cell::nil();
 }
 
 template<>
@@ -47,14 +19,14 @@ Cell Cell::cast<Integer>() const {
     auto out = Integer{};
     std::cerr << "cast enter point\n";
     if (this->is<Integer>()) {
-        out = this->get<Integer>();
+        out = this->as<Integer>();
     } else if (this->is<Float>()) {
         out = static_cast<Integer>(
-            this->get<Float>()
+            this->as<Float>()
         );
     } else if (this->is<Symbol>()) {
         out = static_cast<Integer>(
-            this->get<Symbol>()
+            this->as<Symbol>()
         );
     } else {
         std::cerr << "throw\n";
@@ -71,10 +43,10 @@ Cell Cell::cast<Float>() const {
     auto out = Float{};
     if (this->is<Integer>()) {
         out = static_cast<Float>(
-            this->get<Integer>()
+            this->as<Integer>()
         );
     } else if (this->is<Float>()) {
-        out = this->get<Float>();
+        out = this->as<Float>();
     } else {
         throw BadGetError()
             << "Wrong cast to Float: "
@@ -88,10 +60,10 @@ template<>
 Cell Cell::cast<Symbol>() const {
     auto out = Symbol{};
     if (this->is<Symbol>()) {
-        out = this->get<Symbol>();
+        out = this->as<Symbol>();
     } else if (this->is<Integer>()) {
         out = static_cast<Symbol>(
-            this->get<Integer>()
+            this->as<Integer>()
         );
     } else {
         throw BadGetError()
@@ -99,20 +71,7 @@ Cell Cell::cast<Symbol>() const {
             << this->toString()
         ;
     }
-    return Cell{out};
-}
-
-template<>
-Cell Cell::cast<ExtTypePtr>() const {
-    // TODO(akindyakov): [task](doc/todo/5t7dmp19.md)
-    std::cerr << "cast enter point\n";
-    if (not this->is<ExtTypePtr>()) {
-        throw BadGetError()
-            << "Wrong cast to ExtTypePtr: "
-            << this->toString()
-        ;
-    }
-    return *this;
+    return Cell::symbol(out);
 }
 
 template<>
@@ -123,92 +82,35 @@ Cell Cell::cast<FunctionPtr>() const {
             << this->toString()
         ;
     }
-    return *this;
+    return this->copy();
 }
 
 Cell Cell::copy() const {
-    if (this->is<ExtTypePtr>()) {
-        return Cell{
-            this->get<ExtTypePtr>()->copy()
-        };
-    }
-    return *this;
-}
-
-namespace {
-
-class ToStringVisitor
-{
-public:
-    using result_type = std::string;
-
-public:
-    template<typename T>
-    std::string operator()(const T& v) const {
-        return TypeInfo<T>::toString(v);
-    }
-};
-
+    return Cell{this->valuePtr_->copy()};
 }
 
 std::string Cell::toString() const {
-    return this->visit(
-        ToStringVisitor()
-    );
+    return this->valuePtr_->toString();
 }
 
-namespace {
+template<>
+std::string CellType<FunctionPtr>::toString() const;
+template<>
+ICellType::Ptr CellType<FunctionPtr>::copy() const;
 
-class CellEqualityVisitor
-{
-private:
-    const Cell& first;
-
-public:
-    using result_type = bool;
-
-public:
-    explicit CellEqualityVisitor(
-        const Cell& first_
-    )
-        : first(first_)
-    {
-    }
-
-    template<typename T>
-    bool operator()(const T& value) const {
-        return (
-            Cell::tagOf<T>() == first.tag()
-            && value == first.get<T>()
-        );
-    }
-
-    bool operator()(const ExtTypePtr& value) const {
-        return value->equal(first);
-    }
-};
-
+template<>
+std::string CellType<Integer>::toString() const {
+    return std::to_string(value_);
 }
 
-bool operator == (
-    const Cell& first
-    , const Cell& second
-) {
-    return second.visit(
-        CellEqualityVisitor(first)
-    );
+template<>
+std::string CellType<Float>::toString() const {
+    return std::to_string(value_);
 }
 
-std::ostream& operator<<(std::ostream& os, const Nil& v) {
-    os << TypeInfo<Nil>::toString(v);
-    return os;
-}
-
-bool operator != (
-    const Cell& first
-    , const Cell& second
-) {
-    return !(first == second);
+template<>
+std::string CellType<Symbol>::toString() const {
+    return std::to_string(value_);
 }
 
 }  // namespace AntLisp

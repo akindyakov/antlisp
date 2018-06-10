@@ -14,7 +14,7 @@ public:
     ) const override {
         auto sum = AntLisp::Integer{0};
         for (const auto& cell : frame) {
-            sum += cell.get<AntLisp::Integer>();
+            sum += cell.as<AntLisp::Integer>();
         }
         return AntLisp::Cell::integer(sum);
     }
@@ -29,30 +29,30 @@ public:
     ) const override {
         auto m = AntLisp::Integer{1};
         for (const auto& cell : frame) {
-            m *= cell.get<AntLisp::Integer>();
+            m *= cell.as<AntLisp::Integer>();
         }
         return AntLisp::Cell::integer(m);
     }
 };
 
 void testFullCycle() {
-    auto global = AntLisp::Namespace{
-        {
-            "+", AntLisp::Cell(std::make_shared<ExtSum>())
-        },
-        {
-            "*", AntLisp::Cell(std::make_shared<ExtMultiplication>())
-        },
-        {
-            "first", AntLisp::Cell::integer(12)
-        },
-        {
-            "second", AntLisp::Cell::integer(13)
-        },
-        {
-            "third", AntLisp::Cell::integer(14)
-        },
-    };
+    auto global = AntLisp::Namespace{};
+    global.emplace(
+        "+", AntLisp::Cell::function(std::make_shared<ExtSum>())
+    );
+    global.emplace(
+        "*",
+        AntLisp::Cell::function(std::make_shared<ExtMultiplication>())
+    );
+    global.emplace(
+        "first", AntLisp::Cell::integer(12)
+    );
+    global.emplace(
+        "second", AntLisp::Cell::integer(13)
+    );
+    global.emplace(
+        "third", AntLisp::Cell::integer(14)
+    );
     auto fdef = std::make_shared<AntLisp::NativeFunctionDefinition>();
     fdef->names.push_back("*");
     fdef->names.push_back("+");
@@ -103,28 +103,27 @@ void testFullCycle() {
     );
     auto env = AntLisp::Environment(
         AntLisp::NativeFunction(
-            std::move(fdef), 0, global, "this"
+            std::move(fdef), 0, std::move(global), "this"
         )
     );
     env.run();
     UT_ASSERT_EQUAL(
-        env.ret.get<AntLisp::Integer>(),
+        env.ret.as<AntLisp::Integer>(),
         (12 + 13) * 14
     );
 }
 
 void testLambdaFunction() {
-    auto global = AntLisp::Namespace{
-        {
-            "+", AntLisp::Cell(std::make_shared<ExtSum>())
-        },
-        {
-            "global_first", AntLisp::Cell::integer(2209)
-        },
-        {
-            "global_second", AntLisp::Cell::integer(1043)
-        }
-    };
+    auto global = AntLisp::Namespace{};
+    global.emplace(
+        "+", AntLisp::Cell::function(std::make_shared<ExtSum>())
+    );
+    global.emplace(
+        "global_first", AntLisp::Cell::integer(2209)
+    );
+    global.emplace(
+        "global_second", AntLisp::Cell::integer(1043)
+    );
     auto corefdef = std::make_shared<AntLisp::NativeFunctionDefinition>();
     corefdef->names.push_back("+");
     corefdef->names.push_back("local_first");
@@ -164,12 +163,15 @@ void testLambdaFunction() {
             3  // number of arguments
         )
     );
-    auto coreLocal = global;
+    auto coreLocal = AntLisp::Namespace{};
+    for (const auto& namedCell : global) {
+        coreLocal.emplace(namedCell.first, namedCell.second.copy());
+    }
     coreLocal.emplace(
-        AntLisp::TVarName{"local_first"}, AntLisp::Cell::integer(81)
+        "local_first", AntLisp::Cell::integer(81)
     );
     auto nativeCore = AntLisp::NativeFunction(
-        std::move(corefdef), 0, coreLocal, "this"
+        std::move(corefdef), 0, std::move(coreLocal), "this"
     );
     auto firstLambda = std::make_shared<AntLisp::LambdaFunction>(
         std::move(nativeCore),
@@ -178,10 +180,8 @@ void testLambdaFunction() {
             AntLisp::TVarName{"local_third"},
         }
     );
-    global.insert(
-        std::make_pair(
-            "second_function", AntLisp::Cell::function(firstLambda)
-        )
+    global.emplace(
+        "second_function", AntLisp::Cell::function(std::move(firstLambda))
     );
     auto gDef = std::make_shared<AntLisp::NativeFunctionDefinition>();
     gDef->names.push_back("second_function");
@@ -224,12 +224,12 @@ void testLambdaFunction() {
     );
     auto env = AntLisp::Environment(
         AntLisp::NativeFunction{
-            std::move(gDef), 0, global, "this"
+            std::move(gDef), 0, std::move(global), "this"
         }
     );
     env.run();
     UT_ASSERT_EQUAL(
-        env.ret.get<AntLisp::Integer>(),
+        env.ret.as<AntLisp::Integer>(),
         (81 + 1043 + 2209)
     );
 }

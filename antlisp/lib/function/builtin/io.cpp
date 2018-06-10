@@ -20,7 +20,12 @@ Cell CoutPrint::instantCall(
 }
 
 void all(Namespace& space) {
-    space.emplace("print", std::make_shared<CoutPrint>());
+    space.emplace(
+        "print",
+        Cell::function(
+            std::make_shared<CoutPrint>()
+        )
+    );
 }
 
 }  // namespace IO

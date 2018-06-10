@@ -19,7 +19,7 @@ void interactive(
         //**/ std::cout << "(line \"" << line << "\")\n";
         std::istringstream in(line);
         auto env = AntLisp::Environment(
-            AntLisp::parseCode(in, global)
+            AntLisp::parseCode(in, std::move(global))
         );
         env.run();
         std::cout << env.ret.toString() << std::endl;
@@ -32,7 +32,7 @@ void fromStream(
     , std::istream& in
 ) {
     auto env = AntLisp::Environment(
-        AntLisp::parseCode(in, global)
+        AntLisp::parseCode(in, std::move(global))
     );
     env.run();
     global = std::move(env.vars);

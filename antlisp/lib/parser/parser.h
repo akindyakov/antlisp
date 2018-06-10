@@ -11,7 +11,7 @@ namespace AntLisp {
 
 NativeFunction parseCode(
     std::istream& in
-    , const Namespace& global
+    , Namespace global
 );
 
 }  // namespace AntLisp
