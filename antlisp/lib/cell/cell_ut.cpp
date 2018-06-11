@@ -18,10 +18,12 @@ void nilEqualTest() {
 
 template<typename T>
 void checkTagTempl() {
-    auto v = AntLisp::Cell::ext<T>(T{});
-    auto first = v.typeId();
-    auto second = AntLisp::Cell::typeIdOf<T>();
+    const auto v = AntLisp::Cell::ext<T>(T{});
+    const auto first = v.typeId();
+    const auto second = AntLisp::Cell::typeIdOf<T>();
+    const auto third = AntLisp::Cell::typeIdOf<T>();
     UT_ASSERT_EQUAL(first, second);
+    UT_ASSERT_EQUAL(third, second);
 }
 
 void cellCheckTypeTag() {
@@ -60,6 +62,37 @@ void cellCheckTypeTag() {
 
     checkTagTempl<std::string>();
     checkTagTempl<std::vector<std::string>>();
+}
+
+void cellCheckTypeTagDiversity() {
+    UT_ASSERT(
+        AntLisp::Cell::typeIdOf<int>() !=
+        AntLisp::Cell::typeIdOf<short int>()
+    );
+    UT_ASSERT(
+        AntLisp::Cell::typeIdOf<AntLisp::Nil>() !=
+        AntLisp::Cell::typeIdOf<AntLisp::Integer>()
+    );
+    UT_ASSERT(
+        AntLisp::Cell::typeIdOf<AntLisp::Nil>() !=
+        AntLisp::Cell::typeIdOf<decltype(nullptr)>()
+    );
+    UT_ASSERT(
+        AntLisp::Cell::typeIdOf<AntLisp::Nil>() !=
+        AntLisp::Cell::typeIdOf<bool>()
+    );
+    UT_ASSERT(
+        AntLisp::Cell::typeIdOf<AntLisp::Nil>() !=
+        AntLisp::Cell::typeIdOf<AntLisp::Float>()
+    );
+    UT_ASSERT(
+        AntLisp::Cell::typeIdOf<AntLisp::Nil>() !=
+        AntLisp::Cell::typeIdOf<AntLisp::Symbol>()
+    );
+    UT_ASSERT(
+        AntLisp::Cell::typeIdOf<AntLisp::Nil>() !=
+        AntLisp::Cell::typeIdOf<AntLisp::FunctionPtr>()
+    );
 }
 
 void cellGetError() {
@@ -213,6 +246,7 @@ void testCell_cast_copy_integer() {
 UT_LIST(
     RUN_TEST(nilEqualTest);
     RUN_TEST(cellCheckTypeTag);
+    RUN_TEST(cellCheckTypeTagDiversity);
     RUN_TEST(cellGetError);
     RUN_TEST(testCell_cast_nil);
     RUN_TEST(testCell_cast_integer);
