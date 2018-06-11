@@ -41,23 +41,23 @@ private:
 
 class TapeMachine;
 
-struct NativeFunctionDefinition {
-    explicit NativeFunctionDefinition() = default;
+struct NativeTape {
+    explicit NativeTape() = default;
 
-    explicit NativeFunctionDefinition(
+    explicit NativeTape(
         ArgNames names_
     )
         : names(std::move(names_))
     {
     }
 
-    NativeFunctionDefinition(const NativeFunctionDefinition&) = delete;
-    NativeFunctionDefinition(NativeFunctionDefinition&&) = default;
+    NativeTape(const NativeTape&) = delete;
+    NativeTape(NativeTape&&) = default;
 
-    NativeFunctionDefinition& operator=(const NativeFunctionDefinition&) = delete;
-    NativeFunctionDefinition& operator=(NativeFunctionDefinition&&) = default;
+    NativeTape& operator=(const NativeTape&) = delete;
+    NativeTape& operator=(NativeTape&&) = default;
 
-    virtual ~NativeFunctionDefinition() = default;
+    virtual ~NativeTape() = default;
 
     enum EOperations
         : int
@@ -107,7 +107,7 @@ struct NativeFunctionDefinition {
     std::vector<Cell> consts;  // unnamed
 };
 
-using NativeFunctionDefinitionPtr = std::shared_ptr<NativeFunctionDefinition>;
+using NativeFunctionDefinitionPtr = std::shared_ptr<NativeTape>;
 
 class ExtInstantFunction;
 using InstantFunctionPtr = std::shared_ptr<ExtInstantFunction>;
@@ -119,7 +119,7 @@ public:
         , Namespace predefinedVars
     );
 
-    NativeFunctionDefinition::EOperations getOperation() const;
+    NativeTape::EOperations getOperation() const;
 
     bool good() noexcept;
 
@@ -284,7 +284,7 @@ public:
         Arguments
     ) const override final;
 
-    NativeFunctionDefinition* core();
+    NativeTape* core();
 
     bool hasName(
         const TVarName& name

@@ -53,51 +53,51 @@ void testFullCycle() {
     global.emplace(
         "third", AntLisp::Cell::integer(14)
     );
-    auto fdef = std::make_shared<AntLisp::NativeFunctionDefinition>();
+    auto fdef = std::make_shared<AntLisp::NativeTape>();
     fdef->names.push_back("*");
     fdef->names.push_back("+");
     fdef->names.push_back("first");
     fdef->names.push_back("second");
     fdef->names.push_back("third");
     fdef->operations.push_back(
-        AntLisp::NativeFunctionDefinition::Step(
-            AntLisp::NativeFunctionDefinition::GetLocal,
+        AntLisp::NativeTape::Step(
+            AntLisp::NativeTape::GetLocal,
             0
         )
     );
     fdef->operations.push_back(
-        AntLisp::NativeFunctionDefinition::Step(
-            AntLisp::NativeFunctionDefinition::GetLocal,
+        AntLisp::NativeTape::Step(
+            AntLisp::NativeTape::GetLocal,
             1
         )
     );
     fdef->operations.push_back(
-        AntLisp::NativeFunctionDefinition::Step(
-            AntLisp::NativeFunctionDefinition::GetLocal,
+        AntLisp::NativeTape::Step(
+            AntLisp::NativeTape::GetLocal,
             2
         )
     );
     fdef->operations.push_back(
-        AntLisp::NativeFunctionDefinition::Step(
-            AntLisp::NativeFunctionDefinition::GetLocal,
+        AntLisp::NativeTape::Step(
+            AntLisp::NativeTape::GetLocal,
             3
         )
     );
     fdef->operations.push_back(
-        AntLisp::NativeFunctionDefinition::Step(
-            AntLisp::NativeFunctionDefinition::RunFunction,
+        AntLisp::NativeTape::Step(
+            AntLisp::NativeTape::RunFunction,
             2
         )
     );
     fdef->operations.push_back(
-        AntLisp::NativeFunctionDefinition::Step(
-            AntLisp::NativeFunctionDefinition::GetLocal,
+        AntLisp::NativeTape::Step(
+            AntLisp::NativeTape::GetLocal,
             4
         )
     );
     fdef->operations.push_back(
-        AntLisp::NativeFunctionDefinition::Step(
-            AntLisp::NativeFunctionDefinition::RunFunction,
+        AntLisp::NativeTape::Step(
+            AntLisp::NativeTape::RunFunction,
             2
         )
     );
@@ -124,42 +124,42 @@ void testLambdaFunction() {
     global.emplace(
         "global_second", AntLisp::Cell::integer(1043)
     );
-    auto corefdef = std::make_shared<AntLisp::NativeFunctionDefinition>();
+    auto corefdef = std::make_shared<AntLisp::NativeTape>();
     corefdef->names.push_back("+");
     corefdef->names.push_back("local_first");
     corefdef->names.push_back("local_second");
     corefdef->names.push_back("local_third");
     // get the native function def
     corefdef->operations.push_back(
-        AntLisp::NativeFunctionDefinition::Step(
-            AntLisp::NativeFunctionDefinition::GetLocal,
+        AntLisp::NativeTape::Step(
+            AntLisp::NativeTape::GetLocal,
             0
         )
     );
     // get 0 arg from local
     corefdef->operations.push_back(
-        AntLisp::NativeFunctionDefinition::Step(
-            AntLisp::NativeFunctionDefinition::GetLocal,
+        AntLisp::NativeTape::Step(
+            AntLisp::NativeTape::GetLocal,
             1
         )
     );
     // get 1 arg from local
     corefdef->operations.push_back(
-        AntLisp::NativeFunctionDefinition::Step(
-            AntLisp::NativeFunctionDefinition::GetLocal,
+        AntLisp::NativeTape::Step(
+            AntLisp::NativeTape::GetLocal,
             2
         )
     );
     // get 2 arg from local
     corefdef->operations.push_back(
-        AntLisp::NativeFunctionDefinition::Step(
-            AntLisp::NativeFunctionDefinition::GetLocal,
+        AntLisp::NativeTape::Step(
+            AntLisp::NativeTape::GetLocal,
             3
         )
     );
     corefdef->operations.push_back(
-        AntLisp::NativeFunctionDefinition::Step(
-            AntLisp::NativeFunctionDefinition::RunFunction,
+        AntLisp::NativeTape::Step(
+            AntLisp::NativeTape::RunFunction,
             3  // number of arguments
         )
     );
@@ -183,42 +183,42 @@ void testLambdaFunction() {
     global.emplace(
         "second_function", AntLisp::Cell::function(std::move(firstLambda))
     );
-    auto gDef = std::make_shared<AntLisp::NativeFunctionDefinition>();
+    auto gDef = std::make_shared<AntLisp::NativeTape>();
     gDef->names.push_back("second_function");
     gDef->names.push_back("global_first");
     gDef->names.push_back("global_second");
     // get the native function def
     gDef->operations.push_back(
-        AntLisp::NativeFunctionDefinition::Step(
-            AntLisp::NativeFunctionDefinition::GetLocal,
+        AntLisp::NativeTape::Step(
+            AntLisp::NativeTape::GetLocal,
             0
         )
     );
     // get 0 arg from global
     gDef->operations.push_back(
-        AntLisp::NativeFunctionDefinition::Step(
-            AntLisp::NativeFunctionDefinition::GetLocal,
+        AntLisp::NativeTape::Step(
+            AntLisp::NativeTape::GetLocal,
             1
         )
     );
     // get 1 arg from global
     gDef->operations.push_back(
-        AntLisp::NativeFunctionDefinition::Step(
-            AntLisp::NativeFunctionDefinition::GetLocal,
+        AntLisp::NativeTape::Step(
+            AntLisp::NativeTape::GetLocal,
             2
         )
     );
     // call first lambda
     gDef->operations.push_back(
-        AntLisp::NativeFunctionDefinition::Step(
-            AntLisp::NativeFunctionDefinition::RunFunction,
+        AntLisp::NativeTape::Step(
+            AntLisp::NativeTape::RunFunction,
             2  // number of arguments
         )
     );
     // call core function
     gDef->operations.push_back(
-        AntLisp::NativeFunctionDefinition::Step(
-            AntLisp::NativeFunctionDefinition::RunFunction,
+        AntLisp::NativeTape::Step(
+            AntLisp::NativeTape::RunFunction,
             0  // number of arguments
         )
     );

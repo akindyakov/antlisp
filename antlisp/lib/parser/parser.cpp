@@ -21,7 +21,7 @@ public:
         definitionStack.push_back(
             std::make_shared<LambdaFunction>(
                 NativeFunction(
-                    std::make_shared<NativeFunctionDefinition>(),
+                    std::make_shared<NativeTape>(),
                     0, std::move(global), "this"
                 ),
                 std::vector<TVarName>{} // global arg names - should be empty
@@ -107,7 +107,7 @@ private:
         auto core = definitionStack.back()->core();
         while (expression(pParser)) {
             core->addStep(
-                NativeFunctionDefinition::LocalStackRewind,
+                NativeTape::LocalStackRewind,
                 1
             );
         }
@@ -128,7 +128,7 @@ private:
         lambdaDef(pParser, fname);
         // add defined lambda to local namespace
         core->addStep(
-            NativeFunctionDefinition::SetLocal,
+            NativeTape::SetLocal,
             functionNamePos
         );
     }
@@ -155,7 +155,7 @@ private:
         auto argnum = argNames.size();
         auto newLambda = std::make_shared<LambdaFunction>(
             NativeFunction(
-                std::make_shared<NativeFunctionDefinition>(
+                std::make_shared<NativeTape>(
                     std::move(argNames)
                 ),
                 argnum,
@@ -170,7 +170,7 @@ private:
             )
         );
         core->addStep(
-            NativeFunctionDefinition::GetConst,
+            NativeTape::GetConst,
             core->consts.size() - 1
         );
         definitionStack.push_back(newLambda);
@@ -183,7 +183,7 @@ private:
         definitionStack.pop_back();
         argnum = newLambda->names.size();
         core->addStep(
-            NativeFunctionDefinition::RunFunction,
+            NativeTape::RunFunction,
             argnum
         );
     }
@@ -207,7 +207,7 @@ private:
         auto pos = core->names.size();
         core->names.push_back(name);
         core->addStep(
-            NativeFunctionDefinition::SetLocal,
+            NativeTape::SetLocal,
             pos
         );
     }
@@ -222,23 +222,23 @@ private:
             expression(branchParser.value());
             auto branchEndMark = getMarkUid();
             core->addStep(
-                NativeFunctionDefinition::SkipIfNil,
+                NativeTape::SkipIfNil,
                 branchEndMark
             );
 
             expression(branchParser.value());
             core->addStep(
-                NativeFunctionDefinition::Skip,
+                NativeTape::Skip,
                 endMark
             );
             core->addStep(
-                NativeFunctionDefinition::GuardMark,
+                NativeTape::GuardMark,
                 branchEndMark
             );
             branchParser->close();
         }
         core->addStep(
-            NativeFunctionDefinition::GuardMark,
+            NativeTape::GuardMark,
             endMark
         );
     }
@@ -253,7 +253,7 @@ private:
         }
         auto core = definitionStack.back()->core();
         core->addStep(
-            NativeFunctionDefinition::RunFunction,
+            NativeTape::RunFunction,
             argCount
         );
     }
@@ -269,7 +269,7 @@ private:
                 std::move(cellOpt.get())
             );
             core->addStep(
-                NativeFunctionDefinition::GetConst,
+                NativeTape::GetConst,
                 pos
             );
         } else {
@@ -303,16 +303,16 @@ private:
             auto pos = core->names.size();
             core->names.push_back(varName);
             core->addStep(
-                NativeFunctionDefinition::GetLocal,
+                NativeTape::GetLocal,
                 pos
             );
         }
     }
 
-    NativeFunctionDefinition::Step::Operand
+    NativeTape::Step::Operand
     getMarkUid() {
         ++markCounter;
-        const auto bitSize = 8 * sizeof(NativeFunctionDefinition::Step::Operand);
+        const auto bitSize = 8 * sizeof(NativeTape::Step::Operand);
         return (
             (this->definitionStack.size() << (bitSize / 2)) ^ markCounter
         );
@@ -320,7 +320,7 @@ private:
 
 private:
     std::vector<LambdaFunctionPtr> definitionStack;
-    NativeFunctionDefinition::Step::Operand markCounter = 0;
+    NativeTape::Step::Operand markCounter = 0;
 };
 
 }  // namespace

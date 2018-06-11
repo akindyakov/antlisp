@@ -30,7 +30,7 @@ std::size_t LocalStack::size() const noexcept {
     return stackImpl.size();
 }
 
-void NativeFunctionDefinition::ApplyTailRecursionOptimization() {
+void NativeTape::ApplyTailRecursionOptimization() {
     if (operations.empty()) {
         return;
     }
@@ -209,7 +209,7 @@ NativeFunctionCall LambdaFunction::nativeCall(
     };
 }
 
-NativeFunctionDefinition* LambdaFunction::core() {
+NativeTape* LambdaFunction::core() {
     return nativeFn.fdef.get();
 }
 
@@ -247,7 +247,7 @@ NativeFunctionCall::NativeFunctionCall(
     --runner;
 }
 
-NativeFunctionDefinition::EOperations NativeFunctionCall::getOperation() const {
+NativeTape::EOperations NativeFunctionCall::getOperation() const {
     return function->operations[runner].operation;
 }
 
@@ -312,7 +312,7 @@ void NativeFunctionCall::skipUntilMark() {
     ) {
         auto step = function->operations[runner];
         if (
-            step.operation == NativeFunctionDefinition::GuardMark
+            step.operation == NativeTape::GuardMark
             && step.position == mark
         ) {
             break;
@@ -424,24 +424,24 @@ bool TapeMachine::step() {
     auto call = this->topCall();
     if (call->next()) {
         switch (call->getOperation()) {
-            case NativeFunctionDefinition::Nope:
+            case NativeTape::Nope:
                 break;
-            case NativeFunctionDefinition::GetConst:
+            case NativeTape::GetConst:
                 call->getConst();
                 break;
-            case NativeFunctionDefinition::GetLocal:
+            case NativeTape::GetLocal:
                 call->getLocal();
                 break;
-            case NativeFunctionDefinition::SetLocal:
+            case NativeTape::SetLocal:
                 call->setLocal();
                 break;
-            case NativeFunctionDefinition::RunFunction:
+            case NativeTape::RunFunction:
                 this->runFunctionImpl(call);
                 break;
-            case NativeFunctionDefinition::Skip:
+            case NativeTape::Skip:
                 call->skipUntilMark();
                 break;
-            case NativeFunctionDefinition::SkipIfNil:
+            case NativeTape::SkipIfNil:
                 {
                     auto guard = call->pop();
                     if (guard.is<Nil>()) {
@@ -449,12 +449,12 @@ bool TapeMachine::step() {
                     }
                 }
                 break;
-            case NativeFunctionDefinition::GuardMark:
+            case NativeTape::GuardMark:
                 break;
-            case NativeFunctionDefinition::LocalStackRewind:
+            case NativeTape::LocalStackRewind:
                 call->stackRewind();
                 break;
-            case NativeFunctionDefinition::RunTailRecOptimizedFunction:
+            case NativeTape::RunTailRecOptimizedFunction:
                 if (this->CallStack.size() < 2) {
                     this->runFunctionImpl(call);
                 } else {
