@@ -37,7 +37,7 @@ void NativeTape::ApplyTailRecursionOptimization() {
     if (operations.back().operation == RunFunction) {
         operations.back().operation = RunTailRecOptimizedFunction;
     } else if (operations.back().operation == GuardMark) {
-        auto guard = operations.back().position;
+        auto guard = operations.back().operand;
         for (
             auto rit = operations.rbegin();
             rit != operations.rend();
@@ -45,7 +45,7 @@ void NativeTape::ApplyTailRecursionOptimization() {
         ) {
             if (
                 (rit->operation == Skip or rit->operation == SkipIfNil)
-                and rit->position == guard
+                and rit->operand == guard
             ) {
                 auto nextOpIt = std::next(rit);
                 if (nextOpIt->operation == RunFunction) {
@@ -168,7 +168,7 @@ std::string NativeFunction::toString() const {
         }
     }
     for (const auto& op : fdef->operations) {
-        out << int(op.operation) << " : " << int(op.position) << "\n";
+        out << int(op.operation) << " : " << int(op.operand) << "\n";
     }
     return out.str();
 }
@@ -271,7 +271,7 @@ void NativeFunctionCall::push(Cell cell) {
 
 void NativeFunctionCall::getConst() {
     auto cell = function->consts[
-        function->operations[runner].position
+        function->operations[runner].operand
     ].copy();
     this->push(
         std::move(cell)
@@ -281,7 +281,7 @@ void NativeFunctionCall::getConst() {
 void NativeFunctionCall::getLocal() {
     auto pos = this->function->operations[
         this->runner
-    ].position;
+    ].operand;
     const auto& name = this->function->names[pos];
     auto localIt = this->vars.find(name);
     if (localIt == this->vars.end()) {
@@ -294,26 +294,26 @@ void NativeFunctionCall::setLocal() {
     const auto& name = function->names[
         this->function->operations[
             this->runner
-        ].position
+        ].operand
     ];
     this->vars[name] = this->pop();
 }
 
 void NativeFunctionCall::stackRewind() {
-    for (auto i = function->operations[runner].position; i != 0; --i) {
+    for (auto i = function->operations[runner].operand; i != 0; --i) {
         this->pop();
     }
 }
 
 void NativeFunctionCall::skipUntilMark() {
-    auto mark = function->operations[runner].position;
+    auto mark = function->operations[runner].operand;
     while (
         this->next()
     ) {
         auto step = function->operations[runner];
         if (
             step.operation == NativeTape::GuardMark
-            && step.position == mark
+            && step.operand == mark
         ) {
             break;
         }
@@ -321,7 +321,7 @@ void NativeFunctionCall::skipUntilMark() {
 }
 
 Arguments NativeFunctionCall::createArgs() {
-    auto size = function->operations[runner].position;
+    auto size = function->operations[runner].operand;
     auto args = Arguments(size);
     for (auto& arg : args) {
         arg = pop();

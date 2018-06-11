@@ -81,11 +81,11 @@ struct NativeTape {
             , std::size_t pos
         )
             : operation(op)
-            , position(pos)
+            , operand(pos)
         {
         }
         EOperations operation;
-        Operand position = 0;  // FIXME: rename it to operand
+        Operand operand = 0;
     };
 
     void addStep(
