@@ -39,7 +39,7 @@ private:
     std::vector<Cell> stackImpl;
 };
 
-class Environment;
+class TapeMachine;
 
 struct NativeFunctionDefinition {
     explicit NativeFunctionDefinition() = default;
@@ -300,12 +300,12 @@ public:
 
 using LambdaFunctionPtr = std::shared_ptr<LambdaFunction>;
 
-class Environment {
+class TapeMachine {
 public:
-    explicit Environment(
+    explicit TapeMachine(
         NativeFunctionCall toRun
     );
-    explicit Environment(
+    explicit TapeMachine(
         const NativeFunction& toRun
     );
 

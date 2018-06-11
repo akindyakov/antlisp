@@ -101,14 +101,14 @@ void testFullCycle() {
             2
         )
     );
-    auto env = AntLisp::Environment(
+    auto machine = AntLisp::TapeMachine(
         AntLisp::NativeFunction(
             std::move(fdef), 0, std::move(global), "this"
         )
     );
-    env.run();
+    machine.run();
     UT_ASSERT_EQUAL(
-        env.ret.as<AntLisp::Integer>(),
+        machine.ret.as<AntLisp::Integer>(),
         (12 + 13) * 14
     );
 }
@@ -222,14 +222,14 @@ void testLambdaFunction() {
             0  // number of arguments
         )
     );
-    auto env = AntLisp::Environment(
+    auto machine = AntLisp::TapeMachine(
         AntLisp::NativeFunction{
             std::move(gDef), 0, std::move(global), "this"
         }
     );
-    env.run();
+    machine.run();
     UT_ASSERT_EQUAL(
-        env.ret.as<AntLisp::Integer>(),
+        machine.ret.as<AntLisp::Integer>(),
         (81 + 1043 + 2209)
     );
 }

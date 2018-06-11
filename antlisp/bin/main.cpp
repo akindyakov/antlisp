@@ -18,12 +18,12 @@ void interactive(
         std::getline(std::cin, line, '\n');
         //**/ std::cout << "(line \"" << line << "\")\n";
         std::istringstream in(line);
-        auto env = AntLisp::Environment(
+        auto machine = AntLisp::TapeMachine(
             AntLisp::parseCode(in, std::move(global))
         );
-        env.run();
-        std::cout << env.ret.toString() << std::endl;
-        global = std::move(env.vars);
+        machine.run();
+        std::cout << machine.ret.toString() << std::endl;
+        global = std::move(machine.vars);
     }
 }
 
@@ -31,11 +31,11 @@ void fromStream(
     AntLisp::Namespace& global
     , std::istream& in
 ) {
-    auto env = AntLisp::Environment(
+    auto machine = AntLisp::TapeMachine(
         AntLisp::parseCode(in, std::move(global))
     );
-    env.run();
-    global = std::move(env.vars);
+    machine.run();
+    global = std::move(machine.vars);
 }
 
 void fromFile(

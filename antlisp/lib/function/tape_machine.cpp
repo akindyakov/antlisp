@@ -336,7 +336,7 @@ Namespace NativeFunctionCall::releaseLocals() {
     return locals;
 }
 
-Environment::Environment(
+TapeMachine::TapeMachine(
     NativeFunctionCall toRun
 )
 {
@@ -345,10 +345,10 @@ Environment::Environment(
     );
 }
 
-Environment::Environment(
+TapeMachine::TapeMachine(
     const NativeFunction& toRun
 )
-    : Environment(
+    : TapeMachine(
         toRun.nativeCall(
             Arguments{}
         )
@@ -356,13 +356,13 @@ Environment::Environment(
 {
 }
 
-void Environment::runFunctionImpl(NativeFunctionCall* call) {
+void TapeMachine::runFunctionImpl(NativeFunctionCall* call) {
     auto args = call->createArgs();
     auto cellToRun = call->pop();
     this->runCellWithArguments(call, cellToRun, std::move(args));
 }
 
-void Environment::runTailRecOptimizedFunctionImpl(
+void TapeMachine::runTailRecOptimizedFunctionImpl(
     NativeFunctionCall* call
 ) {
     auto args = call->createArgs();
@@ -371,7 +371,7 @@ void Environment::runTailRecOptimizedFunctionImpl(
     this->runCellWithArguments(this->topCall(), cellToRun, std::move(args));
 }
 
-void Environment::runCellWithArguments(
+void TapeMachine::runCellWithArguments(
     NativeFunctionCall* call
     , Cell& cellToRun
     , Arguments args
@@ -399,15 +399,15 @@ void Environment::runCellWithArguments(
     }
 }
 
-bool Environment::isStackEmpty() const {
+bool TapeMachine::isStackEmpty() const {
     return this->CallStack.empty();
 }
 
-NativeFunctionCall* Environment::topCall() {
+NativeFunctionCall* TapeMachine::topCall() {
     return &this->CallStack.back();
 }
 
-NativeFunctionCall* Environment::pushCall(
+NativeFunctionCall* TapeMachine::pushCall(
     NativeFunctionCall frame
 ) {
     this->CallStack.push_back(
@@ -416,11 +416,11 @@ NativeFunctionCall* Environment::pushCall(
     return this->topCall();
 }
 
-void Environment::popCall() {
+void TapeMachine::popCall() {
     this->CallStack.pop_back();
 }
 
-bool Environment::step() {
+bool TapeMachine::step() {
     auto call = this->topCall();
     if (call->next()) {
         switch (call->getOperation()) {
