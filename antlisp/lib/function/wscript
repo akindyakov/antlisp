@@ -8,6 +8,7 @@ def build(ctx):
         source = [
             "tape_machine.cpp",
             "interface.cpp",
+            "native_tape.cpp",
         ],
         use=[
             "antlisp-lib-cell",
