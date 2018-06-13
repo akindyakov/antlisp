@@ -1,5 +1,7 @@
 #pragma once
 
+#include "type_vocabulary.h"
+
 #include <antlisp/lib/cell/cell.h>
 
 #include <algorithm>
@@ -13,19 +15,6 @@
 
 namespace AntLisp {
 
-using TVarName = std::string;
-
-using Namespace = std::unordered_map<TVarName, Cell>;
-
-using Arguments = std::vector<Cell>;
-
-using ArgNames = std::vector<TVarName>;
-
-class TapeMachineError
-    : public Exception
-{
-};
-
 class LocalStack
 {
 public:
@@ -38,8 +27,6 @@ public:
 private:
     std::vector<Cell> stackImpl;
 };
-
-class TapeMachine;
 
 struct NativeTape {
     explicit NativeTape() = default;
