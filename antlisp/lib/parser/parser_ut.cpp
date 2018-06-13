@@ -88,7 +88,7 @@ void test_parseCode_cond() {
     )antlisp-code");
     auto native = AntLisp::parseCode(in, std::move(global));
     UT_ASSERT_EQUAL(native.fdef->consts.size(), 10);
-    // FIXME: names is [+ + + +], uniq it for the sake of God
+    // [+ + + +]
     UT_ASSERT_EQUAL(native.fdef->names.size(), 4);
 }
 

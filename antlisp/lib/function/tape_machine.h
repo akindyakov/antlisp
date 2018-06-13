@@ -103,6 +103,7 @@ struct NativeTape {
     void ApplyTailRecursionOptimization();
 
     std::vector<Step> operations;
+    // TODO(akindyakov): use unique values in NativeTape::names
     std::vector<TVarName> names;
     std::vector<Cell> consts;  // unnamed
 };
@@ -203,7 +204,7 @@ public:
     }
 
     std::string toString() const override {
-        // TODO(akindyakov)
+        // TODO(akindyakov): please implement toString methdod for ExtInstantFunction
         return std::string{"ext instant function"};
     }
 };

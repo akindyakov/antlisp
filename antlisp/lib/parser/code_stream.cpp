@@ -49,7 +49,10 @@ bool InCodeStream::nextToken(
 ) {
     token.clear();
     if (not this->good()) {
-        throw Error() << "TODO: " << __FILE__ << __LINE__;
+        // TODO(akindyakov): Make error message more informative please
+        throw Error()
+            << "InCodeStream::nextToken() " << __FILE__ << ":" << __LINE__
+        ;
     }
     this->skipSpaces();
     auto symbol = Symbol{};

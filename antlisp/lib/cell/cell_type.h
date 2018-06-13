@@ -37,6 +37,7 @@ class CellType
     : public ICellType
 {
 public:
+    // TODO(akindyakov): think about another type of CellType with intrusive_ptr incide for large external objects
     using Type = T;
     using SelfType = CellType<Type>;
     using ConstType = typename std::add_const<Type>::type;
@@ -71,12 +72,12 @@ public:
     }
 
     static constexpr const char* name() {
-        // TODO: use boost::core::typeinfo to generate CellType name
+        // TODO(akindyakov): use boost::core::typeinfo to generate informative CellType name
         return typeid(Type).name();
     }
 
     std::string toString() const override {
-        // TODO: make an real implementation
+        // TODO(akindyakov): make a real implementation of generic CellType<T>::toString()
         auto ret = std::string{"instance of "};
         ret += '"';
         ret += name();

@@ -59,13 +59,13 @@ private:
         }
         auto token = std::string{};
         if (nextParser->nextToken(token)) {
+            // TODO(akindyakov): make different language mechanisms availability configurable
             if ("defun" == token) {
                 functionDef(nextParser.get());
             } else if ("lambda" == token) {
                 lambdaDef(nextParser.get(), "this");
-            // TODO: implement 'let' construction
-            //} else if ("let" == token) {
-            //    letDef(nextParser.get());
+            } else if ("let" == token) {
+                letDef(nextParser.get());
             } else if ("set" == token) {
                 setDef(nextParser.get());
             } else if ("cond" == token) {
@@ -191,7 +191,7 @@ private:
     void letDef(
         ParenthesesParser& /*pParser*/
     ) {
-        // TODO
+        // TODO(akindyakov): implement 'let' language mechanism
         throw ParseError() << "let construction is not implemented";
     }
 
