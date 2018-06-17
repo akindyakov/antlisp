@@ -6,37 +6,18 @@ def build(ctx):
     ctx.stlib(
         target="antlisp-lib-parser",
         source = [
-            "code_stream.cpp",
             "parser.cpp",
-            "parentheses_parser.cpp",
-            "cell_in_string.cpp",
         ],
         use=[
-            "antlisp-lib-function",
-            "antlisp-lib-cell_ext-string",
-            "antlisp-lib-cell",
             "antlisp-lib-util",
+            "antlisp-lib-function",
+            "antlisp-lib-function-builtin",
+            # in
+            "antlisp-lib-parser-cell",
+            "antlisp-lib-parser-parentheses",
         ],
     )
 
-    ctx.program(
-        target="code_stream_ut",
-        features="test",
-        source="code_stream_ut.cpp",
-        use=[
-            "antlisp-lib-parser",
-            "antlisp-lib-function-builtin",
-        ],
-    )
-    ctx.program(
-        target="parentheses_parser_ut",
-        features="test",
-        source="parentheses_parser_ut.cpp",
-        use=[
-            "antlisp-lib-parser",
-            "antlisp-lib-function-builtin",
-        ],
-    )
     ctx.program(
         target="parser_ut",
         features="test",
@@ -55,12 +36,7 @@ def build(ctx):
             "antlisp-lib-function-builtin",
         ],
     )
-    ctx.program(
-        target="cell_in_string_ut",
-        features="test",
-        source="cell_in_string_ut.cpp",
-        use=[
-            "antlisp-lib-parser",
-            "antlisp-lib-function-builtin",
-        ],
-    )
+    ctx.recurse([
+        "cell",
+        "parentheses",
+    ])

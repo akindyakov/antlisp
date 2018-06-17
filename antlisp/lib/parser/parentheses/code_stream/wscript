@@ -1,0 +1,23 @@
+#!/usr/bin/env python
+# encoding: utf-8
+
+
+def build(ctx):
+    ctx.stlib(
+        target="antlisp-lib-parser-parentheses-code_stream",
+        source = [
+            "code_stream.cpp",
+        ],
+        use=[
+            "antlisp-lib-util",
+        ],
+    )
+
+    ctx.program(
+        target="code_stream_ut",
+        features="test",
+        source="code_stream_ut.cpp",
+        use=[
+            "antlisp-lib-parser-parentheses-code_stream",
+        ],
+    )

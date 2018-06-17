@@ -1,7 +1,8 @@
 #include "cell_in_string.h"
-#include <antlisp/lib/cell_ext/string/string.h>
 
-#include "error.h"
+#include <antlisp/lib/parser/error.h>
+
+#include <antlisp/lib/cell_ext/string/string.h>
 
 
 namespace AntLisp {

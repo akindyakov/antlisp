@@ -1,0 +1,24 @@
+#!/usr/bin/env python
+# encoding: utf-8
+
+
+def build(ctx):
+    ctx.stlib(
+        target="antlisp-lib-parser-cell",
+        source = [
+            "cell_in_string.cpp",
+        ],
+        use=[
+            "antlisp-lib-cell_ext-string",
+            "antlisp-lib-cell",
+            "antlisp-lib-util",
+        ],
+    )
+    ctx.program(
+        target="cell_in_string_ut",
+        features="test",
+        source="cell_in_string_ut.cpp",
+        use=[
+            "antlisp-lib-parser-cell",
+        ],
+    )

@@ -3,7 +3,7 @@
 #include <antlisp/lib/util/exception.h>
 #include <antlisp/lib/util/optional.h>
 
-#include "code_stream.h"
+#include <antlisp/lib/parser/parentheses/code_stream/code_stream.h>
 
 
 namespace AntLisp {
