@@ -173,6 +173,108 @@ void test_parseCode_set() {
     UT_ASSERT_EQUAL(native.fdef->names.size(), 4);  // [xx xy + xx]
 }
 
+void test_ParserOptions_defautls() {
+    auto opts = AntLisp::ParserOptions{};
+    UT_ASSERT(opts.test<AntLisp::Keywords::Defun>());
+    UT_ASSERT(opts.test<AntLisp::Keywords::Lambda>());
+    UT_ASSERT(opts.test<AntLisp::Keywords::Let>());
+    UT_ASSERT(opts.test<AntLisp::Keywords::Set>());
+    UT_ASSERT(opts.test<AntLisp::Keywords::Cond>());
+    UT_ASSERT(opts.test<AntLisp::Keywords::Progn>());
+    UT_ASSERT(opts.test<AntLisp::Keywords::AllKeywords>());
+}
+
+void test_ParserOptions_unset_all() {
+    auto opts = AntLisp::ParserOptions{};
+    opts.unset<AntLisp::Keywords::AllKeywords>();
+    UT_ASSERT(not opts.test<AntLisp::Keywords::Defun>());
+    UT_ASSERT(not opts.test<AntLisp::Keywords::Lambda>());
+    UT_ASSERT(not opts.test<AntLisp::Keywords::Let>());
+    UT_ASSERT(not opts.test<AntLisp::Keywords::Set>());
+    UT_ASSERT(not opts.test<AntLisp::Keywords::Cond>());
+    UT_ASSERT(not opts.test<AntLisp::Keywords::Progn>());
+    UT_ASSERT(not opts.test<AntLisp::Keywords::AllKeywords>());
+}
+
+void test_ParserOptions_defun() {
+    auto opts = AntLisp::ParserOptions{};
+    opts.unset<AntLisp::Keywords::AllKeywords>();
+    UT_ASSERT(not opts.test<AntLisp::Keywords::Defun>());
+    opts.set<AntLisp::Keywords::Defun>();
+    UT_ASSERT(opts.test<AntLisp::Keywords::Defun>());
+    UT_ASSERT(not opts.test<AntLisp::Keywords::Lambda>());
+    UT_ASSERT(not opts.test<AntLisp::Keywords::Let>());
+    UT_ASSERT(not opts.test<AntLisp::Keywords::Set>());
+    UT_ASSERT(not opts.test<AntLisp::Keywords::Cond>());
+    UT_ASSERT(not opts.test<AntLisp::Keywords::Progn>());
+    UT_ASSERT(not opts.test<AntLisp::Keywords::AllKeywords>());
+}
+
+void test_ParserOptions_lambda() {
+    auto opts = AntLisp::ParserOptions{};
+    opts.unset<AntLisp::Keywords::AllKeywords>();
+    UT_ASSERT(not opts.test<AntLisp::Keywords::Lambda>());
+    opts.set<AntLisp::Keywords::Lambda>();
+    UT_ASSERT(not opts.test<AntLisp::Keywords::Defun>());
+    UT_ASSERT(opts.test<AntLisp::Keywords::Lambda>());
+    UT_ASSERT(not opts.test<AntLisp::Keywords::Let>());
+    UT_ASSERT(not opts.test<AntLisp::Keywords::Set>());
+    UT_ASSERT(not opts.test<AntLisp::Keywords::Cond>());
+    UT_ASSERT(not opts.test<AntLisp::Keywords::Progn>());
+}
+
+void test_ParserOptions_let() {
+    auto opts = AntLisp::ParserOptions{};
+    opts.unset<AntLisp::Keywords::AllKeywords>();
+    UT_ASSERT(not opts.test<AntLisp::Keywords::Let>());
+    opts.set<AntLisp::Keywords::Let>();
+    UT_ASSERT(not opts.test<AntLisp::Keywords::Defun>());
+    UT_ASSERT(not opts.test<AntLisp::Keywords::Lambda>());
+    UT_ASSERT(opts.test<AntLisp::Keywords::Let>());
+    UT_ASSERT(not opts.test<AntLisp::Keywords::Set>());
+    UT_ASSERT(not opts.test<AntLisp::Keywords::Cond>());
+    UT_ASSERT(not opts.test<AntLisp::Keywords::Progn>());
+}
+
+void test_ParserOptions_cond() {
+    auto opts = AntLisp::ParserOptions{};
+    opts.unset<AntLisp::Keywords::AllKeywords>();
+    UT_ASSERT(not opts.test<AntLisp::Keywords::Cond>());
+    opts.set<AntLisp::Keywords::Cond>();
+    UT_ASSERT(not opts.test<AntLisp::Keywords::Defun>());
+    UT_ASSERT(not opts.test<AntLisp::Keywords::Lambda>());
+    UT_ASSERT(not opts.test<AntLisp::Keywords::Let>());
+    UT_ASSERT(not opts.test<AntLisp::Keywords::Set>());
+    UT_ASSERT(opts.test<AntLisp::Keywords::Cond>());
+    UT_ASSERT(not opts.test<AntLisp::Keywords::Progn>());
+}
+
+void test_parseCode_switched_off_defun() {
+    auto global = AntLisp::Namespace{};
+    global.emplace(
+        "+",
+        AntLisp::Cell::function(
+            std::make_shared<AntLisp::Builtin::Sum>()
+        )
+    );
+    std::istringstream in(R"antlisp-code(
+    (defun first (x)
+        (+ x 1)
+    )
+    )antlisp-code");
+
+    auto opts = AntLisp::ParserOptions{};
+    opts.set<AntLisp::Keywords::AllKeywords>();
+    opts.unset<AntLisp::Keywords::Defun>();
+    UT_ASSERT(opts.test<AntLisp::Keywords::Cond>());
+    UT_ASSERT(not opts.test<AntLisp::Keywords::Defun>());
+
+    UT_ASSERT_EXCEPTION_TYPE(
+        AntLisp::parseCode(in, std::move(global), opts),
+        AntLisp::ParseError
+    );
+}
+
 UT_LIST(
     RUN_TEST(test_parseCode);
     RUN_TEST(test_parseCode_lambda);
@@ -182,4 +284,11 @@ UT_LIST(
     RUN_TEST(test_parseCode_progn);
     RUN_TEST(test_parseCode_defun);
     RUN_TEST(test_parseCode_set);
+    RUN_TEST(test_ParserOptions_defautls);
+    RUN_TEST(test_ParserOptions_unset_all);
+    RUN_TEST(test_ParserOptions_defun);
+    RUN_TEST(test_ParserOptions_lambda);
+    RUN_TEST(test_ParserOptions_let);
+    RUN_TEST(test_ParserOptions_cond);
+    RUN_TEST(test_parseCode_switched_off_defun);
 );

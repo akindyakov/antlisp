@@ -10,13 +10,20 @@
 
 namespace AntLisp {
 
+ParserOptions::ParserOptions()
+{
+    this->set<Keywords::AllKeywords>();
+}
+
 namespace {
 
 class ConstructionParser {
 public:
     explicit ConstructionParser (
         Namespace global
+        , const ParserOptions& opts
     )
+        : options_(opts)
     {
         definitionStack.push_back(
             std::make_shared<LambdaFunction>(
@@ -61,16 +68,34 @@ private:
         if (nextParser->nextToken(token)) {
             // TODO(akindyakov): make different language mechanisms availability configurable
             if ("defun" == token) {
+                if (not options_.test<Keywords::Defun>()) {
+                    throw ParseError() << "Forbidden keyword [defun]";
+                }
                 functionDef(nextParser.get());
             } else if ("lambda" == token) {
+                if (not options_.test<Keywords::Lambda>()) {
+                    throw ParseError() << "Forbidden keyword [lambda]";
+                }
                 lambdaDef(nextParser.get(), "this");
             } else if ("let" == token) {
+                if (not options_.test<Keywords::Let>()) {
+                    throw ParseError() << "Forbidden keyword [let]";
+                }
                 letDef(nextParser.get());
             } else if ("set" == token) {
+                if (not options_.test<Keywords::Set>()) {
+                    throw ParseError() << "Forbidden keyword [set]";
+                }
                 setDef(nextParser.get());
             } else if ("cond" == token) {
+                if (not options_.test<Keywords::Cond>()) {
+                    throw ParseError() << "Forbidden keyword [cond]";
+                }
                 condDef(nextParser.get());
             } else if ("progn" == token) {
+                if (not options_.test<Keywords::Progn>()) {
+                    throw ParseError() << "Forbidden keyword [progn]";
+                }
                 prognDef(nextParser.get());
             } else {
                 tokenDef(token);
@@ -319,6 +344,7 @@ private:
     }
 
 private:
+    const ParserOptions& options_;
     std::vector<LambdaFunctionPtr> definitionStack;
     NativeTape::Step::Operand markCounter = 0;
 };
@@ -328,9 +354,10 @@ private:
 NativeFunction parseCode(
     std::istream& in
     , Namespace global
+    , const ParserOptions& opts
 ) {
     auto codeStream = InCodeStream(in);
-    return ConstructionParser(std::move(global)).fromCodeStream(
+    return ConstructionParser(std::move(global), opts).fromCodeStream(
         codeStream
     ).finish();
 }
