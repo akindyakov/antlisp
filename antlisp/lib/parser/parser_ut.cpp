@@ -246,6 +246,32 @@ void test_ParserOptions_cond() {
     UT_ASSERT(not opts.testProgn());
 }
 
+void test_parseCode_switched_off_defun() {
+    auto global = AntLisp::Namespace{};
+    global.emplace(
+        "+",
+        AntLisp::Cell::function(
+            std::make_shared<AntLisp::Builtin::Sum>()
+        )
+    );
+    std::istringstream in(R"antlisp-code(
+    (defun first (x)
+        (+ x 1)
+    )
+    )antlisp-code");
+
+    auto opts = AntLisp::ParserOptions{};
+    opts.setAllKeywords();
+    opts.unsetDefun();
+    UT_ASSERT(opts.testCond());
+    UT_ASSERT(not opts.testDefun());
+
+    UT_ASSERT_EXCEPTION_TYPE(
+        AntLisp::parseCode(in, std::move(global), opts),
+        AntLisp::ParseError
+    );
+}
+
 UT_LIST(
     RUN_TEST(test_parseCode);
     RUN_TEST(test_parseCode_lambda);
@@ -261,4 +287,5 @@ UT_LIST(
     RUN_TEST(test_ParserOptions_lambda);
     RUN_TEST(test_ParserOptions_let);
     RUN_TEST(test_ParserOptions_cond);
+    RUN_TEST(test_parseCode_switched_off_defun);
 );
