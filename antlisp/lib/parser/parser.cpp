@@ -1,7 +1,7 @@
 #include "parser.h"
 
-#include "cell_in_string.h"
-#include "parentheses_parser.h"
+#include <antlisp/lib/parser/cell/cell_in_string.h>
+#include <antlisp/lib/parser/parentheses/parentheses_parser.h>
 
 #include <antlisp/lib/util/string.h>
 

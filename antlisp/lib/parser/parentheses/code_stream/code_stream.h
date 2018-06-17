@@ -2,6 +2,9 @@
 
 #include <antlisp/lib/util/exception.h>
 
+#include <ostream>
+#include <istream>
+
 
 namespace AntLisp {
 

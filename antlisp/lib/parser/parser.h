@@ -1,10 +1,8 @@
 #pragma once
 
-#include <antlisp/lib/util/exception.h>
+#include "error.h"
 
 #include <antlisp/lib/function/tape_machine.h>
-
-#include "error.h"
 
 #include <bitset>
 
