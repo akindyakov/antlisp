@@ -16,7 +16,6 @@ public:
     /**
     * All keyword are switched on by default
     */
-    // TODO(akindyakov): test ParserOptions please
     explicit ParserOptions();
 
     enum EKeywords

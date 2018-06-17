@@ -173,6 +173,79 @@ void test_parseCode_set() {
     UT_ASSERT_EQUAL(native.fdef->names.size(), 4);  // [xx xy + xx]
 }
 
+void test_ParserOptions_defautls() {
+    auto opts = AntLisp::ParserOptions{};
+    UT_ASSERT(opts.testDefun());
+    UT_ASSERT(opts.testLambda());
+    UT_ASSERT(opts.testLet());
+    UT_ASSERT(opts.testSet());
+    UT_ASSERT(opts.testCond());
+    UT_ASSERT(opts.testProgn());
+}
+
+void test_ParserOptions_unset_all() {
+    auto opts = AntLisp::ParserOptions{};
+    opts.unsetAllKeywords();
+    UT_ASSERT(not opts.testDefun());
+    UT_ASSERT(not opts.testLambda());
+    UT_ASSERT(not opts.testLet());
+    UT_ASSERT(not opts.testSet());
+    UT_ASSERT(not opts.testCond());
+    UT_ASSERT(not opts.testProgn());
+}
+
+void test_ParserOptions_defun() {
+    auto opts = AntLisp::ParserOptions{};
+    opts.unsetAllKeywords();
+    UT_ASSERT(not opts.testDefun());
+    opts.setDefun();
+    UT_ASSERT(opts.testDefun());
+    UT_ASSERT(not opts.testLambda());
+    UT_ASSERT(not opts.testLet());
+    UT_ASSERT(not opts.testSet());
+    UT_ASSERT(not opts.testCond());
+    UT_ASSERT(not opts.testProgn());
+}
+
+void test_ParserOptions_lambda() {
+    auto opts = AntLisp::ParserOptions{};
+    opts.unsetAllKeywords();
+    UT_ASSERT(not opts.testLambda());
+    opts.setLambda();
+    UT_ASSERT(not opts.testDefun());
+    UT_ASSERT(opts.testLambda());
+    UT_ASSERT(not opts.testLet());
+    UT_ASSERT(not opts.testSet());
+    UT_ASSERT(not opts.testCond());
+    UT_ASSERT(not opts.testProgn());
+}
+
+void test_ParserOptions_let() {
+    auto opts = AntLisp::ParserOptions{};
+    opts.unsetAllKeywords();
+    UT_ASSERT(not opts.testLet());
+    opts.setLet();
+    UT_ASSERT(not opts.testDefun());
+    UT_ASSERT(not opts.testLambda());
+    UT_ASSERT(opts.testLet());
+    UT_ASSERT(not opts.testSet());
+    UT_ASSERT(not opts.testCond());
+    UT_ASSERT(not opts.testProgn());
+}
+
+void test_ParserOptions_cond() {
+    auto opts = AntLisp::ParserOptions{};
+    opts.unsetAllKeywords();
+    UT_ASSERT(not opts.testCond());
+    opts.setCond();
+    UT_ASSERT(not opts.testDefun());
+    UT_ASSERT(not opts.testLambda());
+    UT_ASSERT(not opts.testLet());
+    UT_ASSERT(not opts.testSet());
+    UT_ASSERT(opts.testCond());
+    UT_ASSERT(not opts.testProgn());
+}
+
 UT_LIST(
     RUN_TEST(test_parseCode);
     RUN_TEST(test_parseCode_lambda);
@@ -182,4 +255,10 @@ UT_LIST(
     RUN_TEST(test_parseCode_progn);
     RUN_TEST(test_parseCode_defun);
     RUN_TEST(test_parseCode_set);
+    RUN_TEST(test_ParserOptions_defautls);
+    RUN_TEST(test_ParserOptions_unset_all);
+    RUN_TEST(test_ParserOptions_defun);
+    RUN_TEST(test_ParserOptions_lambda);
+    RUN_TEST(test_ParserOptions_let);
+    RUN_TEST(test_ParserOptions_cond);
 );
