@@ -12,7 +12,7 @@ def build(ctx):
         use=[
             "antlisp-lib-function",
             "antlisp-lib-cell",
-            "antlisp-lib-cell-string",
+            "antlisp-lib-cell_ext-string",
         ],
     )
     ctx.program(

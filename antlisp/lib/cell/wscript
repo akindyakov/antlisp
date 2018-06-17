@@ -22,7 +22,3 @@ def build(ctx):
             "antlisp-lib-cell"
         ],
     )
-
-    ctx.recurse([
-        "string",
-    ])

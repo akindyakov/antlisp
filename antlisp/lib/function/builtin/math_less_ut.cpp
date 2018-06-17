@@ -1,6 +1,6 @@
 #include "math.h"
 
-#include <antlisp/lib/cell/string/string.h>
+#include <antlisp/lib/cell_ext/string/string.h>
 
 #include <antlisp/lib/test/ut.h>
 

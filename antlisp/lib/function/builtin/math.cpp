@@ -2,7 +2,7 @@
 
 #include <antlisp/lib/util/exception.h>
 
-#include <antlisp/lib/cell/string/string.h>
+#include <antlisp/lib/cell_ext/string/string.h>
 
 
 namespace AntLisp {

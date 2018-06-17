@@ -4,7 +4,7 @@
 
 def build(ctx):
     ctx.stlib(
-        target="antlisp-lib-cell-string",
+        target="antlisp-lib-cell_ext-string",
         source = [
             "string.cpp",
         ],
@@ -19,6 +19,6 @@ def build(ctx):
         features="test",
         source="string_ut.cpp",
         use=[
-            "antlisp-lib-cell-string",
+            "antlisp-lib-cell_ext-string",
         ],
     )
