@@ -12,90 +12,7 @@ namespace AntLisp {
 
 ParserOptions::ParserOptions()
 {
-    this->setAllKeywords();
-}
-
-ParserOptions& ParserOptions::setDefun() {
-    keywords_.set(Defun);
-    return *this;
-}
-ParserOptions& ParserOptions::setLambda() {
-    keywords_.set(Lambda);
-    return *this;
-}
-ParserOptions& ParserOptions::setLet() {
-    keywords_.set(Let);
-    return *this;
-}
-ParserOptions& ParserOptions::setSet() {
-    keywords_.set(Set);
-    return *this;
-}
-ParserOptions& ParserOptions::setCond() {
-    keywords_.set(Cond);
-    return *this;
-}
-ParserOptions& ParserOptions::setProgn() {
-    keywords_.set(Progn);
-    return *this;
-}
-ParserOptions& ParserOptions::setAllKeywords() {
-    keywords_.set();
-    return *this;
-}
-
-ParserOptions& ParserOptions::unsetDefun() {
-    keywords_.reset(Defun);
-    return *this;
-}
-ParserOptions& ParserOptions::unsetLambda() {
-    keywords_.reset(Lambda);
-    return *this;
-}
-ParserOptions& ParserOptions::unsetLet() {
-    keywords_.reset(Let);
-    return *this;
-}
-ParserOptions& ParserOptions::unsetSet() {
-    keywords_.reset(Set);
-    return *this;
-}
-ParserOptions& ParserOptions::unsetCond() {
-    keywords_.reset(Cond);
-    return *this;
-}
-ParserOptions& ParserOptions::unsetProgn() {
-    keywords_.reset(Progn);
-    return *this;
-}
-ParserOptions& ParserOptions::unsetAllKeywords() {
-    keywords_.reset();
-    return *this;
-}
-
-bool ParserOptions::testDefun() const {
-    return keywords_.test(Defun);
-}
-bool ParserOptions::testLambda() const {
-    return keywords_.test(Lambda);
-}
-bool ParserOptions::testLet() const {
-    return keywords_.test(Let);
-}
-bool ParserOptions::testSet() const {
-    return keywords_.test(Set);
-}
-bool ParserOptions::testCond() const {
-    return keywords_.test(Cond);
-}
-bool ParserOptions::testProgn() const {
-    return keywords_.test(Progn);
-}
-
-bool ParserOptions::testKeyword(
-    EKeywords keyword
-) const {
-    return keywords_.test(keyword);
+    this->set<Keywords::AllKeywords>();
 }
 
 namespace {
@@ -151,32 +68,32 @@ private:
         if (nextParser->nextToken(token)) {
             // TODO(akindyakov): make different language mechanisms availability configurable
             if ("defun" == token) {
-                if (not options_.testDefun()) {
+                if (not options_.test<Keywords::Defun>()) {
                     throw ParseError() << "Forbidden keyword [defun]";
                 }
                 functionDef(nextParser.get());
             } else if ("lambda" == token) {
-                if (not options_.testLambda()) {
+                if (not options_.test<Keywords::Lambda>()) {
                     throw ParseError() << "Forbidden keyword [lambda]";
                 }
                 lambdaDef(nextParser.get(), "this");
             } else if ("let" == token) {
-                if (not options_.testLet()) {
+                if (not options_.test<Keywords::Let>()) {
                     throw ParseError() << "Forbidden keyword [let]";
                 }
                 letDef(nextParser.get());
             } else if ("set" == token) {
-                if (not options_.testSet()) {
+                if (not options_.test<Keywords::Set>()) {
                     throw ParseError() << "Forbidden keyword [set]";
                 }
                 setDef(nextParser.get());
             } else if ("cond" == token) {
-                if (not options_.testCond()) {
+                if (not options_.test<Keywords::Cond>()) {
                     throw ParseError() << "Forbidden keyword [cond]";
                 }
                 condDef(nextParser.get());
             } else if ("progn" == token) {
-                if (not options_.testProgn()) {
+                if (not options_.test<Keywords::Progn>()) {
                     throw ParseError() << "Forbidden keyword [progn]";
                 }
                 prognDef(nextParser.get());
