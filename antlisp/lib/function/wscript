@@ -22,6 +22,14 @@ def build(ctx):
             "antlisp-lib-function"
         ],
     )
+    ctx.program(
+        target="native_tape_ut",
+        features="test",
+        source="native_tape_ut.cpp",
+        use=[
+            "antlisp-lib-function"
+        ],
+    )
     ctx.recurse([
         "builtin",
     ])

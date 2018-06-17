@@ -6,6 +6,7 @@
 
 #include <memory>
 #include <vector>
+#include <ostream>
 
 
 namespace AntLisp {
@@ -40,7 +41,8 @@ struct NativeTape {
         SkipIfNil,      // 6
         GuardMark,      // 7
         LocalStackRewind,  // 8
-        RunTailRecOptimizedFunction  // 9
+        RunTailRecOptimizedFunction,  // 9
+        InvalidUpLimit,
     };
 
     struct Step {
@@ -71,6 +73,8 @@ struct NativeTape {
 
     void ApplyTailRecursionOptimization();
 
+    std::string toString() const;
+
     std::vector<Step> operations;
     // TODO(akindyakov): use unique values in NativeTape::names
     std::vector<TVarName> names;
@@ -78,5 +82,9 @@ struct NativeTape {
 };
 
 using NativeFunctionDefinitionPtr = std::shared_ptr<NativeTape>;
+
+const std::string& toString(NativeTape::EOperations op);
+
+std::ostream& operator<<(std::ostream& os, NativeTape::EOperations op);
 
 }  // namespace AntLisp

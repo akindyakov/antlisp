@@ -123,27 +123,20 @@ bool NativeFunction::hasName(
 
 std::string NativeFunction::toString() const {
     std::ostringstream out;
-    {
-        out << "( ";
-        auto last = fdef->names.cbegin() + argnum;
-        for (auto it = fdef->names.cbegin(); it != last; ++it) {
-            out << *it << " ";
-        }
-        out << ")\n";
-    }
+    out << "native function: (\n";
+    out << "locals: (\n";
     for (const auto& closure : closures) {
+        out << "  {" << closure.first << ' ';
         if (closure.second.is<FunctionPtr>()) {
-            out << "( " << closure.first << " <lambda> )\n";
+            out << "<function>";
         } else {
-            out << "( " << closure.first
-                << ' ' << closure.second.toString()
-                << '\n'
-            ;
+            out << closure.second.toString();
         }
+        out << "}\n";
     }
-    for (const auto& op : fdef->operations) {
-        out << int(op.operation) << " : " << int(op.operand) << "\n";
-    }
+    out << ")\n";
+    out << fdef->toString();
+    out << ")\n";
     return out.str();
 }
 
@@ -434,6 +427,9 @@ bool TapeMachine::step() {
                 } else {
                     this->runTailRecOptimizedFunctionImpl(call);
                 }
+                break;
+            case NativeTape::InvalidUpLimit:
+                throw Error() << "Invalid native operation";
                 break;
         }
     } else {
