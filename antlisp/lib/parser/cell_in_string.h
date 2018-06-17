@@ -20,7 +20,7 @@ class CellParser<Nil>
 {
 public:
     static constexpr auto nilName = "nil";
-    static constexpr auto trueName = "true";
+    static constexpr auto trueName = "t";
 
     static bool check(const std::string& str);
     static Cell parse(const std::string& str);

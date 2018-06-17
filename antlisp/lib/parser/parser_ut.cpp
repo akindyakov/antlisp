@@ -82,7 +82,7 @@ void test_parseCode_cond() {
     std::istringstream in(R"antlisp-code(
     (cond
         (nil  ( + 1 2 ) )
-        (true (+ 2 3))
+        (t (+ 2 3))
         ((+ 1 0) (+ 3 4))
     )
     )antlisp-code");

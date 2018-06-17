@@ -6,7 +6,7 @@
         target_n (+ n 1) prev_sum (+ prev_prev_sum prev_sum)
       )
     )
-    (true (+ prev_prev_sum prev_sum))
+    (t (+ prev_prev_sum prev_sum))
   )
 )
 (defun fib (n)

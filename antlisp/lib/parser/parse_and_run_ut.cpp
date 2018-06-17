@@ -42,7 +42,7 @@ void test_parseCode_lambda_recursive_call() {
       (lambda (n)
         (cond
           ((= n 0) 0)
-          (true (+ 1 (this (+ -1 n))))
+          (t (+ 1 (this (+ -1 n))))
         )
       )
       5
@@ -63,7 +63,7 @@ void test_parseCode_cond() {
     std::istringstream in(R"antlisp-code(
     (cond
         (nil  (+ 1 2))
-        (true (+ 2 3))
+        (t (+ 2 3))
         ((+ 1 0) (+ 3 4))
     )
     )antlisp-code");
@@ -84,7 +84,7 @@ void test_parseCode_progn_simple() {
     AntLisp::Builtin::allMathFunctions(global);
     std::istringstream in(R"antlisp-code(
     (progn
-      true
+      t
       nil
       (+ 4 44)
     )
@@ -150,7 +150,7 @@ void test_parseCode_defun_recursive_call() {
       (defun ballad (n sum)
         (cond
           ((= n 0) sum)
-          (true (ballad (+ n -1) (+ sum 2)))
+          (t (ballad (+ n -1) (+ sum 2)))
         )
       )
       (ballad 5 0)
@@ -175,7 +175,7 @@ void test_parseCode_lambda_multi_call() {
       progn
         (+ x y 1)
         nil
-        true
+        t
         (+ x y 1)
     )
   )
