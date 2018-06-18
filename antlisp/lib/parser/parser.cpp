@@ -97,6 +97,11 @@ private:
                     throw ParseError() << "Forbidden keyword [progn]";
                 }
                 prognDef(nextParser.get());
+            } else if ("load" == token) {
+                if (not options_.test<Keywords::Load>()) {
+                    throw ParseError() << "Forbidden keyword [load]";
+                }
+                loadDef(nextParser.get());
             } else {
                 tokenDef(token);
                 callDef(nextParser.get());
@@ -137,6 +142,17 @@ private:
             );
         }
         core->operations.pop_back();
+    }
+
+    void loadDef(
+        ParenthesesParser& pParser
+    ) {
+        auto prefix = std::string{};
+        if (!pParser.nextToken(prefix)) {
+            throw SyntaxError() << pParser.getStat().toString() << " there is supposed to be function name.";
+        }
+        prefix += ":";
+        auto core = definitionStack.back()->core();
     }
 
     void functionDef(

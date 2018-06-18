@@ -18,6 +18,7 @@ enum class Keywords
     Set,
     Cond,
     Progn,
+    Load,
     AllKeywords,
 };
 
