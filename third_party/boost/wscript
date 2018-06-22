@@ -1,0 +1,32 @@
+#!/usr/bin/env python
+# encoding: utf-8
+
+
+import urllib.request
+
+
+def build(ctx):
+    #ctx.program(
+    #    target="third_party-boost-lib",
+    #    source = [
+    #        "args.cpp",
+    #        "main.cpp",
+    #    ],
+    #)
+    url = "https://dl.bintray.com/boostorg/release/1.67.0/source/boost_1_67_0.tar.bz2"
+    filename = "boost_1_67_0.tar.bz2"
+    sha_256_hash = "2684c972994ee57fc5632e03bf044746f6eb45d4920c343937a465fd67a5adba"
+    print(dir(ctx))
+    print("ctx.path")
+    print(ctx.path)
+    print("ctx.path.abspath")
+    print(ctx.path.abspath())
+    print("ctx.lrooth")
+    print(ctx.root)
+    print("ctx.options")
+    print(ctx.options)
+    tg = ctx(rule='curl {url}  --output ${{TGT}}'.format(url=url), target="boost_1_67_0.tar.bz2")
+    tg = ctx(rule="tar --bzip2 --extract --file ${SRC}", source="boost_1_67_0.tar.bz2", target="boost_1_67_0")
+    print(dir(tg))
+    #urllib.request.urlretrieve(url=url, filename=filename)
+    #ctx(rule="cp ${SRC} ${TGT}', source='foo.txt', target='bar.txt')

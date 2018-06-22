@@ -35,7 +35,12 @@ def configure(ctx):
     ]
 
 
-def build(ctx):
+def _build(ctx):
     ctx.recurse([
         "antlisp",
+    ])
+
+def build(ctx):
+    ctx.recurse([
+        "third_party",
     ])
