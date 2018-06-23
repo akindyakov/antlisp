@@ -4,5 +4,6 @@
 
 def build(ctx):
     ctx.recurse([
+        "lisp_error",
         "string",
     ])
