@@ -4,18 +4,42 @@
 
 
 namespace AntLisp {
-namespace Builtin {
 
-void loadLoad(Namespace& space) {
-    boost::ignore_unused(space);
+NamesLoader::NamesLoader(
+    std::vector<boost::filesystem::path> paths
+)
+    : paths_(std::move(paths))
+{
 }
 
-Cell Load::instantCall(
-    Arguments args
-) const {
-    boost::ignore_unused(args);
-    return Cell::nil();
-}
+// void loadFromFile(
+//     Arguments args
+//     , Namespace& dst
+// ) {
+//     boost::ignore_unused(args);
+//     boost::ignore_unused(dst);
+// }
+//
+// void loadFromWeb(
+//     Arguments args
+//     , Namespace& dst
+// ) {
+//     boost::ignore_unused(args);
+//     boost::ignore_unused(dst);
+// }
+//
+// void loadBuiltins(
+//     Arguments args
+//     , Namespace& dst
+// ) {
+//     boost::ignore_unused(args);
+//     boost::ignore_unused(dst);
+// }
 
-}  // namespace Builtin
+// void loadNames(
+//     Arguments args
+//     , Namespace& dst
+// ) {
+// }
+
 }  // namespace AntLisp

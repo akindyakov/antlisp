@@ -72,6 +72,7 @@ const std::string& toString(NativeTape::EOperations op) {
         {NativeTape::GuardMark, "guard"},
         {NativeTape::LocalStackRewind, "pop from stack"},
         {NativeTape::RunTailRecOptimizedFunction, "run tail function"},
+        {NativeTape::LoadNames, "load names"},
     };
     auto it = map.find(op);
     if (it == map.end()) {

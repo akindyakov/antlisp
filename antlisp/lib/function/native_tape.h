@@ -42,6 +42,7 @@ struct NativeTape {
         GuardMark,      // 7
         LocalStackRewind,  // 8
         RunTailRecOptimizedFunction,  // 9
+        LoadNames,      // 10
         InvalidUpLimit,
     };
 

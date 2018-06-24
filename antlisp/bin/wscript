@@ -10,7 +10,9 @@ def build(ctx):
             "main.cpp",
         ],
         lib=[
+            "boost_filesystem",
             "boost_program_options",
+            "boost_system",
         ],
         use=[
             "antlisp-lib",
