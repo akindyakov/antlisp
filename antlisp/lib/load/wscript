@@ -10,9 +10,11 @@ def build(ctx):
         ],
         use=[
             "antlisp-lib-util",
-            "antlisp-lib-function",
-            "antlisp-lib-function-builtin",
-            "antlisp-lib-parser-cell",
+            "antlisp-lib-cell",
+        ],
+        lib=[
+            "boost_filesystem",
+            "boost_system",
         ],
     )
     ctx.program(
@@ -21,6 +23,10 @@ def build(ctx):
         source="load_ut.cpp",
         use=[
             "antlisp-lib-load",
+        ],
+        lib=[
+            "boost_filesystem",
+            "boost_system",
         ],
     )
     ctx.recurse([

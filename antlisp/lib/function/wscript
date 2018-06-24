@@ -12,6 +12,11 @@ def build(ctx):
         ],
         use=[
             "antlisp-lib-cell",
+            "antlisp-lib-load",
+        ],
+        lib=[
+            "boost_filesystem",
+            "boost_system",
         ],
     )
     ctx.program(
@@ -19,7 +24,11 @@ def build(ctx):
         features="test",
         source="tape_machine_ut.cpp",
         use=[
-            "antlisp-lib-function"
+            "antlisp-lib-function",
+        ],
+        lib=[
+            "boost_filesystem",
+            "boost_system",
         ],
     )
     ctx.program(

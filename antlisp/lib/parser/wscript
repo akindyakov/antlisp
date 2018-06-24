@@ -26,6 +26,10 @@ def build(ctx):
             "antlisp-lib-parser",
             "antlisp-lib-function-builtin",
         ],
+        lib=[
+            "boost_filesystem",
+            "boost_system",
+        ],
     )
     ctx.program(
         target="parse_and_run_ut",
@@ -34,6 +38,10 @@ def build(ctx):
         use=[
             "antlisp-lib-parser",
             "antlisp-lib-function-builtin",
+        ],
+        lib=[
+            "boost_filesystem",
+            "boost_system",
         ],
     )
     ctx.recurse([

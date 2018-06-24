@@ -22,6 +22,10 @@ def build(ctx):
         use=[
             "antlisp-lib-function-builtin",
         ],
+        lib=[
+            "boost_filesystem",
+            "boost_system",
+        ],
     )
     ctx.program(
         target="builtin_math_sum_ut",
@@ -29,6 +33,10 @@ def build(ctx):
         source="math_sum_ut.cpp",
         use=[
             "antlisp-lib-function-builtin",
+        ],
+        lib=[
+            "boost_filesystem",
+            "boost_system",
         ],
     )
     ctx.program(
@@ -38,6 +46,10 @@ def build(ctx):
         use=[
             "antlisp-lib-function-builtin",
         ],
+        lib=[
+            "boost_filesystem",
+            "boost_system",
+        ],
     )
     ctx.program(
         target="builtin_math_less_ut",
@@ -45,6 +57,10 @@ def build(ctx):
         source="math_less_ut.cpp",
         use=[
             "antlisp-lib-function-builtin",
+        ],
+        lib=[
+            "boost_filesystem",
+            "boost_system",
         ],
     )
     ctx.program(
@@ -54,6 +70,10 @@ def build(ctx):
         use=[
             "antlisp-lib-function-builtin",
         ],
+        lib=[
+            "boost_filesystem",
+            "boost_system",
+        ],
     )
     ctx.program(
         target="builtin_math_div_ut",
@@ -61,5 +81,9 @@ def build(ctx):
         source="math_div_ut.cpp",
         use=[
             "antlisp-lib-function-builtin",
+        ],
+        lib=[
+            "boost_filesystem",
+            "boost_system",
         ],
     )
