@@ -8,24 +8,23 @@
 
 
 void test_antlisp_simple_to_string() {
-    auto value = AntLisp::Cell::ext<AntLisp::LispError>(
-        AntLisp::LispError("Some nice error message")
+    auto value = AntLisp::Cell::ext<AntLisp::LispErrorPtr>(
+        AntLisp::LispError::create(0, "Some nice error message")
     );
-    std::cerr << value.toString() << "\n";
     UT_ASSERT_EQUAL(
         value.toString(),
-        std::string{"antlisp error(0.): \"Some nice error message\""}
+        std::string{"(error: 0 \"Some nice error message\")\n"}
     );
 }
 
 void test_antlisp_inherited_to_string() {
-    auto err = AntLisp::LispError(
-      AntLisp::LispError::CodeType{12},
-      "Corrupt"
+    auto err = AntLisp::LispError::create(
+        AntLisp::LispError::CodeType{12},
+        "Corrupt"
     );
     UT_ASSERT_EQUAL(
-        err.message(),
-        std::string{"antlisp error(12.): \"Corrupt\""}
+        err->message(),
+        std::string{"(error: 12 \"Corrupt\")\n"}
     );
     auto nextErr = AntLisp::LispError::inherit(
       err,
@@ -33,8 +32,10 @@ void test_antlisp_inherited_to_string() {
       "Incomplete"
     );
     UT_ASSERT_EQUAL(
-        nextErr.message(),
-        std::string{"antlisp error(35.12.): \"Incomplete\""}
+        nextErr->message(),
+        std::string{R"lisp((error: 35 "Incomplete")
+(error: 12 "Corrupt")
+)lisp"}
     );
     auto nextNextErr = AntLisp::LispError::inherit(
       nextErr,
@@ -42,8 +43,11 @@ void test_antlisp_inherited_to_string() {
       "Failed"
     );
     UT_ASSERT_EQUAL(
-        nextNextErr.message(),
-        std::string{"antlisp error(833.35.12.): \"Failed\""}
+        nextNextErr->message(),
+        std::string{R"lisp((error: 833 "Failed")
+(error: 35 "Incomplete")
+(error: 12 "Corrupt")
+)lisp"}
     );
 }
 

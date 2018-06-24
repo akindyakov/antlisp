@@ -2,6 +2,7 @@
 
 #include <antlisp/lib/util/string.h>
 
+
 namespace AntLisp {
 
 constexpr LispError::CodeType LispError::defaultCode;
@@ -9,7 +10,7 @@ constexpr LispError::CodeType LispError::defaultCode;
 LispError::LispError(
     std::string msg
 )
-    : err_code_(1, defaultCode)
+    : err_code_(defaultCode)
     , message_(
         std::move(msg)
     )
@@ -20,63 +21,57 @@ LispError::LispError(
     CodeType errCode
     , std::string msg
 )
-    : err_code_(1, errCode)
+    : err_code_(errCode)
     , message_(
         std::move(msg)
     )
 {
 }
 
-LispError LispError::inherit(
-    const LispError& err
+LispErrorPtr LispError::create(
+    CodeType errCode
+    , std::string msg
 ) {
-    auto newErr = LispError(
-        LispError::defaultCode,
-        err.message_
-    );
-    newErr.err_code_.insert(
-        newErr.err_code_.end(),
-        err.err_code_.begin(),
-        err.err_code_.end()
-    );
-    return newErr;
+    return std::make_shared<LispError>(errCode, std::move(msg));
 }
 
-LispError LispError::inherit(
-    const LispError& err
+LispErrorPtr LispError::inherit(
+    LispErrorPtr fromError
     , CodeType errCode
     , std::string msg
 ) {
-    auto newErr = LispError(errCode, std::move(msg));
-    newErr.err_code_.insert(
-        newErr.err_code_.end(),
-        err.err_code_.begin(),
-        err.err_code_.end()
-    );
+    auto newErr = LispError::create(errCode, std::move(msg));
+    newErr->from_error_ = std::move(fromError);
     return newErr;
 }
 
-std::string LispError::message() const {
-    auto repr = std::string{"antlisp error("};
-    for (const auto& code : err_code_) {
-        repr += std::to_string(code);
-        repr += '.';
+void LispError::messageImpl(std::string& to) const {
+    to += "(error: ";
+    to += std::to_string(this->err_code_);
+    to += " ";
+    to += Str::Quotes(this->message_);
+    to += ")\n";
+    if (this->from_error_) {
+        this->from_error_->messageImpl(to);
     }
-    repr += "): ";
-    repr.append(Str::Quotes(message_));
+}
+
+std::string LispError::message() const {
+    auto repr = std::string{};
+    this->messageImpl(repr);
     return repr;
 }
 
 
 template<>
-std::string CellType<LispError>::toString() const {
-    return value_.message();
+std::string CellType<LispErrorPtr>::toString() const {
+    return value_->message();
 }
 
 template<>
-ICellType::Ptr CellType<LispError>::copy() const {
-    return std::make_unique<CellType<LispError>>(
-        LispError::inherit(value_)
+ICellType::Ptr CellType<LispErrorPtr>::copy() const {
+    return std::make_unique<CellType<LispErrorPtr>>(
+        value_
     );
 }
 
