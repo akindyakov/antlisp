@@ -147,12 +147,23 @@ private:
     void loadDef(
         ParenthesesParser& pParser
     ) {
-        auto prefix = std::string{};
-        if (!pParser.nextToken(prefix)) {
-            throw SyntaxError() << pParser.getStat().toString() << " there is supposed to be function name.";
+        takeVarByName("load");  // "load" should be defined as a function
+        auto argCount = std::size_t{1};
+        if (expression(pParser)) {
+            throw SyntaxError() << pParser.getStat().toString() << " there is supposed to be prefix for the loading namespace.";
         }
-        prefix += ":";
+        if (expression(pParser)) {  // optional
+            ++argCount;
+        }
+        auto something = std::string{};
+        if (pParser.nextToken(something)) {
+            throw SyntaxError() << pParser.getStat().toString() << " unexpected tocken " << Str::Quotes(something);
+        }
         auto core = definitionStack.back()->core();
+        core->addStep(
+            NativeTape::RunFunction,
+            argCount
+        );
     }
 
     void functionDef(
