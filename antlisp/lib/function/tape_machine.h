@@ -4,7 +4,6 @@
 #include "type_vocabulary.h"
 
 #include <antlisp/lib/cell/cell.h>
-#include <antlisp/lib/load/load.h>
 
 #include <algorithm>
 #include <exception>
@@ -63,13 +62,6 @@ public:
     Arguments createArgs();
 
     Namespace releaseLocals();
-
-    void addLocal(
-        const TVarName& name
-        , Cell cell
-    ) {
-        vars[name] = std::move(cell);
-    }
 
 private:
     NativeFunctionDefinitionPtr function;
@@ -232,7 +224,6 @@ class TapeMachine {
 public:
     explicit TapeMachine(
         const NativeFunction& toRun
-        , NamesLoader* loader = nullptr
     );
 
     bool step();
@@ -269,7 +260,6 @@ public:
     Cell ret;
 
 private:
-    NamesLoader* loader_;
     std::vector<NativeFunctionCall> CallStack;
 };
 

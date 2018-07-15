@@ -8,6 +8,7 @@
 
 namespace AntLisp {
 
+// remove it
 class LispError;
 
 class LispError {

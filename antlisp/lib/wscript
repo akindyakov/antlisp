@@ -21,7 +21,6 @@ def build(ctx):
         "cell",
         "cell_ext",
         "function",
-        "load",
         "parser",
         "test",
         "util",
