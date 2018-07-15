@@ -243,6 +243,35 @@ void testCell_cast_copy_integer() {
     );
 }
 
+void testCell_ext_creation_vector() {
+    auto cell = AntLisp::Cell::ext<std::vector<int>>(
+        0, 1, 2, 3, 4, 5, 6, 7
+    );
+    UT_ASSERT_EQUAL(cell.cAs<std::vector<int>>().size(), 8);
+}
+
+void testCell_ext_creation_user_class() {
+    class TestClass {
+    public:
+        explicit TestClass(
+            const std::string& str
+            , int number
+        )
+            : value(number)
+            , text(str)
+        {
+        }
+        int value;
+        const std::string& text;
+    };
+    auto text = std::string{"Sweet dreams"};
+    auto cell = AntLisp::Cell::ext<TestClass>(
+        text, 12
+    );
+    UT_ASSERT_EQUAL(cell.cAs<TestClass>().value, 12);
+    UT_ASSERT_EQUAL(cell.cAs<TestClass>().text, text);
+}
+
 UT_LIST(
     RUN_TEST(nilEqualTest);
     RUN_TEST(cellCheckTypeTag);
@@ -254,4 +283,6 @@ UT_LIST(
     RUN_TEST(testCell_cast_symbol);
     RUN_TEST(testCell_cast_function);
     RUN_TEST(testCell_cast_copy_integer);
+    RUN_TEST(testCell_ext_creation_vector);
+    RUN_TEST(testCell_ext_creation_user_class);
 );
