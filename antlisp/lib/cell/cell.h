@@ -103,12 +103,13 @@ public:
     }
 
     template<
-      typename Type
+        typename Type
+        , typename... Args
     >
-    static Cell ext(Type&& value) {
+    static Cell ext(Args&&... args) {
         return Cell{
             std::make_unique<CellType<Type>>(
-                value
+                std::forward<Args>(args)...
             )
         };
     }
