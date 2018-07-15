@@ -49,7 +49,7 @@ public:
         typename... Args
     >
     explicit CellType(Args&&... args)
-        : value_(std::forward<Args>(args)...)
+        : value_{std::forward<Args>(args)...}
     {
     }
 
