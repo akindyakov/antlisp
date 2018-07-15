@@ -148,10 +148,23 @@ private:
         ParenthesesParser& pParser
     ) {
         takeVarByName("load");  // "load" should be defined as a function
-        auto argCount = std::size_t{1};
-        if (expression(pParser)) {
-            throw SyntaxError() << pParser.getStat().toString() << " there is supposed to be prefix for the loading namespace.";
+        auto name = std::string{};
+        if (!pParser.nextToken(name)) {
+            throw SyntaxError()
+                << pParser.getStat().toString()
+                << " there is supposed to be prefix for the loading namespace."
+            ;
         }
+        auto core = definitionStack.back()->core();
+        {
+            auto pos = core->consts.size();
+            core->consts.push_back(Cell::ext<StringType>(name));
+            core->addStep(
+                NativeTape::GetConst,
+                pos
+            );
+        }
+        auto argCount = std::size_t{1};
         if (expression(pParser)) {  // optional
             ++argCount;
         }
@@ -159,10 +172,15 @@ private:
         if (pParser.nextToken(something)) {
             throw SyntaxError() << pParser.getStat().toString() << " unexpected tocken " << Str::Quotes(something);
         }
-        auto core = definitionStack.back()->core();
         core->addStep(
             NativeTape::RunFunction,
             argCount
+        );
+        auto pos = core->names.size();
+        core->names.push_back(name);
+        core->addStep(
+            NativeTape::SetLocal,
+            pos
         );
     }
 

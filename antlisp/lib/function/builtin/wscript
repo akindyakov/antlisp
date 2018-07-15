@@ -10,9 +10,9 @@ def build(ctx):
             "math.cpp",
         ],
         use=[
-            "antlisp-lib-function",
             "antlisp-lib-cell",
             "antlisp-lib-cell_ext-string",
+            "antlisp-lib-function",
         ],
     )
     ctx.program(

@@ -298,14 +298,14 @@ Arguments NativeFunctionCall::createArgs() {
 }
 
 Namespace NativeFunctionCall::releaseLocals() {
-    return std::move(vars);
+    auto locals = std::move(vars);
+    vars.clear();
+    return locals;
 }
 
 TapeMachine::TapeMachine(
     const NativeFunction& toRun
-    , NamesLoader* loader
 )
-    : loader_(loader)
 {
     CallStack.push_back(
       toRun.nativeCall(
@@ -417,21 +417,6 @@ bool TapeMachine::step() {
                     this->runFunctionImpl(call);
                 } else {
                     this->runTailRecOptimizedFunctionImpl(call);
-                }
-                break;
-            case NativeTape::LoadNames: {
-                    auto args = call->createArgs();
-                    if (loader_ != nullptr) {
-                        loader_->load(
-                            std::move(args),
-                            [call](
-                                const TVarName& name
-                                , Cell cell
-                            ){
-                                call->addLocal(name, std::move(cell));
-                            }
-                        );
-                    }
                 }
                 break;
             case NativeTape::InvalidUpLimit:

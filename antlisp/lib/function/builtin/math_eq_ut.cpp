@@ -27,7 +27,6 @@ void test_equality_int_neg() {
     auto ans = eq.instantCall(
         std::move(args)
     );
-    std::cerr << ans.toString() << '\n';
     UT_ASSERT(
         ans.is<AntLisp::Nil>()
     );
