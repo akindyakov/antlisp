@@ -39,5 +39,4 @@ def build(ctx):
         ],
     )
     ctx.recurse([
-        "load",
     ])
