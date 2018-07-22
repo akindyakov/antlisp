@@ -1,3 +1,5 @@
+#pragma once
+
 #include <antlisp/lib/function/tape_machine.h>
 
 
