@@ -2,8 +2,8 @@
 
 #include <antlisp/lib/parser/parser.h>
 #include <antlisp/lib/function/tape_machine.h>
-#include <antlisp/lib/function/builtin/math.h>
-#include <antlisp/lib/function/builtin/io.h>
+#include <antlisp/lib/builtin/math.h>
+#include <antlisp/lib/builtin/io.h>
 
 #include <fstream>
 #include <iostream>

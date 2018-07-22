@@ -4,7 +4,7 @@
 
 def build(ctx):
     ctx.stlib(
-        target="antlisp-lib-function-builtin",
+        target="antlisp-lib-builtin",
         source = [
             "io.cpp",
             "math.cpp",
@@ -20,7 +20,7 @@ def build(ctx):
         features="test",
         source="math_ut.cpp",
         use=[
-            "antlisp-lib-function-builtin",
+            "antlisp-lib-builtin",
         ],
         lib=[
             "boost_filesystem",
@@ -32,7 +32,7 @@ def build(ctx):
         features="test",
         source="math_sum_ut.cpp",
         use=[
-            "antlisp-lib-function-builtin",
+            "antlisp-lib-builtin",
         ],
         lib=[
             "boost_filesystem",
@@ -44,7 +44,7 @@ def build(ctx):
         features="test",
         source="math_multiplication_ut.cpp",
         use=[
-            "antlisp-lib-function-builtin",
+            "antlisp-lib-builtin",
         ],
         lib=[
             "boost_filesystem",
@@ -56,7 +56,7 @@ def build(ctx):
         features="test",
         source="math_less_ut.cpp",
         use=[
-            "antlisp-lib-function-builtin",
+            "antlisp-lib-builtin",
         ],
         lib=[
             "boost_filesystem",
@@ -68,7 +68,7 @@ def build(ctx):
         features="test",
         source="math_eq_ut.cpp",
         use=[
-            "antlisp-lib-function-builtin",
+            "antlisp-lib-builtin",
         ],
         lib=[
             "boost_filesystem",
@@ -80,7 +80,7 @@ def build(ctx):
         features="test",
         source="math_div_ut.cpp",
         use=[
-            "antlisp-lib-function-builtin",
+            "antlisp-lib-builtin",
         ],
         lib=[
             "boost_filesystem",

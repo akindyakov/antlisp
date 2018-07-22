@@ -11,7 +11,7 @@ def build(ctx):
         use=[
             "antlisp-lib-util",
             "antlisp-lib-function",
-            "antlisp-lib-function-builtin",
+            "antlisp-lib-builtin",
             # in
             "antlisp-lib-parser-cell",
             "antlisp-lib-parser-parentheses",
@@ -24,7 +24,7 @@ def build(ctx):
         source="parser_ut.cpp",
         use=[
             "antlisp-lib-parser",
-            "antlisp-lib-function-builtin",
+            "antlisp-lib-builtin",
         ],
         lib=[
             "boost_filesystem",
@@ -37,7 +37,7 @@ def build(ctx):
         source="parse_and_run_ut.cpp",
         use=[
             "antlisp-lib-parser",
-            "antlisp-lib-function-builtin",
+            "antlisp-lib-builtin",
         ],
         lib=[
             "boost_filesystem",
