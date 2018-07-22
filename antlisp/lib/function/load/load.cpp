@@ -5,7 +5,6 @@
 
 #include <antlisp/lib/cell_ext/lisp_error/error.h>
 #include <antlisp/lib/cell_ext/string/string.h>
-#include <antlisp/lib/function/builtin/io.h>
 
 
 namespace AntLisp {

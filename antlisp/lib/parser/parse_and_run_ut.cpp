@@ -1,7 +1,7 @@
 #include "parser.h"
 
 #include <antlisp/lib/function/tape_machine.h>
-#include <antlisp/lib/function/builtin/math.h>
+#include <antlisp/lib/builtin/math.h>
 
 #include <antlisp/lib/test/ut.h>
 
