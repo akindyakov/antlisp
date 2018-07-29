@@ -88,7 +88,7 @@ public:
 
     static Namespace parseArguments(
         Arguments& args
-        , const std::vector<TVarName>& names
+        , const std::vector<VarName>& names
         , const std::size_t argMaxNum
     );
 };
@@ -136,7 +136,7 @@ public:
         NativeFunctionDefinitionPtr fdef_
         , std::size_t argnum_
         , Namespace closures_
-        , TVarName selfName_
+        , VarName selfName_
     );
 
     NativeFunction(const NativeFunction&) = delete;
@@ -166,7 +166,7 @@ public:
     ) const override;
 
     bool hasName(
-        const TVarName& name
+        const VarName& name
     ) const;
 
     std::string toString() const override;
@@ -175,7 +175,7 @@ public:
     std::size_t argnum = 0;
     NativeFunctionDefinitionPtr fdef;
     Namespace closures;  // default arguments
-    TVarName selfName;
+    VarName selfName;
 };
 
 class LambdaFunction
@@ -207,7 +207,7 @@ public:
     NativeTape* core();
 
     bool hasName(
-        const TVarName& name
+        const VarName& name
     ) const;
 
     std::string toString() const override;
@@ -215,7 +215,7 @@ public:
 public:
     // members visible only for parsers
     NativeFunction nativeFn;
-    std::vector<TVarName> names;
+    std::vector<VarName> names;
 };
 
 using LambdaFunctionPtr = std::shared_ptr<LambdaFunction>;

@@ -11,13 +11,13 @@
 
 namespace AntLisp {
 
-using TVarName = std::string;
+using VarName = std::string;
 
-using Namespace = std::unordered_map<TVarName, Cell>;
+using Namespace = std::unordered_map<VarName, Cell>;
 
 using Arguments = std::vector<Cell>;
 
-using ArgNames = std::vector<TVarName>;
+using ArgNames = std::vector<VarName>;
 
 class TapeMachineError
     : public Exception

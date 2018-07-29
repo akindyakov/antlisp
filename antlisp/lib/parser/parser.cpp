@@ -31,7 +31,7 @@ public:
                     std::make_shared<NativeTape>(),
                     0, std::move(global), "this"
                 ),
-                std::vector<TVarName>{} // global arg names - should be empty
+                std::vector<VarName>{} // global arg names - should be empty
             )
         );
     }
