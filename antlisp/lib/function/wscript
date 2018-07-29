@@ -12,6 +12,7 @@ def build(ctx):
         ],
         use=[
             "antlisp-lib-cell",
+            "antlisp-lib-varname",
         ],
         lib=[
             "boost_filesystem",

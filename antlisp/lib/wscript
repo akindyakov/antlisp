@@ -26,4 +26,5 @@ def build(ctx):
         "parser",
         "test",
         "util",
+        "varname",
     ])
