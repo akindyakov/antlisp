@@ -64,10 +64,10 @@ public:
     Namespace releaseLocals();
 
 private:
-    NativeFunctionDefinitionPtr function;
-    LocalStack localCallStack;
-    Namespace vars;
-    std::size_t runner = 0;
+    NativeFunctionDefinitionPtr function_;
+    LocalStack localCallStack_;
+    Namespace vars_;
+    std::size_t runner_ = 0;
 };
 
 class IFunction {
@@ -238,6 +238,18 @@ public:
     {
     };
 
+    const Cell& ret() const {
+        return ret_;
+    }
+
+    Namespace takeVars() {
+      return std::move(vars_);
+    }
+
+    const Namespace& vars() const {
+      return vars_;
+    }
+
 private:
     bool isStackEmpty() const;
     NativeFunctionCall* topCall();
@@ -255,11 +267,9 @@ private:
         , Arguments args
     );
 
-public:
-    Namespace vars;
-    Cell ret;
-
 private:
+    Namespace vars_;
+    Cell ret_;
     std::vector<NativeFunctionCall> callStack_;
 };
 

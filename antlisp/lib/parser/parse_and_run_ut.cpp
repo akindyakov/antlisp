@@ -16,7 +16,7 @@ void testFullCycle() {
     auto machine = AntLisp::TapeMachine(native);
     machine.run();
     UT_ASSERT_EQUAL(
-        machine.ret.as<AntLisp::Integer>(),
+        machine.ret().as<AntLisp::Integer>(),
         21 + (2 * 3)
     );
 }
@@ -29,7 +29,7 @@ void test_parseCode_lambda_call() {
     auto machine = AntLisp::TapeMachine(native);
     machine.run();
     UT_ASSERT_EQUAL(
-        machine.ret.as<AntLisp::Integer>(),
+        machine.ret().as<AntLisp::Integer>(),
         4 + 2 + 1
     );
 }
@@ -52,7 +52,7 @@ void test_parseCode_lambda_recursive_call() {
     auto machine = AntLisp::TapeMachine(native);
     machine.run();
     UT_ASSERT_EQUAL(
-        machine.ret.as<AntLisp::Integer>(),
+        machine.ret().as<AntLisp::Integer>(),
         5
     );
 }
@@ -74,7 +74,7 @@ void test_parseCode_cond() {
     auto machine = AntLisp::TapeMachine(native);
     machine.run();
     UT_ASSERT_EQUAL(
-        machine.ret.as<AntLisp::Integer>(),
+        machine.ret().as<AntLisp::Integer>(),
         2 + 3
     );
 }
@@ -93,7 +93,7 @@ void test_parseCode_progn_simple() {
     auto machine = AntLisp::TapeMachine(native);
     machine.run();
     UT_ASSERT_EQUAL(
-        machine.ret.as<AntLisp::Integer>(),
+        machine.ret().as<AntLisp::Integer>(),
         4 + 44
     );
 }
@@ -117,7 +117,7 @@ void test_parseCode_progn() {
     auto machine = AntLisp::TapeMachine(native);
     machine.run();
     UT_ASSERT_EQUAL(
-        machine.ret.as<AntLisp::Integer>(),
+        machine.ret().as<AntLisp::Integer>(),
         12 + 13
     );
 }
@@ -137,7 +137,7 @@ void test_parseCode_defun_call() {
     auto machine = AntLisp::TapeMachine(native);
     machine.run();
     UT_ASSERT_EQUAL(
-        machine.ret.as<AntLisp::Integer>(),
+        machine.ret().as<AntLisp::Integer>(),
         192 + 168 + 35
     );
 }
@@ -160,7 +160,7 @@ void test_parseCode_defun_recursive_call() {
     auto machine = AntLisp::TapeMachine(native);
     machine.run();
     UT_ASSERT_EQUAL(
-        machine.ret.as<AntLisp::Integer>(),
+        machine.ret().as<AntLisp::Integer>(),
         5 * 2
     );
 }
@@ -186,7 +186,7 @@ void test_parseCode_lambda_multi_call() {
     auto machine = AntLisp::TapeMachine(native);
     machine.run();
     UT_ASSERT_EQUAL(
-        machine.ret.as<AntLisp::Integer>(),
+        machine.ret().as<AntLisp::Integer>(),
         4 + 2 + 1
     );
 }
@@ -206,7 +206,7 @@ void test_parseCode_set() {
     auto machine = AntLisp::TapeMachine(native);
     machine.run();
     UT_ASSERT_EQUAL(
-        machine.ret.as<AntLisp::Integer>(),
+        machine.ret().as<AntLisp::Integer>(),
         181 + 39
     );
 }
@@ -223,7 +223,7 @@ void test_parseCode_multistate() {
     auto machine = AntLisp::TapeMachine(native);
     machine.run();
     UT_ASSERT_EQUAL(
-        machine.ret.as<AntLisp::Integer>(),
+        machine.ret().as<AntLisp::Integer>(),
         87 + 250 + 250 + 242
     );
 }
