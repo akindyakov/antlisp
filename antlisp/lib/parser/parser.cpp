@@ -350,10 +350,12 @@ private:
     void takeVarByName(
         const std::string& varName
     ) {
+        auto const prefix = VarNamePrefix(varName);
+        auto const prefixStr = prefix.firstName();
         auto to = definitionStack.rbegin();
         while (
             to != definitionStack.rend()
-            && not to->get()->hasName(varName)
+            && not to->get()->hasName(prefixStr)
         ) {
             ++to;
         }

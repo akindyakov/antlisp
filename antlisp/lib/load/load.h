@@ -19,15 +19,19 @@ public:
     Cell instantCall(
         Arguments args
     ) const override;
+
+    static Cell cell();
+    static void inject(Namespace& space);
 };
 
-using NamespaceCell = CellType<Namespace>;
+using NamespacePtr = std::shared_ptr<Namespace>;
+using NamespaceCell = CellType<NamespacePtr>;
 
 template<>
-std::string CellType<Namespace>::toString() const;
+std::string CellType<NamespacePtr>::toString() const;
 
 template<>
-ICellType::Ptr CellType<Namespace>::copy() const;
+ICellType::Ptr CellType<NamespacePtr>::copy() const;
 
 class NamesCache {
 public:

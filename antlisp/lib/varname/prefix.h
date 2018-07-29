@@ -14,8 +14,6 @@ namespace AntLisp {
 
 using VarName = std::string;
 
-using Namespace = std::unordered_map<VarName, Cell>;
-
 class VarNamePrefix {
 public:
     explicit VarNamePrefix(
@@ -30,6 +28,10 @@ public:
         return not name_.empty();
     }
 
+    bool isComplex() const {
+        return name_.size() != prefix_.size();
+    }
+
     VarName fullName() const {
         return prefix_.to_string();
     }
@@ -42,5 +44,8 @@ private:
     boost::string_view prefix_;
     boost::string_view name_;
 };
+
+// TODO: continue here, we definetely need more complex class Namespace
+using Namespace = std::unordered_map<VarName, Cell>;
 
 }  // namespace AntLisp

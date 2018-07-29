@@ -250,12 +250,21 @@ void NativeFunctionCall::getLocal() {
         runner_
     ].operand;
     const auto& name = function_->names[pos];
-    auto localIt = vars_.find(name);
+    auto const prefix = VarNamePrefix(name);
+    auto localIt = vars_.find(
+        prefix.firstName()
+    );
     if (localIt == vars_.end()) {
         throw RuntimeError()
             << "There is no such local name " << Str::Quotes(name);
     }
-    push(localIt->second.copy());
+    if (prefix.isComplex()) {
+        // FIXME
+        throw NotImplementedError()
+            << "I have a bad news for you my fried, this part of name system still does not implemented. Be patient.";
+    } else {
+        push(localIt->second.copy());
+    }
 }
 
 void NativeFunctionCall::setLocal() {

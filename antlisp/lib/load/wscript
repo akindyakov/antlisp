@@ -9,6 +9,7 @@ def build(ctx):
             "load.cpp",
         ],
         use=[
+            "antlisp-lib-builtin",
             "antlisp-lib-cell",
             "antlisp-lib-cell_ext-string",
             "antlisp-lib-util",
