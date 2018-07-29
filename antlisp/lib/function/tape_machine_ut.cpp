@@ -108,7 +108,7 @@ void testFullCycle() {
     );
     machine.run();
     UT_ASSERT_EQUAL(
-        machine.ret.as<AntLisp::Integer>(),
+        machine.ret().as<AntLisp::Integer>(),
         (12 + 13) * 14
     );
 }
@@ -229,7 +229,7 @@ void testLambdaFunction() {
     );
     machine.run();
     UT_ASSERT_EQUAL(
-        machine.ret.as<AntLisp::Integer>(),
+        machine.ret().as<AntLisp::Integer>(),
         (81 + 1043 + 2209)
     );
 }

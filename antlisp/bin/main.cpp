@@ -22,8 +22,8 @@ void interactive(
             AntLisp::parseCode(in, std::move(global))
         );
         machine.run();
-        std::cout << machine.ret.toString() << std::endl;
-        global = std::move(machine.vars);
+        std::cout << machine.ret().toString() << std::endl;
+        global = machine.takeVars();
     }
 }
 
@@ -35,7 +35,7 @@ void fromStream(
         AntLisp::parseCode(in, std::move(global))
     );
     machine.run();
-    global = std::move(machine.vars);
+    global = machine.takeVars();
 }
 
 void fromFile(

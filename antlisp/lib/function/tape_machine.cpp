@@ -204,80 +204,81 @@ NativeFunctionCall::NativeFunctionCall(
     NativeFunctionDefinitionPtr fdef
     , Namespace predefinedVars
 )
-    : function(
+    : function_(
         std::move(fdef)
     )
-    , vars(
+    , vars_(
         std::move(predefinedVars)
     )
 {
-    --runner;
+    --runner_;
 }
 
 NativeTape::EOperations NativeFunctionCall::getOperation() const {
-    return function->operations[runner].operation;
+    return function_->operations[runner_].operation;
 }
 
 bool NativeFunctionCall::next() noexcept {
-    return ++runner < function->operations.size();
+    return ++runner_ < function_->operations.size();
 }
 
 Cell NativeFunctionCall::pop() {
     return (
-        localCallStack.size() == 0
+        localCallStack_.size() == 0
         ? Cell::nil()
-        : localCallStack.pop()
+        : localCallStack_.pop()
     );
 }
 
 void NativeFunctionCall::push(Cell cell) {
-    localCallStack.push(
+    localCallStack_.push(
         std::move(cell)
     );
 }
 
 void NativeFunctionCall::getConst() {
-    auto cell = function->consts[
-        function->operations[runner].operand
+    auto cell = function_->consts[
+        function_->operations[runner_].operand
     ].copy();
-    this->push(
+    push(
         std::move(cell)
     );
 }
 
 void NativeFunctionCall::getLocal() {
-    auto pos = this->function->operations[
-        this->runner
+    auto pos = function_->operations[
+        runner_
     ].operand;
-    const auto& name = this->function->names[pos];
-    auto localIt = this->vars.find(name);
-    if (localIt == this->vars.end()) {
-        throw RuntimeError() << "There is no such local name " << Str::Quotes(name);
+    const auto& name = function_->names[pos];
+    auto localIt = vars_.find(name);
+    if (localIt == vars_.end()) {
+        throw RuntimeError()
+            << "There is no such local name " << Str::Quotes(name);
     }
-    this->push(localIt->second.copy());
+    push(localIt->second.copy());
 }
 
 void NativeFunctionCall::setLocal() {
-    const auto& name = function->names[
-        this->function->operations[
-            this->runner
+    const auto& name = function_->names[
+        function_->operations[
+            runner_
         ].operand
     ];
-    this->vars[name] = this->pop();
+    vars_[name] = pop();
 }
 
 void NativeFunctionCall::stackRewind() {
-    for (auto i = function->operations[runner].operand; i != 0; --i) {
-        this->pop();
+    for (auto i = function_->operations[runner_].operand; i != 0; --i) {
+        pop();
     }
 }
 
 void NativeFunctionCall::skipUntilMark() {
-    auto mark = function->operations[runner].operand;
+    auto mark = function_->operations[runner_].operand;
     while (
-        this->next()
+        next()
     ) {
-        auto step = function->operations[runner];
+        const auto& step = function_->operations[runner_];
         if (
             step.operation == NativeTape::GuardMark
             && step.operand == mark
@@ -288,7 +289,7 @@ void NativeFunctionCall::skipUntilMark() {
 }
 
 Arguments NativeFunctionCall::createArgs() {
-    auto size = function->operations[runner].operand;
+    auto size = function_->operations[runner_].operand;
     auto args = Arguments(size);
     for (auto& arg : args) {
         arg = pop();
@@ -298,8 +299,8 @@ Arguments NativeFunctionCall::createArgs() {
 }
 
 Namespace NativeFunctionCall::releaseLocals() {
-    auto locals = std::move(vars);
-    vars.clear();
+    auto locals = std::move(vars_);
+    vars_.clear();
     return locals;
 }
 
@@ -317,7 +318,7 @@ TapeMachine::TapeMachine(
 void TapeMachine::runFunctionImpl(NativeFunctionCall* call) {
     auto args = call->createArgs();
     auto cellToRun = call->pop();
-    this->runCellWithArguments(call, cellToRun, std::move(args));
+    runCellWithArguments(call, cellToRun, std::move(args));
 }
 
 void TapeMachine::runTailRecOptimizedFunctionImpl(
@@ -325,8 +326,8 @@ void TapeMachine::runTailRecOptimizedFunctionImpl(
 ) {
     auto args = call->createArgs();
     auto cellToRun = call->pop();
-    this->popCall();
-    this->runCellWithArguments(this->topCall(), cellToRun, std::move(args));
+    popCall();
+    runCellWithArguments(topCall(), cellToRun, std::move(args));
 }
 
 void TapeMachine::runCellWithArguments(
@@ -337,7 +338,7 @@ void TapeMachine::runCellWithArguments(
     if (cellToRun.is<FunctionPtr>()) {
         auto fnPtr = cellToRun.as<FunctionPtr>();
         if (fnPtr->isNative()) {
-            this->pushCall(
+            pushCall(
                 fnPtr->nativeCall(
                     std::move(args)
                 )
@@ -358,28 +359,28 @@ void TapeMachine::runCellWithArguments(
 }
 
 bool TapeMachine::isStackEmpty() const {
-    return this->callStack_.empty();
+    return callStack_.empty();
 }
 
 NativeFunctionCall* TapeMachine::topCall() {
-    return &this->callStack_.back();
+    return &callStack_.back();
 }
 
 NativeFunctionCall* TapeMachine::pushCall(
     NativeFunctionCall frame
 ) {
-    this->callStack_.push_back(
+    callStack_.push_back(
         std::move(frame)
     );
-    return this->topCall();
+    return topCall();
 }
 
 void TapeMachine::popCall() {
-    this->callStack_.pop_back();
+    callStack_.pop_back();
 }
 
 bool TapeMachine::step() {
-    auto call = this->topCall();
+    auto call = topCall();
     if (call->next()) {
         switch (call->getOperation()) {
             case NativeTape::Nope:
@@ -394,7 +395,7 @@ bool TapeMachine::step() {
                 call->setLocal();
                 break;
             case NativeTape::RunFunction:
-                this->runFunctionImpl(call);
+                runFunctionImpl(call);
                 break;
             case NativeTape::Skip:
                 call->skipUntilMark();
@@ -413,10 +414,10 @@ bool TapeMachine::step() {
                 call->stackRewind();
                 break;
             case NativeTape::RunTailRecOptimizedFunction:
-                if (this->callStack_.size() < 2) {
-                    this->runFunctionImpl(call);
+                if (callStack_.size() < 2) {
+                    runFunctionImpl(call);
                 } else {
-                    this->runTailRecOptimizedFunctionImpl(call);
+                    runTailRecOptimizedFunctionImpl(call);
                 }
                 break;
             case NativeTape::InvalidUpLimit:
@@ -425,11 +426,11 @@ bool TapeMachine::step() {
         }
     } else {
         // save return value
-        this->ret = call->pop();
+        ret_ = call->pop();
         // preserve the last local vars (for import)
-        this->vars = call->releaseLocals();
+        vars_ = call->releaseLocals();
         // drop spent call
-        this->popCall();
+        popCall();
         // should we resume something from the stack?
         if (this->isStackEmpty()) {
             // done, nothing to do
@@ -438,9 +439,9 @@ bool TapeMachine::step() {
         // resume it
         call = this->topCall();
         call->push(
-            std::move(this->ret)
+            std::move(ret_)
         );
-        this->ret = Cell::nil();
+        ret_ = Cell::nil();
     }
     return true;
 }
