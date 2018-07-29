@@ -260,7 +260,7 @@ public:
     Cell ret;
 
 private:
-    std::vector<NativeFunctionCall> CallStack;
+    std::vector<NativeFunctionCall> callStack_;
 };
 
 }  // namespace AntLisp
