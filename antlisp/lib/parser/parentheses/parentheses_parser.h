@@ -15,10 +15,10 @@ public:
     ~ParenthesesParser();
 
     ParenthesesParser(ParenthesesParser&& other)
-        : codeStream(other.codeStream)
-        , level(other.level)
+        : codeStream_(other.codeStream_)
+        , level_(other.level_)
     {
-        other.level = -1;
+        other.level_ = -1;
     }
 
     ParenthesesParser(const ParenthesesParser&) = delete;
@@ -49,7 +49,7 @@ public:
     Optional<ParenthesesParser> nextParser();
 
     const CodeStat& getStat() const {
-        return codeStream.getStat();
+        return codeStream_.getStat();
     }
 
     void close();
@@ -61,8 +61,8 @@ private:
     );
 
 private:
-    InCodeStream& codeStream;
-    int level = 0;
+    InCodeStream& codeStream_;
+    int level_ = 0;
 };
 
 }  // namespace AntLisp

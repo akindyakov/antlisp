@@ -26,7 +26,7 @@ public:
     std::size_t size() const noexcept;
 
 private:
-    std::vector<Cell> stackImpl;
+    std::vector<Cell> cells_;
 };
 
 class ExtInstantFunction;
@@ -64,10 +64,10 @@ public:
     Namespace releaseLocals();
 
 private:
+    std::size_t runner_ = 0;
     NativeFunctionDefinitionPtr function_;
     LocalStack localCallStack_;
     Namespace vars_;
-    std::size_t runner_ = 0;
 };
 
 class IFunction {

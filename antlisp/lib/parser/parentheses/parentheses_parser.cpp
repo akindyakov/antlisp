@@ -8,11 +8,11 @@
 namespace AntLisp {
 
 ParenthesesParser::~ParenthesesParser() {
-    if (this->level >= 0) {
+    if (level_ >= 0) {
         std::cerr
-            << "[debug] " << this->getStat().toString()
+            << "[debug] " << getStat().toString()
             << " Warning: deleting unclosed ParenthesesParser"
-            << " on depth " << this->level << '\n';
+            << " on depth " << level_ << '\n';
     }
 }
 
@@ -26,14 +26,14 @@ ParenthesesParser ParenthesesParser::fromCodeStream(
 }
 
 bool ParenthesesParser::isLocked() const {
-    return this->level != this->getStat().parentheses;
+    return level_ != this->getStat().parentheses;
 }
 
 bool ParenthesesParser::isEnd() const {
     return (
-        this->level < 0
-        || this->getStat().parentheses < this->level
-        || not codeStream.good()
+        level_ < 0
+        || getStat().parentheses < level_
+        || not codeStream_.good()
     );
 }
 
@@ -48,7 +48,7 @@ bool ParenthesesParser::nextToken(
     std::string& token
 ) {
     if (this->good()) {
-        if (codeStream.nextToken(token)) {
+        if (codeStream_.nextToken(token)) {
             return true;
         }
         return false;
@@ -65,21 +65,21 @@ std::string ParenthesesParser::nextToken() {
 }
 
 void ParenthesesParser::close() {
-    if (this->level > 0) {
-        if (not codeStream.tryClose()) {
+    if (level_ > 0) {
+        if (not codeStream_.tryClose()) {
             throw Error()
                 << this->getStat().toString()
                 << " Wrong attempt to close unfinished expression";
         }
     }
-    this->level = -1;
+    level_ = -1;
 }
 
 Optional<ParenthesesParser> ParenthesesParser::nextParser() {
-    if (codeStream.tryOpen()) {
+    if (codeStream_.tryOpen()) {
         return ParenthesesParser(
-            codeStream,
-            codeStream.getStat().parentheses
+            codeStream_,
+            codeStream_.getStat().parentheses
         );
     }
     return Optional<ParenthesesParser>{};
@@ -87,10 +87,10 @@ Optional<ParenthesesParser> ParenthesesParser::nextParser() {
 
 ParenthesesParser::ParenthesesParser(
     InCodeStream& reader_
-    , int level_
+    , int level
 )
-    : codeStream(reader_)
-    , level(level_)
+    : codeStream_(reader_)
+    , level_(level)
 {
 }
 
