@@ -13,21 +13,21 @@ std::string CellType<FunctionPtr>::toString() const {
 }
 
 void LocalStack::push(Cell value) {
-    stackImpl.push_back(
+    cells_.push_back(
         std::move(value)
     );
 }
 
 Cell LocalStack::pop() {
     auto value = std::move(
-        stackImpl.back()
+        cells_.back()
     );
-    stackImpl.pop_back();
+    cells_.pop_back();
     return value;
 }
 
 std::size_t LocalStack::size() const noexcept {
-    return stackImpl.size();
+    return cells_.size();
 }
 
 Namespace IFunction::parseArguments(
