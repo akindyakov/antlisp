@@ -307,7 +307,7 @@ TapeMachine::TapeMachine(
     const NativeFunction& toRun
 )
 {
-    CallStack.push_back(
+    callStack_.push_back(
       toRun.nativeCall(
           Arguments{}
       )
@@ -358,24 +358,24 @@ void TapeMachine::runCellWithArguments(
 }
 
 bool TapeMachine::isStackEmpty() const {
-    return this->CallStack.empty();
+    return this->callStack_.empty();
 }
 
 NativeFunctionCall* TapeMachine::topCall() {
-    return &this->CallStack.back();
+    return &this->callStack_.back();
 }
 
 NativeFunctionCall* TapeMachine::pushCall(
     NativeFunctionCall frame
 ) {
-    this->CallStack.push_back(
+    this->callStack_.push_back(
         std::move(frame)
     );
     return this->topCall();
 }
 
 void TapeMachine::popCall() {
-    this->CallStack.pop_back();
+    this->callStack_.pop_back();
 }
 
 bool TapeMachine::step() {
@@ -413,7 +413,7 @@ bool TapeMachine::step() {
                 call->stackRewind();
                 break;
             case NativeTape::RunTailRecOptimizedFunction:
-                if (this->CallStack.size() < 2) {
+                if (this->callStack_.size() < 2) {
                     this->runFunctionImpl(call);
                 } else {
                     this->runTailRecOptimizedFunctionImpl(call);
