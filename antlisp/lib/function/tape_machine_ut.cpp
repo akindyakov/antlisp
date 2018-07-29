@@ -175,9 +175,9 @@ void testLambdaFunction() {
     );
     auto firstLambda = std::make_shared<AntLisp::LambdaFunction>(
         std::move(nativeCore),
-        std::vector<AntLisp::TVarName>{
-            AntLisp::TVarName{"local_second"},
-            AntLisp::TVarName{"local_third"},
+        std::vector<AntLisp::VarName>{
+            AntLisp::VarName{"local_second"},
+            AntLisp::VarName{"local_third"},
         }
     );
     global.emplace(

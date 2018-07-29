@@ -77,7 +77,7 @@ struct NativeTape {
 
     std::vector<Step> operations;
     // TODO(akindyakov): use unique values in NativeTape::names
-    std::vector<TVarName> names;
+    std::vector<VarName> names;
     std::vector<Cell> consts;  // unnamed
 };
 

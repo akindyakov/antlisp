@@ -32,7 +32,7 @@ std::size_t LocalStack::size() const noexcept {
 
 Namespace IFunction::parseArguments(
     Arguments& args
-    , const std::vector<TVarName>& names
+    , const std::vector<VarName>& names
     , const std::size_t argMaxNum
 ) {
     auto vars = Namespace{};
@@ -51,7 +51,7 @@ NativeFunction::NativeFunction(
     NativeFunctionDefinitionPtr fdef_
     , std::size_t argnum_
     , Namespace closures_
-    , TVarName selfName_
+    , VarName selfName_
 )
     : argnum(argnum_)
     , fdef(
@@ -112,7 +112,7 @@ NativeFunctionCall NativeFunction::nativeCall(
 }
 
 bool NativeFunction::hasName(
-    const TVarName& name
+    const VarName& name
 ) const {
     auto last = fdef->names.cend();
     return (
@@ -181,7 +181,7 @@ NativeTape* LambdaFunction::core() {
 }
 
 bool LambdaFunction::hasName(
-    const TVarName& name
+    const VarName& name
 ) const {
     return (
         nativeFn.hasName(name)

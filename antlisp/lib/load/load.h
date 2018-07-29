@@ -32,7 +32,7 @@ ICellType::Ptr CellType<Namespace>::copy() const;
 class NamesCache {
 public:
     using LoaderCallbackType = std::function<
-        void(const TVarName& name, Cell cell)
+        void(const VarName& name, Cell cell)
     >;
 
 public:
@@ -49,7 +49,7 @@ public:
 private:
     std::vector<boost::filesystem::path> paths_;
     // cache
-    // std::unordered_map<TVarName, LoaderCallbackType> builtins_;
+    // std::unordered_map<VarName, LoaderCallbackType> builtins_;
     // std::unordered_map<boost::filesystem::path, Namespace> cache_;
 };
 
