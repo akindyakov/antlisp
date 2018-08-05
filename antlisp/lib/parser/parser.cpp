@@ -352,28 +352,40 @@ private:
     ) {
         auto const prefix = VarNamePrefix(varName);
         auto const prefixStr = prefix.firstName();
-        auto to = definitionStack.rbegin();
+        auto fromIt = definitionStack.rbegin();
         while (
-            to != definitionStack.rend()
-            && not to->get()->hasName(prefixStr)
+            fromIt != definitionStack.rend()
+            && not fromIt->get()->hasName(prefixStr)
         ) {
-            ++to;
+            ++fromIt;
         }
-        if (to == definitionStack.rend()) {
+        if (fromIt == definitionStack.rend()) {
             throw NameError()
-                << "There is no such variable " << Str::Quotes(varName);
+                << "There is no such variable "
+                << Str::Quotes(prefix.fullName());
+        }
+        {
+            auto caller = definitionStack.rbegin();
+            if (caller != fromIt) {
+                caller->get()->names.push_back(prefixStr);
+            }
+            auto core = caller->get()->core();
+            auto pos = core->names.size();
+            core->names.push_back(prefix.fullName());
+            core->addStep(
+                NativeTape::GetLocal,
+                pos
+            );
         }
         for (
-            auto it = definitionStack.rbegin(); it != to; ++it
+            auto it = definitionStack.rbegin() + 1; it <= fromIt; ++it
         ) {
-            it->get()->names.push_back(varName);
-        }
-        for (
-            auto it = definitionStack.rbegin(); it <= to; ++it
-        ) {
+            if (it != fromIt) {
+                it->get()->names.push_back(prefixStr);
+            }
             auto core = it->get()->core();
             auto pos = core->names.size();
-            core->names.push_back(varName);
+            core->names.push_back(prefixStr);
             core->addStep(
                 NativeTape::GetLocal,
                 pos

@@ -53,16 +53,18 @@ Cell NamesLoader::instantCall(
 template<>
 std::string CellType<NamespacePtr>::toString() const {
     std::ostringstream out;
+    out << "(namespace ";
     const auto namesPtr = value_.get();
     for (const auto& name : *namesPtr) {
-        out << "  {" << name.first << ' ';
+        out << "(" << name.first << ' ';
         if (name.second.is<FunctionPtr>()) {
-            out << "<function>";
+            out << "function-ptr";
         } else {
             out << name.second.toString();
         }
-        out << "}\n";
+        out << ") ";
     }
+    out << ")";
     return out.str();
 }
 

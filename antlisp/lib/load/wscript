@@ -4,7 +4,7 @@
 
 def build(ctx):
     ctx.stlib(
-        target="antlisp-lib-function-load",
+        target="antlisp-lib-load",
         source = [
             "load.cpp",
         ],
@@ -24,7 +24,7 @@ def build(ctx):
         features="test",
         source="load_ut.cpp",
         use=[
-            "antlisp-lib-function-load",
+            "antlisp-lib-load",
         ],
         lib=[
             "boost_filesystem",

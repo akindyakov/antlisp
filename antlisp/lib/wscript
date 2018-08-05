@@ -11,10 +11,11 @@ def build(ctx):
         use=[
             "antlisp-lib-cell",
             "antlisp-lib-function",
-            "antlisp-lib-parser",
-            "antlisp-lib-util",
             "antlisp-lib-builtin",
             "antlisp-lib-cell_ext-string",
+            "antlisp-lib-load",
+            "antlisp-lib-parser",
+            "antlisp-lib-util",
         ],
     )
     ctx.recurse([

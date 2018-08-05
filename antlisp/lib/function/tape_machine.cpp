@@ -9,7 +9,7 @@ namespace AntLisp {
 
 template<>
 std::string CellType<FunctionPtr>::toString() const {
-    return value_->toString();
+    return std::string{"_function_ptr_"};
 }
 
 void LocalStack::push(Cell value) {
@@ -259,9 +259,8 @@ void NativeFunctionCall::getLocal() {
             << "There is no such local name " << Str::Quotes(name);
     }
     if (prefix.isComplex()) {
-        // FIXME
         throw NotImplementedError()
-            << "I have a bad news for you my fried, this part of name system still does not implemented. Be patient.";
+            << "I have a bad news for you my friend, this part of name system still does not implemented. Be patient.";
     } else {
         push(localIt->second.copy());
     }

@@ -29,20 +29,20 @@ public:
     }
 
     bool isComplex() const {
-        return name_.size() != prefix_.size();
+        return name_.size() != first_.size();
     }
 
     VarName fullName() const {
-        return prefix_.to_string();
-    }
-
-    VarName firstName() const {
         return name_.to_string();
     }
 
+    VarName firstName() const {
+        return first_.to_string();
+    }
+
 private:
-    boost::string_view prefix_;
     boost::string_view name_;
+    boost::string_view first_;
 };
 
 // TODO: continue here, we definetely need more complex class Namespace

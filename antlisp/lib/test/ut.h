@@ -21,11 +21,9 @@ public:
 
 #define UT_ASSERT(code) \
     { \
-        std::cerr << "let's begin\n"; \
         bool success = true; \
         const char* reason = nullptr; \
         try { \
-            std::cerr << "let's begin\n"; \
             if (!(code)) { \
                 success = false; \
                 reason = "wrong value (" #code ")"; \
