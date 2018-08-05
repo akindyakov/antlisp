@@ -7,10 +7,10 @@
 
 namespace AntLisp {
 
-boost::optional<Cell> tryCellFromString(
+std::optional<Cell> tryCellFromString(
     const std::string& str
 ) {
-    auto out = boost::optional<Cell>{};
+    auto out = std::optional<Cell>{};
     if (str.empty()) {
         return out;
     }

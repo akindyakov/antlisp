@@ -3,10 +3,12 @@
 #include <antlisp/lib/cell/cell.h>
 #include <antlisp/lib/cell_ext/string/string.h>
 
+#include <optional>
+
 
 namespace AntLisp {
 
-boost::optional<Cell> tryCellFromString(
+std::optional<Cell> tryCellFromString(
     const std::string& str
 );
 

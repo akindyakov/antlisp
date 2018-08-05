@@ -336,7 +336,7 @@ private:
             auto core = definitionStack.back()->core();
             auto pos = core->consts.size();
             core->consts.push_back(
-                std::move(cellOpt.get())
+                std::move(cellOpt.value())
             );
             core->addStep(
                 NativeTape::GetConst,

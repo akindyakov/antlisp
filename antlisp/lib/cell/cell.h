@@ -4,10 +4,6 @@
 
 #include <antlisp/lib/util/exception.h>
 
-#include <boost/variant.hpp>
-#include <boost/variant/get.hpp>
-#include <boost/optional.hpp>
-
 #include <string>
 #include <unordered_map>
 #include <iostream>
