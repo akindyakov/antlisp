@@ -163,10 +163,7 @@ void testLambdaFunction() {
             3  // number of arguments
         )
     );
-    auto coreLocal = AntLisp::Namespace{};
-    for (const auto& namedCell : global) {
-        coreLocal.emplace(namedCell.first, namedCell.second.copy());
-    }
+    auto coreLocal = global.copy();
     coreLocal.emplace(
         "local_first", AntLisp::Cell::integer(81)
     );

@@ -24,15 +24,6 @@ public:
     static void inject(Namespace& space);
 };
 
-using NamespacePtr = std::shared_ptr<Namespace>;
-using NamespaceCell = CellType<NamespacePtr>;
-
-template<>
-std::string CellType<NamespacePtr>::toString() const;
-
-template<>
-ICellType::Ptr CellType<NamespacePtr>::copy() const;
-
 class NamesCache {
 public:
     using LoaderCallbackType = std::function<

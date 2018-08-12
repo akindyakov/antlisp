@@ -83,12 +83,7 @@ int main(int argn, char** argv) {
         interactive(global);
     }
     if (args.count("print-global")) {
-        for (const auto& nameAndCell : global) {
-            std::cout
-                << "{"
-                << nameAndCell.first << " " << nameAndCell.second.toString()
-                << "}\n";
-        }
+        std::cout << global.toString() << '\n';
     }
     return 0;
 }

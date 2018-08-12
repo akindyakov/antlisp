@@ -245,7 +245,9 @@ private:
         );
         definitionStack.push_back(newLambda);
         if (not expression(pParser)) {
-            throw SyntaxError() << pParser.getStat().toString() << ", there is suppose to be lambda body";
+            throw SyntaxError()
+                << pParser.getStat().toString()
+                << ", there is suppose to be lambda body";
         }
         pParser.close();
         definitionStack.back()->core()->ApplyTailRecursionOptimization();
@@ -377,9 +379,7 @@ private:
                 pos
             );
         }
-        for (
-            auto it = definitionStack.rbegin() + 1; it <= fromIt; ++it
-        ) {
+        for (auto it = definitionStack.rbegin() + 1; it <= fromIt; ++it) {
             if (it != fromIt) {
                 it->get()->names.push_back(prefixStr);
             }

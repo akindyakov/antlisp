@@ -1,6 +1,6 @@
 #pragma once
 
-#include "prefix.h"
+#include "namespace.h"
 
 namespace AntLisp {
 

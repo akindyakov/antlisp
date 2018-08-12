@@ -50,31 +50,6 @@ Cell NamesLoader::instantCall(
     return Cell::nil();
 }
 
-template<>
-std::string CellType<NamespacePtr>::toString() const {
-    std::ostringstream out;
-    out << "(namespace ";
-    const auto namesPtr = value_.get();
-    for (const auto& name : *namesPtr) {
-        out << "(" << name.first << ' ';
-        if (name.second.is<FunctionPtr>()) {
-            out << "function-ptr";
-        } else {
-            out << name.second.toString();
-        }
-        out << ") ";
-    }
-    out << ")";
-    return out.str();
-}
-
-template<>
-ICellType::Ptr CellType<NamespacePtr>::copy() const {
-    return std::make_unique<CellType<NamespacePtr>>(
-        value_
-    );
-}
-
 NamesCache::NamesCache(
     std::vector<boost::filesystem::path> paths
 )

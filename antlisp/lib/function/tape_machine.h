@@ -174,7 +174,7 @@ public:
 public:
     std::size_t argnum = 0;
     NativeFunctionDefinitionPtr fdef;
-    Namespace closures;  // default arguments
+    Namespace closures_;  // default arguments
     VarName selfName;
 };
 

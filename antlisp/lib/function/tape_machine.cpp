@@ -40,7 +40,7 @@ Namespace IFunction::parseArguments(
     auto rit = args.begin();
     while (rit != args.end() && nameIndex < argMaxNum) {
         const auto& argName = names[nameIndex];
-        vars[argName] = std::move(*rit);
+        vars.set(argName, std::move(*rit));
         ++rit;
         ++nameIndex;
     }
@@ -50,23 +50,23 @@ Namespace IFunction::parseArguments(
 NativeFunction::NativeFunction(
     NativeFunctionDefinitionPtr fdef_
     , std::size_t argnum_
-    , Namespace closures_
+    , Namespace closures
     , VarName selfName_
 )
     : argnum(argnum_)
     , fdef(
         std::move(fdef_)
     )
-    , closures(
-        std::move(closures_)
+    , closures_(
+        std::move(closures)
     )
     , selfName(
         std::move(selfName_)
     )
 {
-    closures[selfName] = Cell::function(
+    closures_.set(selfName, Cell::function(
         nullptr
-    );
+    ));
 }
 
 bool NativeFunction::isNative() const {
@@ -76,15 +76,16 @@ bool NativeFunction::isNative() const {
 FunctionPtr NativeFunction::activate(
     Namespace vars
 ) const {
-    for (const auto& var : closures) {
-        vars.emplace(var.first, var.second.copy());
-    }
+    vars.update(closures_);
     auto copy = std::make_shared<NativeFunction>(
         fdef, argnum, std::move(vars), selfName
     );
     // Add this ptr to local vars to make recursive call
-    copy->closures[selfName] = Cell::function(
-        copy
+    copy->closures_.set(
+        selfName,
+        Cell::function(
+            copy
+        )
     );
     // Not activated native function does not have 'this' variable
     return copy;
@@ -105,9 +106,7 @@ NativeFunctionCall NativeFunction::nativeCall(
         fdef->names,
         argnum
     );
-    for (const auto& var : closures) {
-        vars.emplace(var.first, var.second.copy());
-    }
+    vars.update(closures_);
     return NativeFunctionCall(fdef, std::move(vars));
 }
 
@@ -116,28 +115,20 @@ bool NativeFunction::hasName(
 ) const {
     auto last = fdef->names.cend();
     return (
-        closures.count(name) != 0
+        closures_.has(name)
         || last != std::find(fdef->names.cbegin(), last, name)
     );
 }
 
 std::string NativeFunction::toString() const {
-    std::ostringstream out;
-    out << "native function: (\n";
-    out << "locals: (\n";
-    for (const auto& closure : closures) {
-        out << "  {" << closure.first << ' ';
-        if (closure.second.is<FunctionPtr>()) {
-            out << "<function>";
-        } else {
-            out << closure.second.toString();
-        }
-        out << "}\n";
-    }
-    out << ")\n";
-    out << fdef->toString();
-    out << ")\n";
-    return out.str();
+    auto str = std::string{};
+    str.append("native function: (\n");
+    str.append("locals: (\n");
+    str.append(closures_.toString());
+    str.append(")\n");
+    str.append(fdef->toString());
+    str.append(")\n");
+    return str;
 }
 
 LambdaFunction::LambdaFunction(
@@ -250,20 +241,9 @@ void NativeFunctionCall::getLocal() {
         runner_
     ].operand;
     const auto& name = function_->names[pos];
-    auto const prefix = VarNamePrefix(name);
-    auto localIt = vars_.find(
-        prefix.firstName()
+    push(
+        vars_.get(name).copy()
     );
-    if (localIt == vars_.end()) {
-        throw RuntimeError()
-            << "There is no such local name " << Str::Quotes(name);
-    }
-    if (prefix.isComplex()) {
-        throw NotImplementedError()
-            << "I have a bad news for you my friend, this part of name system still does not implemented. Be patient.";
-    } else {
-        push(localIt->second.copy());
-    }
 }
 
 void NativeFunctionCall::setLocal() {
@@ -272,7 +252,7 @@ void NativeFunctionCall::setLocal() {
             runner_
         ].operand
     ];
-    vars_[name] = pop();
+    vars_.set(name, pop());
 }
 
 void NativeFunctionCall::stackRewind() {
@@ -307,9 +287,7 @@ Arguments NativeFunctionCall::createArgs() {
 }
 
 Namespace NativeFunctionCall::releaseLocals() {
-    auto locals = std::move(vars_);
-    vars_.clear();
-    return locals;
+    return std::move(vars_);
 }
 
 TapeMachine::TapeMachine(

@@ -39,10 +39,10 @@ void test_parseCode_lambda_recursive_call() {
     AntLisp::Builtin::allMathFunctions(global);
     std::istringstream in(R"(
     (
-      (lambda (n)
+      (lambda (vAr)
         (cond
-          ((= n 0) 0)
-          (t (+ 1 (this (+ -1 n))))
+          ((= vAr 0) 0)
+          (t (+ 1 (this (+ -1 vAr))))
         )
       )
       5
