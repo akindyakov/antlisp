@@ -7,5 +7,5 @@
     )
   )
 )
-
-(print (fibonacci 20))
+(load io)
+(io:print (fibonacci 20))

@@ -69,6 +69,7 @@ int main(int argn, char** argv) {
 
     auto global = AntLisp::Namespace{};
     AntLisp::NamesLoader::inject(global);
+    AntLisp::Builtin::allMathFunctions(global);
     if (args.count("script-file")) {
         fromFile(
             global,

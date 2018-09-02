@@ -12,6 +12,7 @@
 (defun fib (n)
   (fib_rec n 0 0 1)
 )
-(print
+(load io)
+(io:print
   "fib(10) -> " (fib 120)
 )
