@@ -33,7 +33,6 @@ void Namespace::insert(const VarName& name, Cell cell) {
 void Namespace::set(const VarName& name, Cell cell) {
     auto it = table_.find(name);
     if (it == table_.end()) {
-        std::cerr << "set [" << name << "] " << cell.toString() << '\n';
         table_.emplace(name, std::move(cell));
     } else {
         it->second = std::move(cell);
@@ -55,7 +54,6 @@ Cell const& Namespace::get(const VarName& name) const {
 }
 
 Cell const& Namespace::get(VarNamePrefix prefix) const {
-  std::cerr << prefix.firstName() << '\n';
     auto const it = table_.find(
         prefix.firstName()
     );

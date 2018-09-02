@@ -17,7 +17,6 @@ Cell Cell::cast<Nil>() const {
 template<>
 Cell Cell::cast<Integer>() const {
     auto out = Integer{};
-    std::cerr << "cast enter point\n";
     if (this->is<Integer>()) {
         out = this->as<Integer>();
     } else if (this->is<Float>()) {
@@ -29,7 +28,6 @@ Cell Cell::cast<Integer>() const {
             this->as<Symbol>()
         );
     } else {
-        std::cerr << "throw\n";
         throw BadGetError()
             << "Wrong cast to Integer: "
             << this->toString()
