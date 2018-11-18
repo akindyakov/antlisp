@@ -8,3 +8,5 @@ doc/**.pdf
 build-waf
 antlisp/tools/waf/waf-**
 .waf**
+.plz-cache
+plz-out

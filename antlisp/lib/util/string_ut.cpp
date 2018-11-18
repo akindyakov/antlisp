@@ -2,7 +2,6 @@
 
 #include <antlisp/lib/test/ut.h>
 
-
 void testQuotes() {
     UT_ASSERT_EQUAL(
         AntLisp::Str::Quotes("where is your wings?"), "\"where is your wings?\""
@@ -26,7 +25,7 @@ void testWrap() {
 }
 
 UT_LIST(
-    testQuotes();
-    testParentheses();
-    testWrap();
+    RUN_TEST(testQuotes);
+    RUN_TEST(testParentheses);
+    RUN_TEST(testWrap);
 );

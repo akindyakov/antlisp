@@ -1,7 +1,8 @@
 #include "exception.h"
 
+#include <antlisp/lib/test/ut.h>
 
-int main() {
+void exception() {
     auto ex = AntLisp::Exception() << "abc" << 123 << "]";
     auto expected = std::string("abc123]");
     if (ex.message() != expected) {
@@ -10,5 +11,8 @@ int main() {
             << "', expected '" << expected << "'. ";
         throw std::exception();
     }
-    return 0;
 }
+
+UT_LIST(
+    RUN_TEST(exception);
+);

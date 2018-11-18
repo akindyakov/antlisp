@@ -1,0 +1,38 @@
+; Please config file
+; Leaving this file as is is enough to use plz to build your project.
+; Please will stay on whatever version you currently have until you run
+; 'plz update', when it will download the latest available version.
+;
+; Or you can uncomment the following to pin everyone to a particular version;
+; when you change it all users will automatically get updated.
+; [please]
+; version = 13.2.0
+
+[cpp]
+  DefaultOptCflags = \
+    --std=c99 \
+    -O3 \
+    -DNDEBUG \
+    -Wall \
+    -Werror
+
+  DefaultDbgCflags = \
+    --std=c99 \
+    -g3 \
+    -DDEBUG \
+    -Wall \
+    -Werror.
+
+  DefaultOptCppflags = \
+    --std=c++17 \
+    -O3 \
+    -DNDEBUG \
+    -Wall \
+    -Werror
+
+  DefaultDbgCppflags = \
+    --std=c++17 \
+    -g3 \
+    -DDEBUG \
+    -Wall \
+    -Werror.

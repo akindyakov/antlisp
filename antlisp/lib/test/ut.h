@@ -2,6 +2,7 @@
 
 #include <antlisp/lib/util/exception.h>
 
+#include <fstream>
 
 namespace AntLisp {
 
@@ -71,19 +72,24 @@ public:
 
 #define UT_LIST(code) \
 int main() { \
+    std::fstream log_("test.results", std::ios::binary | std::ios::out); \
     try { \
-        code; \
+        code \
     } catch (const AntLisp::UnitTestException& err) { \
-        std::cerr << "failed: " << err.what() << '\n'; \
+        log_ << "FAIL\n"; \
+        /* std::cerr << "failed: " << err.what() << '\n'; */ \
+        log_ << "error: " << err.what() << '\n'; \
         return 1; \
     } \
+    log_ << "PASS\n"; \
     return 0; \
 }
 
 #define RUN_TEST(test_function) {\
     auto success = true; \
     auto reason = std::string{}; \
-    std::cerr << "  - [" #test_function "] "; \
+    /* std::cerr << "  - [" #test_function "] "; */ \
+    log_ << "=== RUN " <<  #test_function << '\n'; \
     try { \
         test_function(); \
     } catch (const std::exception& err) { \
@@ -91,9 +97,11 @@ int main() { \
         reason = err.what(); \
     } \
     if (success) { \
-        std::cerr << ": ok\n"; \
+        /* std::cerr << ": ok\n"; */ \
+        log_ << "--- PASS: " << #test_function << " (0.00s)\n"; \
     } else { \
-        std::cerr << ": failed " << reason << "\n"; \
+        /*std::cerr << ": failed " << reason << "\n"; */ \
+        log_ << "--- FAIL: " << #test_function << " (0.00s)\n"; \
         throw AntLisp::UnitTestException(); \
     } \
 }
