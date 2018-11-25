@@ -12,6 +12,7 @@ cc_library(
     deps = [
         "//antlisp/lib/cell:cell",
         "//antlisp/lib/util:util",
+        "@boost//:boost",
     ],
     visibility = ["PUBLIC"],
 )

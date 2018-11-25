@@ -12,6 +12,7 @@ cc_library(
         "//antlisp/lib/parser/cell:cell_in_string",
         "//antlisp/lib/parser/parentheses",
         "//antlisp/lib/util:util",
+        "@boost//:boost",
     ],
     visibility = ["PUBLIC"],
 )

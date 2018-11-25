@@ -9,6 +9,9 @@ cc_library(
         "string.cpp",
     ],
     visibility = ["PUBLIC"],
+    deps = [
+        "@boost//:boost",
+    ],
 )
 
 cc_test(

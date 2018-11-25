@@ -1,0 +1,1216 @@
+_SRCS = "boost_1_68_0"
+
+cc_library(
+    name="headers",
+    hdrs=glob([
+        _SRCS + "/boost/**/*.h",
+        _SRCS + "/boost/**/*.hpp",
+        _SRCS + "/boost/**/*.ipp",
+    ]),
+    visibility=["//antlisp/..."],
+)
+
+cc_library(
+    name="boost",
+    deps=[
+        ":headers",
+        ":program_options",
+        ":system",
+    ],
+    visibility=["//antlisp/..."],
+)
+
+cc_library(
+    name="algorithm",
+    deps=[
+        ":function",
+        ":iterator",
+        ":range",
+    ],
+)
+
+cc_library(
+    name="align",
+)
+
+cc_library(
+    name="any",
+    deps=[
+        ":config",
+        ":mpl",
+        ":static_assert",
+        ":type_index",
+    ],
+)
+
+cc_library(
+    name="assign",
+    deps=[
+        ":config",
+        ":detail",
+        ":mpl",
+        ":preprocessor",
+        ":ptr_container",
+        ":range",
+        ":static_assert",
+    ],
+)
+
+cc_library(
+    name="atomic",
+    deps=[
+        ":assert",
+        ":config",
+        ":cstdint",
+    ],
+)
+
+cc_library(
+    name="archive",
+    deps=[
+        ":assert",
+        ":cstdint",
+        ":integer",
+        ":io",
+        ":iterator",
+        ":mpl",
+        ":noncopyable",
+        ":smart_ptr",
+        ":spirit",
+    ],
+)
+
+cc_library(
+    name="array",
+    deps=[
+        ":assert",
+        ":config",
+        ":functional",
+        ":swap",
+    ],
+)
+
+cc_library(
+    name="asio",
+    linkopts=["-lpthread"],
+    deps=[
+        ":bind",
+        ":date_time",
+        ":regex",
+    ],
+)
+
+cc_library(
+    name="assert",
+)
+
+cc_library(
+    name="beast",
+    deps=[
+        ":asio",
+        ":config",
+        ":detail",
+        ":endian",
+        ":smart_ptr",
+        ":static_assert",
+        ":system",
+    ],
+)
+
+cc_library(
+    name="bimap",
+    deps=[
+        ":concept_check",
+        ":multi_index",
+        ":serialization",
+    ],
+)
+
+cc_library(
+    name="bind",
+    deps=[
+        ":get_pointer",
+        ":is_placeholder",
+        ":mem_fn",
+        ":ref",
+        ":type",
+        ":visit_each",
+    ],
+)
+
+cc_library(
+    name="callable_traits",
+    deps=[
+    ],
+)
+
+cc_library(
+    name="call_traits",
+)
+
+cc_library(
+    name="cerrno",
+)
+
+cc_library(
+    name="checked_delete",
+)
+
+cc_library(
+    name="chrono",
+    deps=[
+        ":config",
+        ":mpl",
+        ":operators",
+        ":predef",
+        ":ratio",
+        ":system",
+    ],
+)
+
+cc_library(
+    name="circular_buffer",
+    deps=[
+        ":call_traits",
+        ":concept_check",
+        ":config",
+        ":container",
+        ":detail",
+        ":iterator",
+        ":limits",
+        ":move",
+        ":static_assert",
+    ],
+)
+
+cc_library(
+    name="concept_archetype",
+    deps=[
+        ":config",
+        ":iterator",
+        ":mpl",
+    ],
+)
+
+cc_library(
+    name="concept_check",
+    deps=[
+        ":concept",
+        ":concept_archetype",
+    ],
+)
+
+cc_library(
+    name="config",
+    deps=[
+    ],
+)
+
+cc_library(
+    name="concept",
+)
+
+cc_library(
+    name="container",
+    srcs=glob([
+        _SRCS + "/libs/container/src/dlmalloc_ext_2_8_6.c",
+    ]),
+    hdrs=[
+        _SRCS + "/libs/container/src/dlmalloc_2_8_6.c",
+    ],
+    deps=[
+        ":config",
+        ":intrusive",
+        ":move",
+    ],
+)
+
+cc_library(
+    name="container_hash",
+    deps=[
+        ":assert",
+        ":config",
+        ":integer",
+        ":limits",
+    ],
+)
+
+cc_library(
+    name="conversion",
+)
+
+cc_library(
+    name="crc",
+    deps=[
+        ":config",
+        ":integer",
+        ":limits",
+    ],
+)
+
+cc_library(
+    name="cstdint",
+)
+
+cc_library(
+    name="current_function",
+)
+
+cc_library(
+    name="date_time",
+    deps=[
+        ":algorithm",
+        ":io",
+        ":lexical_cast",
+        ":mpl",
+        ":operators",
+        ":smart_ptr",
+        ":static_assert",
+    ],
+)
+
+cc_library(
+    name="detail",
+    deps=[
+        ":limits",
+    ],
+)
+
+cc_library(
+    name="dynamic_bitset",
+    deps=[
+        ":config",
+        ":detail",
+        ":integer",
+        ":move",
+    ],
+)
+
+cc_library(
+    name="endian",
+    deps=[
+        ":config",
+        ":cstdint",
+        ":detail",
+        ":predef",
+    ],
+)
+
+cc_library(
+    name="exception",
+    deps=[
+        ":config",
+        ":detail",
+    ],
+)
+
+cc_library(
+    name="exception_ptr",
+    deps=[
+        ":config",
+    ],
+)
+
+cc_library(
+    name="filesystem",
+    copts=[
+        "-Wno-deprecated-declarations",
+    ],
+    deps=[
+        ":config",
+        ":functional",
+        ":io",
+        ":iterator",
+        ":range",
+        ":smart_ptr",
+        ":system",
+    ],
+)
+
+cc_library(
+    name="foreach",
+    deps=[
+        ":config",
+        ":detail",
+        ":iterator",
+        ":mpl",
+        ":noncopyable",
+        ":range",
+    ],
+)
+
+cc_library(
+    name="format",
+    deps=[
+        ":assert",
+        ":config",
+        ":detail",
+        ":limits",
+        ":optional",
+        ":smart_ptr",
+        ":timer",
+    ],
+)
+
+cc_library(
+    name="function",
+    deps=[
+        ":bind",
+        ":integer",
+        ":type_index",
+    ],
+)
+
+cc_library(
+    name="function_types",
+)
+
+cc_library(
+    name="functional",
+    deps=[
+        ":container_hash",
+        ":detail",
+        ":integer",
+    ],
+)
+
+cc_library(
+    name="fusion",
+    deps=[
+        ":call_traits",
+        ":config",
+        ":detail",
+        ":function_types",
+        ":functional",
+        ":get_pointer",
+        ":mpl",
+        ":preprocessor",
+        ":ref",
+        ":static_assert",
+        ":tuple",
+        ":typeof",
+    ],
+)
+
+cc_library(
+    name="geometry",
+    deps=[
+        ":algorithm",
+        ":call_traits",
+        ":config",
+        ":function_types",
+        ":lexical_cast",
+        ":math",
+        ":mpl",
+        ":numeric",
+        ":qvm",
+        ":range",
+        ":rational",
+        ":variant",
+    ],
+)
+
+cc_library(
+    name="property_tree",
+    deps=[
+        ":bind",
+        ":format",
+        ":multi_index",
+        ":optional",
+        ":range",
+        ":ref",
+    ],
+)
+
+cc_library(
+    name="get_pointer",
+)
+
+cc_library(
+    name="heap",
+    deps=[
+        ":parameter",
+    ],
+)
+
+cc_library(
+    name="icl",
+    deps=[
+        ":concept_check",
+    ],
+)
+
+cc_library(
+    name="implicit_cast"
+)
+
+cc_library(
+    name="is_placeholder",
+)
+
+cc_library(
+    name="integer",
+    deps=[
+        ":static_assert",
+    ],
+)
+
+cc_library(
+    name="interprocess",
+    deps=[
+        ":assert",
+        ":checked_delete",
+        ":config",
+        ":container",
+        ":date_time",
+        ":detail",
+        ":integer",
+        ":intrusive",
+        ":limits",
+        ":move",
+        ":static_assert",
+        ":unordered",
+    ],
+)
+
+cc_library(
+    name="iterator",
+    deps=[
+        ":detail",
+        ":static_assert",
+    ],
+)
+
+cc_library(
+    name="intrusive",
+    deps=[
+        ":assert",
+        ":cstdint",
+        ":noncopyable",
+        ":static_assert",
+    ],
+)
+
+cc_library(
+    name="intrusive_ptr",
+    deps=[
+        ":assert",
+        ":detail",
+        ":smart_ptr",
+    ],
+)
+
+cc_library(
+    name="io",
+)
+
+cc_library(
+    name="iostreams",
+    deps=[
+        ":assert",
+        ":bind",
+        ":call_traits",
+        ":checked_delete",
+        ":config",
+        ":detail",
+        ":function",
+        ":integer",
+        ":mpl",
+        ":noncopyable",
+        ":preprocessor",
+        ":random",
+        ":range",
+        ":ref",
+        ":regex",
+        ":shared_ptr",
+        ":static_assert",
+        ":type",
+        "@net_zlib_zlib//:zlib",
+        "@org_bzip_bzip2//:bz2lib",
+        "@org_lzma_lzma//:lzma",
+    ],
+)
+
+cc_library(
+    name="lexical_cast",
+    deps=[
+        ":array",
+        ":chrono",
+        ":config",
+        ":container",
+        ":detail",
+        ":integer",
+        ":limits",
+        ":math",
+        ":mpl",
+        ":noncopyable",
+        ":numeric_conversion",
+        ":range",
+        ":static_assert",
+    ],
+)
+
+cc_library(
+    name="limits",
+)
+
+cc_library(
+    name="locale",
+    srcs=glob(
+        [
+            "libs/locale/src/**/*.cpp",
+            "libs/locale/src/**/*.hpp",
+            "libs/locale/src/**/*.ipp",
+        ],
+        exclude=[
+            "libs/locale/src/win32/*.cpp",
+            "libs/locale/src/icu/*.cpp",
+        ],
+    ),
+    defines=[
+        "-DBOOST_LOCALE_WITH_ICONV",
+        "-DBOOST_LOCALE_NO_WINAPI_BACKEND",
+    ],
+    copts=[
+        # boost::locale implementation uses deprecated auto_ptr
+        "-Wno-deprecated-declarations",
+    ],
+    deps=[
+        ":assert",
+        ":config",
+        ":cstdint",
+        ":smart_ptr",
+        ":thread",
+        ":unordered",
+    ],
+)
+
+cc_library(
+    name="lockfree",
+    deps=[
+        ":align",
+        ":array",
+        ":assert",
+        ":config",
+        ":detail",
+        ":noncopyable",
+        ":parameter",
+        ":predef",
+        ":static_assert",
+    ],
+)
+
+cc_library(
+    name="math",
+)
+
+cc_library(
+    name="mem_fn",
+)
+
+cc_library(
+    name="move",
+    deps=[
+        ":assert",
+        ":detail",
+        ":static_assert",
+    ],
+)
+
+cc_library(
+    name="mp11",
+    deps=[
+        ":config",
+        ":detail",
+    ],
+)
+
+cc_library(
+    name="mpl",
+    deps=[
+        ":move",
+        ":preprocessor",
+    ],
+)
+
+cc_library(
+    name="hana",
+    deps=[
+    ],
+)
+
+cc_library(
+    name="multi_index",
+    deps=[
+        ":foreach",
+        ":serialization",
+        ":static_assert",
+        ":tuple",
+    ],
+)
+
+cc_library(
+    name="multiprecision",
+    deps=[
+        ":config",
+        ":cstdint",
+        ":lexical_cast",
+        ":math",
+        ":mpl",
+        ":predef",
+        ":rational",
+    ],
+)
+
+cc_library(
+    name="noncopyable",
+    deps=[
+    ],
+)
+
+cc_library(
+    name="none",
+)
+
+cc_library(
+    name="numeric_conversion",
+    deps=[
+        ":config",
+        ":detail",
+        ":integer",
+        ":limits",
+        ":mpl",
+        ":type",
+    ],
+)
+
+cc_library(
+    name="numeric_ublas",
+    deps=[
+        ":concept_check",
+        ":config",
+        ":iterator",
+        ":mpl",
+        ":noncopyable",
+        ":numeric",
+        ":range",
+        ":serialization",
+        ":shared_array",
+        ":static_assert",
+        ":timer",
+        ":typeof",
+    ],
+)
+
+cc_library(
+    name="numeric_odeint",
+    deps=[
+        ":fusion",
+        ":lexical_cast",
+        ":math",
+        ":multi_array",
+        ":numeric",
+        ":serialization",
+        ":units",
+    ],
+)
+
+cc_library(
+    name="multi_array",
+)
+
+cc_library(
+    name="units",
+)
+
+cc_library(
+    name="operators",
+)
+
+cc_library(
+    name="optional",
+    deps=[
+        ":assert",
+        ":config",
+        ":detail",
+        ":none",
+        ":static_assert",
+        ":type",
+    ],
+)
+
+cc_library(
+    name="parameter",
+)
+
+cc_library(
+    name="predef",
+)
+
+cc_library(
+    name="preprocessor",
+)
+
+cc_library(
+    name="process",
+    deps=[
+        ":algorithm",
+        ":asio",
+        ":config",
+        ":filesystem",
+        ":fusion",
+        ":system",
+        ":winapi",
+    ],
+)
+
+cc_library(
+    name="program_options",
+    srcs=glob([
+        _SRCS + "/libs/program_options/src/*.cpp",
+    ]),
+    deps=[
+        ":bind",
+        ":config",
+        ":detail",
+        ":function",
+        ":iterator",
+        ":lexical_cast",
+        ":limits",
+        ":noncopyable",
+        ":shared_ptr",
+        ":static_assert",
+    ],
+)
+
+cc_library(
+    name="ptr_container",
+    deps=[
+        ":assert",
+        ":checked_delete",
+        ":circular_buffer",
+        ":config",
+        ":iterator",
+        ":mpl",
+        ":range",
+        ":serialization",
+        ":static_assert",
+        ":unordered",
+    ],
+)
+
+cc_library(
+    name="qvm",
+    deps=[
+        ":assert",
+        ":exception",
+        ":static_assert",
+    ],
+)
+
+cc_library(
+    name="random",
+    deps=[
+        ":assert",
+        ":config",
+        ":detail",
+        ":foreach",
+        ":integer",
+        ":lexical_cast",
+        ":limits",
+        ":math",
+        ":mpl",
+        ":multi_index",
+        ":noncopyable",
+        ":operators",
+        ":range",
+        ":regex",
+        ":shared_ptr",
+        ":static_assert",
+        ":system",
+        ":timer",
+        ":tuple",
+    ],
+)
+
+cc_library(
+    name="range",
+    deps=[
+        ":array",
+        ":assert",
+        ":concept_check",
+        ":config",
+        ":detail",
+        ":functional",
+        ":integer",
+        ":iterator",
+        ":mpl",
+        ":noncopyable",
+        ":optional",
+        ":preprocessor",
+        ":ref",
+        ":regex",
+        ":static_assert",
+        ":tuple",
+    ],
+)
+
+cc_library(
+    name="ratio",
+    deps=[
+        ":integer",
+    ],
+)
+
+cc_library(
+    name="rational",
+    deps=[
+        ":assert",
+        ":call_traits",
+        ":config",
+        ":detail",
+        ":integer",
+        ":operators",
+        ":static_assert",
+    ],
+)
+
+cc_library(
+    name="ref",
+    deps=[
+        ":config",
+        ":detail",
+    ],
+)
+
+cc_library(
+    name="regex",
+    defines=[
+        "BOOST_FALLTHROUGH",
+    ],
+    deps=[
+        ":assert",
+        ":config",
+        ":cstdint",
+        ":detail",
+        ":exception",
+        ":functional",
+        ":integer",
+        ":limits",
+        ":mpl",
+        ":predef",
+        ":ref",
+        ":smart_ptr",
+    ],
+)
+
+cc_library(
+    name="scope_exit",
+    deps=[
+        ":config",
+        ":detail",
+        ":function",
+        ":mpl",
+        ":preprocessor",
+        ":typeof",
+    ],
+)
+
+cc_library(
+    name="scoped_array",
+    deps=[
+        ":checked_delete",
+    ],
+)
+
+cc_library(
+    name="scoped_ptr",
+    deps=[
+        ":checked_delete",
+    ],
+)
+
+cc_library(
+    name="shared_ptr",
+    deps=[
+        ":checked_delete",
+    ],
+)
+
+cc_library(
+    name="shared_array",
+    deps=[
+        ":checked_delete",
+    ],
+)
+
+cc_library(
+    name="signals2",
+    deps=[
+        ":assert",
+        ":bind",
+        ":checked_delete",
+        ":config",
+        ":detail",
+        ":function",
+        ":iterator",
+        ":mpl",
+        ":multi_index",
+        ":noncopyable",
+        ":optional",
+        ":parameter",
+        ":predef",
+        ":preprocessor",
+        ":ref",
+        ":scoped_ptr",
+        ":shared_ptr",
+        ":smart_ptr",
+        ":swap",
+        ":tuple",
+        ":variant",
+        ":visit_each",
+    ],
+)
+
+cc_library(
+    name="serialization",
+    deps=[
+        ":archive",
+        ":array",
+        ":call_traits",
+        ":config",
+        ":detail",
+        ":function",
+        ":operators",
+    ],
+)
+
+cc_library(
+    name="smart_ptr",
+    deps=[
+        ":align",
+        ":predef",
+        ":scoped_array",
+        ":scoped_ptr",
+        ":shared_array",
+        ":shared_ptr",
+    ],
+)
+
+cc_library(
+    name="spirit",
+    deps=[
+        ":optional",
+        ":ref",
+    ],
+)
+
+cc_library(
+    name="static_assert",
+)
+
+cc_library(
+    name="system",
+    srcs=glob([
+        _SRCS + "/libs/system/src/*.cpp",
+    ]),
+    deps=[
+        ":assert",
+        ":cerrno",
+        ":config",
+        ":cstdint",
+        ":noncopyable",
+        ":predef",
+    ],
+)
+
+cc_library(
+    name="swap",
+    deps=[
+    ],
+)
+
+cc_library(
+    name="throw_exception",
+    deps=[
+        ":current_function",
+        ":detail",
+        ":exception",
+    ],
+)
+
+cc_library(
+    name="thread",
+    srcs=[
+        "libs/thread/src/pthread/once.cpp",
+        "libs/thread/src/pthread/thread.cpp",
+    ],
+    hdrs=[
+        "libs/thread/src/pthread/once_atomic.cpp",
+    ],
+    linkopts=["-lpthread"],
+    deps=[
+        ":algorithm",
+        ":atomic",
+        ":bind",
+        ":chrono",
+        ":config",
+        ":date_time",
+        ":detail",
+        ":enable_shared_from_this",
+        ":exception",
+        ":function",
+        ":io",
+        ":lexical_cast",
+        ":smart_ptr",
+        ":system",
+        ":tuple",
+    ],
+)
+
+cc_library(
+    name="tokenizer",
+    deps=[
+        ":assert",
+        ":config",
+        ":detail",
+        ":iterator",
+        ":mpl",
+    ],
+)
+
+cc_library(
+    name="tribool",
+    deps=[
+        ":config",
+        ":detail",
+    ],
+)
+
+cc_library(
+    name="tti",
+    deps=[
+        ":config",
+        ":function_types",
+        ":mpl",
+        ":preprocessor",
+    ],
+)
+
+cc_library(
+    name="type",
+    deps=[
+    ],
+)
+
+cc_library(
+    name="type_index",
+    deps=[
+        ":container_hash",
+        ":functional",
+    ],
+)
+
+cc_library(
+    name="typeof",
+    deps=[
+        ":config",
+        ":detail",
+        ":mpl",
+        ":preprocessor",
+    ],
+)
+
+cc_library(
+    name="tuple",
+    deps=[
+        ":ref",
+    ],
+)
+
+cc_library(
+    name="unordered",
+    deps=[
+        ":assert",
+        ":config",
+        ":container",
+        ":detail",
+        ":functional",
+        ":iterator",
+        ":limits",
+        ":move",
+        ":preprocessor",
+        ":smart_ptr",
+        ":swap",
+        ":tuple",
+    ],
+)
+
+cc_library(
+    name="uuid",
+    deps=[
+        ":assert",
+        ":config",
+        ":detail",
+        ":io",
+        ":random",
+        ":serialization",
+        ":static_assert",
+        ":tti",
+    ],
+)
+
+cc_library(
+    name="variant",
+    deps=[
+        ":call_traits",
+        ":config",
+        ":detail",
+        ":functional",
+        ":math",
+        ":static_assert",
+        ":type_index",
+    ],
+)
+
+cc_library(
+    name="version",
+)
+
+cc_library(
+    name="visit_each",
+)
+
+cc_library(
+    name="timer",
+    srcs=glob([
+        _SRCS + "/libs/timer/src/*.cpp",
+    ]),
+    deps=[
+        ":cerrno",
+        ":chrono",
+        ":config",
+        ":cstdint",
+        ":io",
+        ":limits",
+        ":system",
+    ],
+)
+
+cc_library(
+    name="numeric",
+)
+
+cc_library(
+    name="proto",
+    deps=[
+        ":fusion",
+    ],
+)
+
+cc_library(
+    name="phoenix",
+    deps=[
+        ":proto",
+    ],
+)

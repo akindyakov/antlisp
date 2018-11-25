@@ -9,6 +9,7 @@ cc_binary(
     ],
     deps = [
         "//antlisp/lib:antlib",
+        "@boost//:boost",
     ],
     visibility = ["PUBLIC"],
 )
