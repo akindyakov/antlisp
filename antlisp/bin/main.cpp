@@ -5,6 +5,7 @@
 #include <antlisp/lib/builtin/math.h>
 #include <antlisp/lib/builtin/io.h>
 #include <antlisp/lib/interface.h>
+#include <antlisp/lib/util/exception.h>
 
 #include <fstream>
 #include <iostream>
@@ -17,14 +18,18 @@ void interactive(
     while (std::cin) {
         std::cout << "> " << std::flush;
         std::getline(std::cin, line, '\n');
-        //**/ std::cout << "(line \"" << line << "\")\n";
         std::istringstream in(line);
-        auto machine = AntLisp::TapeMachine(
-            AntLisp::parseCode(in, std::move(global))
-        );
-        machine.run();
-        std::cout << machine.ret().toString() << std::endl;
-        global = machine.takeVars();
+        try {
+            auto machine = AntLisp::TapeMachine(
+                AntLisp::parseCode(in, std::move(global))
+            );
+            machine.run();
+            std::cout << machine.ret().toString() << '\n';
+            global = machine.takeVars();
+        }
+        catch (AntLisp::Exception const& ex) {
+            std::cout << "Error: " << ex.what() << '\n';
+        }
     }
 }
 
